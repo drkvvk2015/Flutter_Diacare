@@ -48,6 +48,11 @@ cmdline-tools.zip
 android/**/build/
 **/outputs/
 
+# Flutter build outputs
+build/
+build/app/
+build/web/
+
 # Flutter platform-generated/ephemeral files (should not be versioned)
 ios/Flutter/Generated.xcconfig
 ios/Flutter/ephemeral/
