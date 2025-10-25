@@ -1,0 +1,356 @@
+import 'package:flutter/material.dart';
+// Removed unused dart:ui import
+// import 'dashboard_screen.dart';
+import '../widgets/voice_text_field.dart';
+// import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+
+/// LoginScreen handles authentication for both doctor and patient roles.
+/// The role is passed via navigation arguments and is used for login context.
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool _loading = false;
+  String? _error;
+  String? _role;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Get the role from navigation arguments
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args['role'] != null) {
+      _role = args['role'] as String;
+    }
+  }
+
+  /// Sign in with email and password. Navigates to dashboard with role.
+  Future<void> _signInWithEmailPassword() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      print('DEBUG: Starting login process');
+      print('DEBUG: Email: ${emailController.text.trim()}');
+      print('DEBUG: Role: $_role');
+
+      // Simulate authentication for testing purposes
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Basic validation
+      if (emailController.text.trim().isEmpty ||
+          passwordController.text.trim().isEmpty) {
+        throw Exception('Please enter both email and password');
+      }
+
+      if (!emailController.text.contains('@')) {
+        throw Exception('Please enter a valid email address');
+      }
+
+      if (passwordController.text.length < 6) {
+        throw Exception('Password must be at least 6 characters');
+      }
+
+      print('DEBUG: Login completed successfully');
+
+      if (!mounted) return; // context safety
+      Navigator.pushReplacementNamed(
+        context,
+        '/dashboard',
+        arguments: {'role': _role},
+      );
+    } catch (e) {
+      print('DEBUG: Login error: $e');
+      setState(() {
+        _error = e.toString().replaceFirst('Exception: ', '');
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  /// Sign in with Google. Navigates to dashboard with role.
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      print('DEBUG: Starting Google login process');
+      print('DEBUG: Role: $_role');
+
+      // Simulate Google authentication for testing purposes
+      await Future.delayed(const Duration(seconds: 3));
+
+      print('DEBUG: Google login completed successfully');
+
+      if (!mounted) return; // context safety
+      Navigator.pushReplacementNamed(
+        context,
+        '/dashboard',
+        arguments: {'role': _role},
+      );
+    } catch (e) {
+      print('DEBUG: Google login error: $e');
+      setState(() {
+        _error = 'Google sign-in is currently unavailable for testing.';
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 600;
+        final cardWidth = isWide ? 420.0 : double.infinity;
+        final horizontalPadding = isWide ? 0.0 : 24.0;
+        return Scaffold(
+          body: AnimatedContainer(
+            duration: const Duration(milliseconds: 800),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF43CEA2), Color(0xFF185A9D)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Center(
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.8, end: 1.0),
+                duration: const Duration(milliseconds: 700),
+                curve: Curves.elasticOut,
+                builder: (context, scale, child) =>
+                    Transform.scale(scale: scale, child: child),
+                child: Semantics(
+                  label: _role == 'doctor'
+                      ? 'Doctor Login Form'
+                      : 'Patient Login Form',
+                  child: Card(
+                    elevation: 16,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: Container(
+                      width: cardWidth,
+                      padding: const EdgeInsets.all(28.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Hero(
+                            tag: 'login-title',
+                            child: ShaderMask(
+                              shaderCallback: (Rect bounds) {
+                                return const LinearGradient(
+                                  colors: [
+                                    Color(0xFF43CEA2),
+                                    Color(0xFF185A9D),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ).createShader(bounds);
+                              },
+                              child: Text(
+                                _role == 'doctor'
+                                    ? 'Doctor Login'
+                                    : 'Patient Login',
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 400),
+                            child: _error != null
+                                ? Padding(
+                                    key: ValueKey(_error),
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                            ),
+                                            title: const Text('Login Error'),
+                                            content: Text(_error!),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                                child: const Text('OK'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(
+                                            Icons.error_outline,
+                                            color: Colors.red,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Flexible(
+                                            child: Text(
+                                              _error!,
+                                              style: const TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                          Semantics(
+                            label: 'Email Address Field',
+                            textField: true,
+                            child: VoiceTextFormField(
+                              controller: emailController,
+                              labelText: 'Email',
+                              prefixIcon: Icons.email_outlined,
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Semantics(
+                            label: 'Password Field',
+                            textField: true,
+                            child: VoiceTextFormField(
+                              controller: passwordController,
+                              labelText: 'Password',
+                              prefixIcon: Icons.lock_outline,
+                              obscureText: true,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Semantics(
+                            label: 'Login Button',
+                            button: true,
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: colorScheme.primary,
+                                  foregroundColor: colorScheme.onPrimary,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  textStyle: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: _loading
+                                    ? null
+                                    : _signInWithEmailPassword,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.login, size: 20),
+                                    const SizedBox(width: 8),
+                                    const Text('Login'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Semantics(
+                            label: 'Sign in with Google Button',
+                            button: true,
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: FilledButton.icon(
+                                icon: Hero(
+                                  tag: 'google-icon',
+                                  child: Image.asset(
+                                    'assets/icons/google.png',
+                                    height: 24,
+                                  ),
+                                ),
+                                label: const Text('Sign in with Google'),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black87,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  textStyle: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  elevation: 2,
+                                ),
+                                onPressed: _loading ? null : _signInWithGoogle,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 400),
+                            child: _loading
+                                ? Padding(
+                                    key: const ValueKey('loading'),
+                                    padding: const EdgeInsets.only(top: 32),
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 36,
+                                        height: 36,
+                                        child: CircularProgressIndicator(
+                                          color: colorScheme.primary,
+                                          strokeWidth: 3,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
