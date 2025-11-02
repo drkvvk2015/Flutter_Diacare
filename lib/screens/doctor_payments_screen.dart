@@ -24,7 +24,7 @@ class DoctorPaymentsScreen extends StatelessWidget {
           final payments = snapshot.data!.docs;
           return ListView.separated(
             itemCount: payments.length,
-            separatorBuilder: (_, _) => const Divider(),
+            separatorBuilder: (context, index) => const Divider(),
             itemBuilder: (context, i) {
               final p = payments[i].data() as Map<String, dynamic>;
               return ListTile(

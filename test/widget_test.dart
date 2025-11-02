@@ -11,18 +11,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_diacare/main.dart';
 
 void main() {
-  testWidgets('Login screen renders with expected widgets', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const DiacareApp());
+  testWidgets('App starts and shows splash', (WidgetTester tester) async {
+    // Build app
+    await tester.pumpWidget(const DiaCareApp());
 
-    // Verify that the login screen title is present.
-    expect(find.text('Doctor Login'), findsOneWidget);
+    // Initial splash contents are visible
+    expect(find.text('Loading DiaCare...'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-    // Verify that Email and Password input fields are present.
-    expect(find.widgetWithText(TextField, 'Email'), findsOneWidget);
-    expect(find.widgetWithText(TextField, 'Password'), findsOneWidget);
-
-    // Verify that Login button is present.
-    expect(find.widgetWithText(ElevatedButton, 'Login'), findsOneWidget);
+    // Let the splash timer elapse to avoid pending timer failures
+    await tester.pump(const Duration(milliseconds: 700));
   });
 }

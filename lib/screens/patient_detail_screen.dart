@@ -185,9 +185,8 @@ class EPrescriptionTab extends StatelessWidget {
       subtitle: Text(medications),
       trailing: Chip(
         label: Text(status),
-        backgroundColor: status == 'Active'
-            ? Colors.green[100]
-            : Colors.grey[200],
+        backgroundColor:
+            status == 'Active' ? Colors.green[100] : Colors.grey[200],
       ),
     );
   }
@@ -410,6 +409,8 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
@@ -493,10 +494,10 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
                                   .collection('patients')
                                   .doc(widget.patient.id)
                                   .set({
-                                    'exerciseAdvice': advice,
-                                    'exerciseAdviceDate': DateTime.now()
-                                        .toIso8601String(),
-                                  }, SetOptions(merge: true));
+                                'exerciseAdvice': advice,
+                                'exerciseAdviceDate':
+                                    DateTime.now().toIso8601String(),
+                              }, SetOptions(merge: true));
                               if (!mounted) return;
                               messenger.showSnackBar(
                                 const SnackBar(
@@ -607,11 +608,10 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
                                           .collection('patients')
                                           .doc(widget.patient.id)
                                           .set({
-                                            'assignedExercisePlan': plan,
-                                            'assignedExercisePlanDate':
-                                                DateTime.now()
-                                                    .toIso8601String(),
-                                          }, SetOptions(merge: true));
+                                        'assignedExercisePlan': plan,
+                                        'assignedExercisePlanDate':
+                                            DateTime.now().toIso8601String(),
+                                      }, SetOptions(merge: true));
                                       if (!mounted) return;
                                       messenger.showSnackBar(
                                         SnackBar(
@@ -738,9 +738,9 @@ class _NextVisitTabState extends State<NextVisitTab> {
           .collection('patients')
           .doc(widget.patient.id)
           .set({
-            'nextVisit': _dateController.text,
-            'nextVisitReason': _reasonController.text,
-          }, SetOptions(merge: true));
+        'nextVisit': _dateController.text,
+        'nextVisitReason': _reasonController.text,
+      }, SetOptions(merge: true));
       if (!mounted) return;
       setState(() {
         _lastVisit = _dateController.text;
@@ -859,8 +859,8 @@ class _NextVisitInvestigationTabState extends State<NextVisitInvestigationTab> {
           .collection('patients')
           .doc(widget.patient.id)
           .set({
-            'nextVisitInvestigations': _investigations,
-          }, SetOptions(merge: true));
+        'nextVisitInvestigations': _investigations,
+      }, SetOptions(merge: true));
       if (!mounted) return;
       _investigationController.clear();
       setState(() {});
@@ -1169,8 +1169,7 @@ class AnthropometryTabState extends State<AnthropometryTab> {
                           Anthropometry(
                             height: height ?? 0,
                             weight: weight ?? 0,
-                            bmi:
-                                (weight ?? 0) /
+                            bmi: (weight ?? 0) /
                                 (((height ?? 1) / 100) * ((height ?? 1) / 100)),
                             waist: waist ?? 0,
                             hip: hip ?? 0,

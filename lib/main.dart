@@ -2,6 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Import actual screens
+import 'screens/patient_list_screen.dart';
+import 'screens/appointment_screen.dart';
+import 'screens/video_call_screen.dart';
+import 'screens/prescription_screen.dart';
+import 'screens/health_analytics_screen.dart';
+import 'screens/diagnostic_screen.dart';
+import 'screens/patient_dashboard_screen.dart';
+import 'screens/records_screen.dart';
+import 'screens/chat_screen.dart';
+import 'screens/admin_dashboard_screen.dart';
+import 'screens/pharmacy_dashboard_screen.dart';
+import 'screens/doctor_payments_screen.dart';
+
 // Simple session model and AuthService using SharedPreferences
 class Session {
   final String role;
@@ -824,6 +838,7 @@ class SimpleDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildDoctorDashboard(BuildContext context) {
+    final String userId = userName ?? 'demo_doctor';
     return GridView.count(
       crossAxisCount: 2,
       crossAxisSpacing: 16,
@@ -834,48 +849,71 @@ class SimpleDashboardScreen extends StatelessWidget {
           title: 'My Patients',
           subtitle: '24 Active',
           color: Colors.blue,
-          onTap: () => _showFeature(context, 'Patient Management'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const PatientListScreen())),
         ),
         _buildFeatureCard(
           icon: Icons.calendar_today,
           title: 'Appointments',
           subtitle: '8 Today',
           color: Colors.green,
-          onTap: () => _showFeature(context, 'Appointment Schedule'),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) =>
+                      AppointmentScreen(userRole: 'doctor', userId: userId))),
         ),
         _buildFeatureCard(
           icon: Icons.video_call,
           title: 'Telemedicine',
           subtitle: '3 Pending',
           color: Colors.orange,
-          onTap: () => _showFeature(context, 'Video Consultations'),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) =>
+                      VideoCallScreen(userId: userId, userRole: 'doctor'))),
         ),
         _buildFeatureCard(
           icon: Icons.assignment,
           title: 'Prescriptions',
           subtitle: 'Write New',
           color: Colors.purple,
-          onTap: () => _showFeature(context, 'Digital Prescriptions'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const PrescriptionScreen())),
         ),
         _buildFeatureCard(
           icon: Icons.analytics,
           title: 'Analytics',
           subtitle: 'View Reports',
           color: Colors.indigo,
-          onTap: () => _showFeature(context, 'Patient Analytics'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const HealthAnalyticsScreen())),
         ),
         _buildFeatureCard(
           icon: Icons.medical_services,
           title: 'Diagnostics',
           subtitle: '12 Results',
           color: Colors.teal,
-          onTap: () => _showFeature(context, 'Lab Results'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const DiagnosticScreen())),
+        ),
+        _buildFeatureCard(
+          icon: Icons.payment,
+          title: 'Payments',
+          subtitle: 'View Earnings',
+          color: Colors.amber,
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => DoctorPaymentsScreen(doctorId: userId))),
         ),
       ],
     );
   }
 
   Widget _buildPatientDashboard(BuildContext context) {
+    final String userId = userName ?? 'demo_patient';
     return GridView.count(
       crossAxisCount: 2,
       crossAxisSpacing: 16,
@@ -886,42 +924,54 @@ class SimpleDashboardScreen extends StatelessWidget {
           title: 'Health Stats',
           subtitle: 'View Progress',
           color: Colors.red,
-          onTap: () => _showFeature(context, 'Health Monitoring'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const HealthAnalyticsScreen())),
         ),
         _buildFeatureCard(
           icon: Icons.calendar_today,
           title: 'Book Appointment',
           subtitle: 'Find Doctors',
           color: Colors.blue,
-          onTap: () => _showFeature(context, 'Appointment Booking'),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) =>
+                      AppointmentScreen(userRole: 'patient', userId: userId))),
         ),
         _buildFeatureCard(
           icon: Icons.folder,
           title: 'Medical Records',
           subtitle: 'View History',
           color: Colors.green,
-          onTap: () => _showFeature(context, 'Medical History'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const RecordsScreen())),
         ),
         _buildFeatureCard(
           icon: Icons.local_pharmacy,
-          title: 'Medications',
+          title: 'Prescriptions',
           subtitle: '3 Active',
           color: Colors.purple,
-          onTap: () => _showFeature(context, 'Medication Tracker'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const PrescriptionScreen())),
         ),
         _buildFeatureCard(
-          icon: Icons.fitness_center,
-          title: 'Exercise Plan',
-          subtitle: 'Stay Fit',
+          icon: Icons.video_call,
+          title: 'Video Call',
+          subtitle: 'Consultation',
           color: Colors.orange,
-          onTap: () => _showFeature(context, 'Fitness Tracking'),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) =>
+                      VideoCallScreen(userId: userId, userRole: 'patient'))),
         ),
         _buildFeatureCard(
           icon: Icons.chat,
           title: 'Ask Doctor',
           subtitle: 'Quick Chat',
           color: Colors.teal,
-          onTap: () => _showFeature(context, 'Chat with Doctor'),
+          onTap: () => Navigator.push(
+              context, MaterialPageRoute(builder: (_) => const ChatScreen())),
         ),
       ],
     );
@@ -935,45 +985,54 @@ class SimpleDashboardScreen extends StatelessWidget {
       children: [
         _buildFeatureCard(
           icon: Icons.dashboard,
-          title: 'System Monitor',
-          subtitle: 'All Systems OK',
+          title: 'Admin Dashboard',
+          subtitle: 'Full Overview',
           color: Colors.indigo,
-          onTap: () => _showFeature(context, 'System Monitoring'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const AdminDashboardScreen())),
         ),
         _buildFeatureCard(
           icon: Icons.people,
           title: 'User Management',
           subtitle: '1,245 Users',
           color: Colors.blue,
-          onTap: () => _showFeature(context, 'User Administration'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const PatientListScreen())),
         ),
         _buildFeatureCard(
-          icon: Icons.security,
-          title: 'Security Center',
-          subtitle: 'No Threats',
-          color: Colors.red,
-          onTap: () => _showFeature(context, 'Security Management'),
-        ),
-        _buildFeatureCard(
-          icon: Icons.bar_chart,
+          icon: Icons.analytics,
           title: 'Analytics',
           subtitle: 'View Reports',
           color: Colors.green,
-          onTap: () => _showFeature(context, 'System Analytics'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const HealthAnalyticsScreen())),
         ),
         _buildFeatureCard(
-          icon: Icons.settings,
-          title: 'Settings',
-          subtitle: 'Configure System',
-          color: Colors.grey,
-          onTap: () => _showFeature(context, 'System Settings'),
-        ),
-        _buildFeatureCard(
-          icon: Icons.backup,
-          title: 'Backups',
-          subtitle: 'Last: 2 hrs ago',
+          icon: Icons.calendar_today,
+          title: 'Appointments',
+          subtitle: 'All Bookings',
           color: Colors.orange,
-          onTap: () => _showFeature(context, 'Data Backup'),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => AppointmentScreen(
+                      userRole: 'admin', userId: 'admin_user'))),
+        ),
+        _buildFeatureCard(
+          icon: Icons.medical_services,
+          title: 'Diagnostics',
+          subtitle: 'Lab Management',
+          color: Colors.teal,
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const DiagnosticScreen())),
+        ),
+        _buildFeatureCard(
+          icon: Icons.assignment,
+          title: 'Prescriptions',
+          subtitle: 'All Records',
+          color: Colors.purple,
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const PrescriptionScreen())),
         ),
       ],
     );
@@ -986,46 +1045,54 @@ class SimpleDashboardScreen extends StatelessWidget {
       mainAxisSpacing: 16,
       children: [
         _buildFeatureCard(
-          icon: Icons.inventory,
-          title: 'Inventory',
-          subtitle: '1,240 Items',
+          icon: Icons.dashboard,
+          title: 'Pharmacy Dashboard',
+          subtitle: 'Overview',
           color: Colors.blue,
-          onTap: () => _showFeature(context, 'Medicine Inventory'),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => const PharmacyDashboardScreen())),
         ),
         _buildFeatureCard(
-          icon: Icons.receipt,
-          title: 'New Orders',
+          icon: Icons.assignment,
+          title: 'Prescriptions',
           subtitle: '15 Pending',
           color: Colors.green,
-          onTap: () => _showFeature(context, 'Order Management'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const PrescriptionScreen())),
         ),
         _buildFeatureCard(
-          icon: Icons.payment,
-          title: 'Payments',
-          subtitle: 'Process Bills',
+          icon: Icons.local_pharmacy,
+          title: 'Medications',
+          subtitle: 'Manage Stock',
           color: Colors.orange,
-          onTap: () => _showFeature(context, 'Payment Processing'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const PrescriptionScreen())),
         ),
         _buildFeatureCard(
-          icon: Icons.local_shipping,
-          title: 'Deliveries',
-          subtitle: '8 In Transit',
+          icon: Icons.analytics,
+          title: 'Analytics',
+          subtitle: 'Sales Report',
           color: Colors.purple,
-          onTap: () => _showFeature(context, 'Delivery Tracking'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const HealthAnalyticsScreen())),
         ),
         _buildFeatureCard(
-          icon: Icons.qr_code_scanner,
-          title: 'Scan Prescription',
-          subtitle: 'Quick Process',
+          icon: Icons.chat,
+          title: 'Messages',
+          subtitle: 'Customer Support',
           color: Colors.teal,
-          onTap: () => _showFeature(context, 'Prescription Scanner'),
+          onTap: () => Navigator.push(
+              context, MaterialPageRoute(builder: (_) => const ChatScreen())),
         ),
         _buildFeatureCard(
-          icon: Icons.trending_up,
-          title: 'Sales Report',
-          subtitle: 'View Trends',
+          icon: Icons.medical_services,
+          title: 'Diagnostics',
+          subtitle: 'Lab Orders',
           color: Colors.indigo,
-          onTap: () => _showFeature(context, 'Sales Analytics'),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const DiagnosticScreen())),
         ),
       ],
     );
@@ -1115,24 +1182,6 @@ class SimpleDashboardScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  void _showFeature(BuildContext context, String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(feature),
-        content: Text(
-          'This feature will be available in the next update.\n\nCurrent capabilities:\n• User authentication ✅\n• Social media login ✅\n• Role-based access ✅\n• Dashboard navigation ✅',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
       ),
     );
   }
@@ -1453,7 +1502,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
-
                     if (_error != null) ...[
                       Container(
                         padding: const EdgeInsets.all(12),
@@ -1477,7 +1525,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                       const SizedBox(height: 16),
                     ],
-
                     TextFormField(
                       controller: fullNameController,
                       decoration: InputDecoration(
@@ -1489,7 +1536,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-
                     TextFormField(
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -1502,7 +1548,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-
                     if (widget.role == 'doctor') ...[
                       TextFormField(
                         controller: licenseController,
@@ -1516,7 +1561,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                       const SizedBox(height: 16),
                     ],
-
                     TextFormField(
                       controller: passwordController,
                       obscureText: true,
@@ -1529,7 +1573,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-
                     TextFormField(
                       controller: confirmPasswordController,
                       obscureText: true,
@@ -1542,7 +1585,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -1574,7 +1616,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
