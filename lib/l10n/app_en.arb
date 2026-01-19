@@ -1,0 +1,66 @@
+{
+  "@@locale": "en",
+  "appName": "DiaCare",
+  "@appName": {
+    "description": "Application name"
+  },
+  
+  "common_ok": "OK",
+  "common_cancel": "Cancel",
+  "common_save": "Save",
+  "common_delete": "Delete",
+  "common_edit": "Edit",
+  "common_confirm": "Confirm",
+  "common_close": "Close",
+  "common_yes": "Yes",
+  "common_no": "No",
+  "common_loading": "Loading...",
+  "common_retry": "Retry",
+  "common_search": "Search",
+  "common_filter": "Filter",
+  "common_sort": "Sort",
+  "common_refresh": "Refresh",
+  
+  "auth_login": "Login",
+  "auth_logout": "Logout",
+  "auth_register": "Register",
+  "auth_email": "Email",
+  "auth_password": "Password",
+  "auth_forgot_password": "Forgot Password?",
+  "auth_create_account": "Create Account",
+  "auth_have_account": "Already have an account?",
+  "auth_no_account": "Don't have an account?",
+  
+  "nav_home": "Home",
+  "nav_dashboard": "Dashboard",
+  "nav_appointments": "Appointments",
+  "nav_prescriptions": "Prescriptions",
+  "nav_profile": "Profile",
+  "nav_settings": "Settings",
+  "nav_records": "Records",
+  "nav_chat": "Chat",
+  
+  "health_blood_glucose": "Blood Glucose",
+  "health_blood_pressure": "Blood Pressure",
+  "health_weight": "Weight",
+  "health_height": "Height",
+  "health_heart_rate": "Heart Rate",
+  "health_temperature": "Temperature",
+  "health_bmi": "BMI",
+  
+  "appointment_book": "Book Appointment",
+  "appointment_upcoming": "Upcoming Appointments",
+  "appointment_past": "Past Appointments",
+  "appointment_cancel": "Cancel Appointment",
+  "appointment_reschedule": "Reschedule",
+  "appointment_details": "Appointment Details",
+  
+  "error_network": "No internet connection",
+  "error_server": "Server error occurred",
+  "error_unknown": "An unexpected error occurred",
+  "error_try_again": "Please try again",
+  
+  "success_saved": "Successfully saved",
+  "success_deleted": "Successfully deleted",
+  "success_updated": "Successfully updated"
+}

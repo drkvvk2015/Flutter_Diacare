@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -198,7 +197,7 @@ class PerformanceService {
     try {
       final file = await _dataCache.getFileFromCache(key);
       if (file?.file != null) {
-        final content = await file!.file.readAsString();
+        await file!.file.readAsString();
         // TODO: Implement proper JSON parsing for cached Firestore data
         _log('Retrieved cached Firestore document: $key');
         return null; // Placeholder for actual implementation

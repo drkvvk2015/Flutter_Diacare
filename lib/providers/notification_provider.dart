@@ -1,14 +1,33 @@
+/// Notification State Management Provider
+/// 
+/// Manages in-app notifications, alerts, and notification filtering.
+/// Provides methods for adding, reading, and removing notifications.
+/// 
+/// Features:
+/// - Notification CRUD operations
+/// - Unread notification tracking
+/// - Type-based filtering (appointments, health, system)
+/// - In-app notification display
+/// - Batch operations (mark all read, clear all)
 import 'package:flutter/material.dart';
 
 /// Notification state management provider
+/// 
+/// Handles all notification-related operations including creation,
+/// reading status management, and filtering by type.
 class NotificationProvider extends ChangeNotifier {
+  // Notification storage
   final List<AppNotification> _notifications = [];
   final List<AppNotification> _unreadNotifications = [];
-  bool _isLoading = false;
+  
+  // Loading and error state
+  final bool _isLoading = false;
   String? _error;
+  
+  // Filter state
   NotificationFilter _currentFilter = NotificationFilter.all;
 
-  // Getters
+  // Public getters for notification access
   List<AppNotification> get notifications => _notifications;
   List<AppNotification> get unreadNotifications => _unreadNotifications;
   bool get isLoading => _isLoading;

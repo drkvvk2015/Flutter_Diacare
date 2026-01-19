@@ -774,7 +774,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
           height: 180,
           child: LineChart(
             LineChartData(
-              titlesData: FlTitlesData(
+              titlesData: const FlTitlesData(
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(showTitles: true, reservedSize: 40),
                 ),
@@ -798,7 +798,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
                   isCurved: true,
                   color: Colors.teal,
                   barWidth: 3,
-                  dotData: FlDotData(show: true),
+                  dotData: const FlDotData(show: true),
                 ),
               ],
             ),

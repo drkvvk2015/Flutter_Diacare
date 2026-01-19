@@ -55,8 +55,6 @@ class MockAuthService {
 
     // Normalize email to lowercase for consistent matching
     final normalizedEmail = email.toLowerCase().trim();
-    print('[MockAuth] Normalized email: $normalizedEmail');
-    print('[MockAuth] Available emails: ${_validCredentials.keys.toList()}');
 
     // Validate credentials
     if (_validCredentials.containsKey(normalizedEmail) &&
@@ -65,12 +63,8 @@ class MockAuthService {
       _currentUserEmail = normalizedEmail;
       _currentUserType = _validCredentials[normalizedEmail]!['type'];
 
-      print(
-        '[MockAuth] User signed in: $normalizedEmail (${_currentUserType})',
-      );
       return true;
     } else {
-      print('[MockAuth] Login failed - Invalid credentials');
       throw Exception(
         'Invalid email or password. Please check your credentials.',
       );
@@ -86,15 +80,12 @@ class MockAuthService {
     _currentUserEmail = 'google.user@gmail.com';
     _currentUserType = 'patient';
 
-    print('[MockAuth] Google sign-in successful: ${_currentUserEmail}');
     return true;
   }
 
   /// Sign out current user
   Future<void> signOut() async {
     await Future.delayed(const Duration(milliseconds: 500));
-
-    print('[MockAuth] User signed out: ${_currentUserEmail}');
 
     _isLoggedIn = false;
     _currentUserEmail = null;
@@ -126,7 +117,6 @@ class MockAuthService {
     _currentUserEmail = email;
     _currentUserType = userType;
 
-    print('[MockAuth] New user created and signed in: $email (${userType})');
     return true;
   }
 
@@ -137,8 +127,6 @@ class MockAuthService {
     if (!_validCredentials.containsKey(email)) {
       throw Exception('No account found for this email address.');
     }
-
-    print('[MockAuth] Password reset email sent to: $email');
   }
 
   /// Change password for current user
@@ -150,7 +138,6 @@ class MockAuthService {
     await Future.delayed(const Duration(seconds: 1));
 
     _validCredentials[_currentUserEmail!]!['password'] = newPassword;
-    print('[MockAuth] Password changed for user: ${_currentUserEmail}');
   }
 
   /// Get user profile information

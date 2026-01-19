@@ -307,6 +307,17 @@ class AdminDashboardScreen extends StatelessWidget {
                         onTap: () => _showHelpFeedbackDialog(context),
                       ),
                     ),
+                    SizedBox(
+                      width: isWide ? 340 : double.infinity,
+                      child: DashboardCard(
+                        key: const Key('admin_dashboard_card_user_management'),
+                        icon: Icons.manage_accounts,
+                        iconColor: Colors.deepOrange,
+                        title: 'User Management',
+                        subtitle: 'View, edit, and manage all users.',
+                        onTap: () => _showUserManagement(context),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -494,23 +505,23 @@ class AdminDashboardScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Analytics & Reports'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.bar_chart),
-              title: const Text('Daily Reports'),
-              subtitle: const Text('View daily activity reports'),
+              leading: Icon(Icons.bar_chart),
+              title: Text('Daily Reports'),
+              subtitle: Text('View daily activity reports'),
             ),
             ListTile(
-              leading: const Icon(Icons.pie_chart),
-              title: const Text('Monthly Analytics'),
-              subtitle: const Text('View monthly system analytics'),
+              leading: Icon(Icons.pie_chart),
+              title: Text('Monthly Analytics'),
+              subtitle: Text('View monthly system analytics'),
             ),
             ListTile(
-              leading: const Icon(Icons.trending_up),
-              title: const Text('Revenue Reports'),
-              subtitle: const Text('View revenue and financial reports'),
+              leading: Icon(Icons.trending_up),
+              title: Text('Revenue Reports'),
+              subtitle: Text('View revenue and financial reports'),
             ),
           ],
         ),
@@ -529,23 +540,23 @@ class AdminDashboardScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('System Settings'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.security),
-              title: const Text('Security Settings'),
-              subtitle: const Text('Configure system security'),
+              leading: Icon(Icons.security),
+              title: Text('Security Settings'),
+              subtitle: Text('Configure system security'),
             ),
             ListTile(
-              leading: const Icon(Icons.notifications),
-              title: const Text('Notification Settings'),
-              subtitle: const Text('Configure system notifications'),
+              leading: Icon(Icons.notifications),
+              title: Text('Notification Settings'),
+              subtitle: Text('Configure system notifications'),
             ),
             ListTile(
-              leading: const Icon(Icons.backup),
-              title: const Text('Backup Settings'),
-              subtitle: const Text('Configure data backup'),
+              leading: Icon(Icons.backup),
+              title: Text('Backup Settings'),
+              subtitle: Text('Configure data backup'),
             ),
           ],
         ),
@@ -594,6 +605,433 @@ class AdminDashboardScreen extends StatelessWidget {
               );
             },
             child: const Text('Send'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Shows the user management dialog with options to view all users,
+  /// filter by role, and manage individual users.
+  void _showUserManagement(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('User Management'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.people, color: Colors.blue),
+              title: const Text('View All Users'),
+              subtitle: const Text('See all registered users'),
+              onTap: () {
+                Navigator.pop(context);
+                _showAllUsers(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.medical_services, color: Colors.green),
+              title: const Text('Doctors'),
+              subtitle: const Text('Manage doctor accounts'),
+              onTap: () {
+                Navigator.pop(context);
+                _showUsersByRole(context, 'doctor');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person, color: Colors.orange),
+              title: const Text('Patients'),
+              subtitle: const Text('Manage patient accounts'),
+              onTap: () {
+                Navigator.pop(context);
+                _showUsersByRole(context, 'patient');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.local_pharmacy, color: Colors.purple),
+              title: const Text('Pharmacy'),
+              subtitle: const Text('Manage pharmacy accounts'),
+              onTap: () {
+                Navigator.pop(context);
+                _showUsersByRole(context, 'pharmacy');
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Displays all users from Firestore with options to edit or delete.
+  void _showAllUsers(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('All Users'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .orderBy('createdAt', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(child: Text('No users found'));
+              }
+              return ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (context, index) {
+                  final doc = snapshot.data!.docs[index];
+                  final data = doc.data() as Map<String, dynamic>;
+                  return _buildUserTile(context, doc.id, data);
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Displays users filtered by role.
+  void _showUsersByRole(BuildContext context, String role) {
+    final roleTitle = role[0].toUpperCase() + role.substring(1);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('$roleTitle Users'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .where('role', isEqualTo: role)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Center(child: Text('No $role users found'));
+              }
+              return ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (context, index) {
+                  final doc = snapshot.data!.docs[index];
+                  final data = doc.data() as Map<String, dynamic>;
+                  return _buildUserTile(context, doc.id, data);
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds a user list tile with edit and delete options.
+  Widget _buildUserTile(
+      BuildContext context, String docId, Map<String, dynamic> data) {
+    final name = data['displayName'] ?? data['name'] ?? 'Unknown';
+    final email = data['email'] ?? 'No email';
+    final role = data['role'] ?? 'user';
+    final isActive = data['isActive'] ?? true;
+
+    Color roleColor;
+    switch (role) {
+      case 'doctor':
+        roleColor = Colors.blue;
+        break;
+      case 'patient':
+        roleColor = Colors.green;
+        break;
+      case 'pharmacy':
+        roleColor = Colors.purple;
+        break;
+      case 'admin':
+        roleColor = Colors.orange;
+        break;
+      default:
+        roleColor = Colors.grey;
+    }
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: roleColor.withValues(alpha: 0.2),
+          child: Icon(
+            _getRoleIcon(role),
+            color: roleColor,
+            size: 20,
+          ),
+        ),
+        title: Text(
+          name,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            decoration: isActive ? null : TextDecoration.lineThrough,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(email, style: const TextStyle(fontSize: 12)),
+            Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: roleColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    role.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: roleColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  isActive ? Icons.check_circle : Icons.cancel,
+                  size: 14,
+                  color: isActive ? Colors.green : Colors.red,
+                ),
+                Text(
+                  isActive ? ' Active' : ' Inactive',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: isActive ? Colors.green : Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        trailing: PopupMenuButton<String>(
+          onSelected: (value) {
+            switch (value) {
+              case 'edit':
+                _showEditUserDialog(context, docId, data);
+                break;
+              case 'toggle':
+                _toggleUserStatus(context, docId, isActive);
+                break;
+              case 'delete':
+                _confirmDeleteUser(context, docId, name);
+                break;
+            }
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'edit',
+              child: ListTile(
+                leading: Icon(Icons.edit, size: 20),
+                title: Text('Edit'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            PopupMenuItem(
+              value: 'toggle',
+              child: ListTile(
+                leading: Icon(
+                  isActive ? Icons.block : Icons.check_circle,
+                  size: 20,
+                ),
+                title: Text(isActive ? 'Deactivate' : 'Activate'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'delete',
+              child: ListTile(
+                leading: Icon(Icons.delete, size: 20, color: Colors.red),
+                title: Text('Delete', style: TextStyle(color: Colors.red)),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Returns the appropriate icon for a user role.
+  IconData _getRoleIcon(String role) {
+    switch (role) {
+      case 'doctor':
+        return Icons.medical_services;
+      case 'patient':
+        return Icons.person;
+      case 'pharmacy':
+        return Icons.local_pharmacy;
+      case 'admin':
+        return Icons.admin_panel_settings;
+      default:
+        return Icons.person_outline;
+    }
+  }
+
+  /// Shows dialog to edit user details.
+  void _showEditUserDialog(
+      BuildContext context, String docId, Map<String, dynamic> data) {
+    final nameController =
+        TextEditingController(text: data['displayName'] ?? data['name'] ?? '');
+    final emailController =
+        TextEditingController(text: data['email'] ?? '');
+    String selectedRole = data['role'] ?? 'patient';
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Edit User'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Display Name',
+                  prefixIcon: Icon(Icons.person),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email),
+                ),
+                enabled: false, // Email cannot be changed
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: selectedRole,
+                decoration: const InputDecoration(
+                  labelText: 'Role',
+                  prefixIcon: Icon(Icons.badge),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'doctor', child: Text('Doctor')),
+                  DropdownMenuItem(value: 'patient', child: Text('Patient')),
+                  DropdownMenuItem(value: 'pharmacy', child: Text('Pharmacy')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => selectedRole = value);
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(docId)
+                    .update({
+                  'displayName': nameController.text.trim(),
+                  'name': nameController.text.trim(),
+                  'role': selectedRole,
+                  'updatedAt': FieldValue.serverTimestamp(),
+                });
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('User updated successfully')),
+                  );
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Toggles user active status.
+  Future<void> _toggleUserStatus(
+      BuildContext context, String docId, bool currentStatus) async {
+    await FirebaseFirestore.instance.collection('users').doc(docId).update({
+      'isActive': !currentStatus,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            currentStatus ? 'User deactivated' : 'User activated',
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Confirms and deletes a user.
+  void _confirmDeleteUser(BuildContext context, String docId, String userName) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete User'),
+        content: Text(
+          'Are you sure you want to delete "$userName"?\n\nThis action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(docId)
+                  .delete();
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('User deleted successfully')),
+                );
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

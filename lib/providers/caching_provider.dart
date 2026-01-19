@@ -1,19 +1,36 @@
+/// Caching and Performance Optimization Provider
+/// 
+/// Manages data caching, performance monitoring, and optimization.
+/// Integrates with PerformanceService for advanced caching strategies.
+/// 
+/// Features:
+/// - Firestore document caching
+/// - In-memory data caching
+/// - Critical data preloading
+/// - Cache statistics and metrics
+/// - Performance monitoring
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/performance_service.dart';
 
 /// Provider for managing cached data and performance optimization
+/// 
+/// Wraps PerformanceService to provide reactive cache state management
+/// and expose caching capabilities throughout the application.
 class CachingProvider extends ChangeNotifier {
+  // Performance service for caching operations
   final PerformanceService _performanceService = PerformanceService();
 
-  // Cache states
+  // Initialization and loading states
   bool _isInitialized = false;
   bool _isPreloadingData = false;
+  
+  // Cache metrics and statistics
   Map<String, dynamic> _cacheStats = {};
   Map<String, dynamic> _performanceMetrics = {};
 
-  // Getters
+  // Public getters for cache state
   bool get isInitialized => _isInitialized;
   bool get isPreloadingData => _isPreloadingData;
   Map<String, dynamic> get cacheStats => _cacheStats;

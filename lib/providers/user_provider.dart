@@ -1,8 +1,22 @@
+/// User State Management Provider
+/// 
+/// Manages user authentication state, profile data, and role information.
+/// Integrates with Firebase Auth and Firestore for persistent user data.
+/// 
+/// Features:
+/// - Real-time auth state monitoring
+/// - User profile management
+/// - Role-based access control (doctor, patient, admin)
+/// - Automatic Firestore document creation for new users
+/// - Profile updates with Firebase Auth synchronization
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Comprehensive user state management provider
+/// 
+/// Extends ChangeNotifier for reactive state updates across the application.
+/// Provides centralized access to user data and authentication status.
 class UserProvider extends ChangeNotifier {
   User? _currentUser;
   Map<String, dynamic>? _userData;
@@ -175,9 +189,9 @@ class UserProvider extends ChangeNotifier {
           .collection('users')
           .doc(_currentUser!.uid)
           .update({
-            'role': newRole.name,
-            'roleChangedAt': FieldValue.serverTimestamp(),
-          });
+        'role': newRole.name,
+        'roleChangedAt': FieldValue.serverTimestamp(),
+      });
 
       _userRole = newRole;
       if (_userData != null) {
@@ -267,11 +281,13 @@ class UserProvider extends ChangeNotifier {
     int completedFields = 0;
     const totalFields = 5;
 
-    if (_userData!['displayName']?.toString().isNotEmpty == true)
+    if (_userData!['displayName']?.toString().isNotEmpty == true) {
       completedFields++;
+    }
     if (_userData!['email']?.toString().isNotEmpty == true) completedFields++;
-    if (_userData!['photoUrl']?.toString().isNotEmpty == true)
+    if (_userData!['photoUrl']?.toString().isNotEmpty == true) {
       completedFields++;
+    }
     if (_userData!['role']?.toString().isNotEmpty == true) completedFields++;
     if (_userData!['phone']?.toString().isNotEmpty == true) completedFields++;
 

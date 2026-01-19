@@ -29,7 +29,7 @@ Widget _buildLoginColumn(BuildContext context, {required bool isDoctor}) {
             context,
             MaterialPageRoute(
               builder: (_) =>
-                  isDoctor ? LoginScreen() : const PatientLoginScreen(),
+                  isDoctor ? const LoginScreen() : const PatientLoginScreen(),
               settings: RouteSettings(
                 arguments: {'role': isDoctor ? 'doctor' : 'patient'},
               ),

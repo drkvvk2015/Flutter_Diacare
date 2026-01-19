@@ -38,10 +38,6 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
     try {
-      print('DEBUG: Starting login process');
-      print('DEBUG: Email: ${emailController.text.trim()}');
-      print('DEBUG: Role: $_role');
-
       // Simulate authentication for testing purposes
       await Future.delayed(const Duration(seconds: 2));
 
@@ -59,8 +55,6 @@ class _LoginScreenState extends State<LoginScreen> {
         throw Exception('Password must be at least 6 characters');
       }
 
-      print('DEBUG: Login completed successfully');
-
       if (!mounted) return; // context safety
       Navigator.pushReplacementNamed(
         context,
@@ -68,7 +62,6 @@ class _LoginScreenState extends State<LoginScreen> {
         arguments: {'role': _role},
       );
     } catch (e) {
-      print('DEBUG: Login error: $e');
       setState(() {
         _error = e.toString().replaceFirst('Exception: ', '');
       });
@@ -86,13 +79,8 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
     try {
-      print('DEBUG: Starting Google login process');
-      print('DEBUG: Role: $_role');
-
       // Simulate Google authentication for testing purposes
       await Future.delayed(const Duration(seconds: 3));
-
-      print('DEBUG: Google login completed successfully');
 
       if (!mounted) return; // context safety
       Navigator.pushReplacementNamed(
@@ -101,7 +89,6 @@ class _LoginScreenState extends State<LoginScreen> {
         arguments: {'role': _role},
       );
     } catch (e) {
-      print('DEBUG: Google login error: $e');
       setState(() {
         _error = 'Google sign-in is currently unavailable for testing.';
       });
@@ -276,12 +263,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 onPressed: _loading
                                     ? null
                                     : _signInWithEmailPassword,
-                                child: Row(
+                                child: const Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(Icons.login, size: 20),
-                                    const SizedBox(width: 8),
-                                    const Text('Login'),
+                                    Icon(Icons.login, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('Login'),
                                   ],
                                 ),
                               ),

@@ -62,7 +62,9 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
       setState(() {
         _isLoading = false;
       });
-      _showErrorSnackBar('Error initializing security settings: $e');
+      if (mounted) {
+        _showErrorSnackBar('Error initializing security settings: $e');
+      }
     }
   }
 
@@ -134,8 +136,8 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
                 Text(
                   'Biometric Status',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ],
             ),
@@ -306,8 +308,8 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
                 Text(
                   'Security Status',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ],
             ),
@@ -542,8 +544,8 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
               Text(
                 'No recent security events',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
               )
             else
               ...auditReport.recentEvents
@@ -719,9 +721,9 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withAlpha(26),
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: color.withOpacity(0.3)),
+              border: Border.all(color: color.withAlpha(77)),
             ),
             child: Text(
               value,
@@ -790,7 +792,9 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
         );
 
         if (!result.success) {
-          _showErrorSnackBar('Biometric authentication failed');
+          if (mounted) {
+            _showErrorSnackBar('Biometric authentication failed');
+          }
           return;
         }
       }
@@ -817,11 +821,15 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
         'biometric_toggled',
         context: {'enabled': enabled},
       );
-      _showSuccessSnackBar(
-        'Biometric authentication ${enabled ? 'enabled' : 'disabled'}',
-      );
+      if (mounted) {
+        _showSuccessSnackBar(
+          'Biometric authentication ${enabled ? 'enabled' : 'disabled'}',
+        );
+      }
     } catch (e) {
-      _showErrorSnackBar('Error updating biometric setting: $e');
+      if (mounted) {
+        _showErrorSnackBar('Error updating biometric setting: $e');
+      }
     }
   }
 
@@ -858,9 +866,13 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
         _biometricSettings = newSettings;
       });
 
-      _showSuccessSnackBar('Biometric setting updated');
+      if (mounted) {
+        _showSuccessSnackBar('Biometric setting updated');
+      }
     } catch (e) {
-      _showErrorSnackBar('Error updating biometric setting: $e');
+      if (mounted) {
+        _showErrorSnackBar('Error updating biometric setting: $e');
+      }
     }
   }
 
@@ -910,9 +922,13 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
         _securityStatus = _securityService.getSecurityStatus();
       });
 
-      _showSuccessSnackBar('Security setting updated');
+      if (mounted) {
+        _showSuccessSnackBar('Security setting updated');
+      }
     } catch (e) {
-      _showErrorSnackBar('Error updating security setting: $e');
+      if (mounted) {
+        _showErrorSnackBar('Error updating security setting: $e');
+      }
     }
   }
 
@@ -921,6 +937,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
       reason: 'Test biometric authentication',
     );
 
+    if (!mounted) return;
     if (result.success) {
       _showSuccessSnackBar('Biometric authentication test successful!');
     } else {
@@ -939,29 +956,34 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
       );
       await _securityService.deleteSecureData('test_encryption');
 
-      if (retrievedData == testData) {
-        _showSuccessSnackBar('Encryption test successful!');
-      } else {
-        _showErrorSnackBar('Encryption test failed: Data mismatch');
+      if (mounted) {
+        if (retrievedData == testData) {
+          _showSuccessSnackBar('Encryption test successful!');
+        } else {
+          _showErrorSnackBar('Encryption test failed: Data mismatch');
+        }
       }
     } catch (e) {
-      _showErrorSnackBar('Encryption test failed: $e');
+      if (mounted) {
+        _showErrorSnackBar('Encryption test failed: $e');
+      }
     }
   }
 
   Future<void> _showAutoLockTimeoutDialog() async {
+    final currentContext = context;
     int currentTimeout = _securitySettings?.autoLockTimeout ?? 300;
     int newTimeout = currentTimeout;
 
-    await showDialog(
-      context: context,
+    final result = await showDialog<int>(
+      context: currentContext,
       builder: (context) => AlertDialog(
         title: const Text('Auto-Lock Timeout'),
         content: StatefulBuilder(
           builder: (context, setState) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Select timeout in minutes:'),
+              const Text('Select timeout in minutes:'),
               const SizedBox(height: 16),
               DropdownButton<int>(
                 value: newTimeout ~/ 60,
@@ -988,34 +1010,39 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () async {
-              final newSettings = SecuritySettings(
-                autoLockEnabled: _securitySettings!.autoLockEnabled,
-                autoLockTimeout: newTimeout,
-                dataEncryptionEnabled: _securitySettings!.dataEncryptionEnabled,
-                secureBackupEnabled: _securitySettings!.secureBackupEnabled,
-                auditLoggingEnabled: _securitySettings!.auditLoggingEnabled,
-                lastUpdated: DateTime.now(),
-              );
-
-              await _dataManager.storeSecuritySettings(newSettings);
-              setState(() {
-                _securitySettings = newSettings;
-              });
-
-              Navigator.of(context).pop();
-              _showSuccessSnackBar('Auto-lock timeout updated');
+            onPressed: () {
+              Navigator.of(context).pop(newTimeout);
             },
             child: const Text('Save'),
           ),
         ],
       ),
     );
+
+    if (result != null) {
+      final newSettings = SecuritySettings(
+        autoLockEnabled: _securitySettings!.autoLockEnabled,
+        autoLockTimeout: result,
+        dataEncryptionEnabled: _securitySettings!.dataEncryptionEnabled,
+        secureBackupEnabled: _securitySettings!.secureBackupEnabled,
+        auditLoggingEnabled: _securitySettings!.auditLoggingEnabled,
+        lastUpdated: DateTime.now(),
+      );
+
+      await _dataManager.storeSecuritySettings(newSettings);
+      setState(() {
+        _securitySettings = newSettings;
+      });
+
+      if (mounted) {
+        _showSuccessSnackBar('Auto-lock timeout updated');
+      }
+    }
   }
 
   Future<void> _showDataSummary() async {
     final summary = await _dataManager.getDataSummary();
-
+    if (!mounted) return;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1045,6 +1072,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
   }
 
   Future<void> _clearUserData() async {
+    if (!mounted) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -1070,14 +1098,19 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
       try {
         await _dataManager.clearUserData();
         _analyticsService.logUserAction('user_data_cleared');
-        _showSuccessSnackBar('User data cleared successfully');
+        if (mounted) {
+          _showSuccessSnackBar('User data cleared successfully');
+        }
       } catch (e) {
-        _showErrorSnackBar('Error clearing user data: $e');
+        if (mounted) {
+          _showErrorSnackBar('Error clearing user data: $e');
+        }
       }
     }
   }
 
   Future<void> _clearAllData() async {
+    if (!mounted) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -1103,12 +1136,16 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
       try {
         await _dataManager.clearAllData();
         _analyticsService.logUserAction('all_data_cleared');
-        _showSuccessSnackBar('All data cleared successfully');
+        if (mounted) {
+          _showSuccessSnackBar('All data cleared successfully');
+        }
 
         // Reinitialize after clearing
         await _initializeSecurityData();
       } catch (e) {
-        _showErrorSnackBar('Error clearing all data: $e');
+        if (mounted) {
+          _showErrorSnackBar('Error clearing all data: $e');
+        }
       }
     }
   }
@@ -1123,8 +1160,10 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
       };
 
       await Clipboard.setData(ClipboardData(text: report.toString()));
+      if (!mounted) return;
       _showSuccessSnackBar('Security report copied to clipboard');
     } catch (e) {
+      if (!mounted) return;
       _showErrorSnackBar('Error generating security report: $e');
     }
   }
@@ -1135,29 +1174,37 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
       final hash = _dataManager.generateDataHash(testData);
       final isValid = await _dataManager.verifyDataIntegrity(testData, hash);
 
-      if (isValid) {
-        _showSuccessSnackBar('Data integrity test passed');
-      } else {
-        _showErrorSnackBar('Data integrity test failed');
+      if (mounted) {
+        if (isValid) {
+          _showSuccessSnackBar('Data integrity test passed');
+        } else {
+          _showErrorSnackBar('Data integrity test failed');
+        }
       }
     } catch (e) {
-      _showErrorSnackBar('Error testing data integrity: $e');
+      if (mounted) {
+        _showErrorSnackBar('Error testing data integrity: $e');
+      }
     }
   }
 
   Future<void> _forceReauthentication() async {
     _securityService.requireReAuthentication();
-    _showSuccessSnackBar(
-      'Re-authentication required for next secure operation',
-    );
+    if (mounted) {
+      _showSuccessSnackBar(
+        'Re-authentication required for next secure operation',
+      );
+    }
   }
 
   Future<void> _exportSecurityEvents() async {
     try {
       final events = _securityService.exportSecurityEvents();
       await Clipboard.setData(ClipboardData(text: events));
+      if (!mounted) return;
       _showSuccessSnackBar('Security events exported to clipboard');
     } catch (e) {
+      if (!mounted) return;
       _showErrorSnackBar('Error exporting security events: $e');
     }
   }
@@ -1168,19 +1215,24 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
         reason: 'Authenticate to export all data',
       );
 
+      if (!mounted) return;
       if (!result.success) {
         _showErrorSnackBar('Authentication required to export data');
         return;
       }
 
       final data = await _dataManager.exportAllData();
+      if (!mounted) return;
       if (data != null) {
         await Clipboard.setData(ClipboardData(text: data));
+        if (!mounted) return;
         _showSuccessSnackBar('All data exported to clipboard');
       } else {
+        if (!mounted) return;
         _showErrorSnackBar('Error exporting data');
       }
     } catch (e) {
+      if (!mounted) return;
       _showErrorSnackBar('Error exporting all data: $e');
     }
   }

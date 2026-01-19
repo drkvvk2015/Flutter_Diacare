@@ -260,11 +260,11 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
             if (widget.userRole == 'patient' || widget.userRole == 'doctor')
               IconButton(icon: const Icon(Icons.add), onPressed: _bookDialog),
           ],
-          bottom: TabBar(
+          bottom: const TabBar(
             indicatorColor: Colors.white,
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white70,
-            tabs: const [
+            tabs: [
               Tab(text: 'Pending'),
               Tab(text: 'Finished'),
             ],

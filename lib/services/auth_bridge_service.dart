@@ -44,8 +44,6 @@ class AuthBridgeService {
 
   /// Initialize the auth bridge service
   Future<void> initialize() async {
-    print('[AuthBridge] Initializing premium authentication service...');
-
     // Start session monitoring
     _startSessionMonitoring();
 
@@ -55,8 +53,6 @@ class AuthBridgeService {
       'session_timeout': _sessionDuration.inMinutes,
       'inactivity_timeout': _inactivityTimeout.inMinutes,
     });
-
-    print('[AuthBridge] Premium authentication service ready');
   }
 
   /// Enhanced sign in with security features
@@ -75,8 +71,6 @@ class AuthBridgeService {
 
       // Start performance monitoring
       final stopwatch = Stopwatch()..start();
-
-      print('[AuthBridge] Starting secure authentication process...');
 
       // Authenticate with MockAuthService
       final success = await _mockAuth.signInWithEmailPassword(email, password);
@@ -98,10 +92,6 @@ class AuthBridgeService {
         // Broadcast success event
         _eventController.add(
           AuthEvent.signInSuccess(email, _mockAuth.currentUserType!),
-        );
-
-        print(
-          '[AuthBridge] ✅ Secure authentication successful in ${stopwatch.elapsedMilliseconds}ms',
         );
 
         return AuthResult.success({
@@ -128,8 +118,6 @@ class AuthBridgeService {
 
   /// Enhanced sign out with security cleanup
   Future<void> signOut({String reason = 'user_requested'}) async {
-    print('[AuthBridge] Starting secure sign out process...');
-
     final userEmail = _mockAuth.currentUserEmail;
 
     // Clear session timers
@@ -151,8 +139,6 @@ class AuthBridgeService {
 
     // Broadcast sign out event
     _eventController.add(AuthEvent.signOut(reason));
-
-    print('[AuthBridge] ✅ Secure sign out completed');
   }
 
   /// Session management
@@ -235,7 +221,6 @@ class AuthBridgeService {
 
   /// Renew session
   void _renewSession() {
-    print('[AuthBridge] Session renewed for ${_mockAuth.currentUserEmail}');
     _logSecurityEvent('session_renewed', {
       'email': _mockAuth.currentUserEmail,
       'timestamp': DateTime.now().toIso8601String(),
@@ -249,22 +234,10 @@ class AuthBridgeService {
 
   /// Log security events
   void _logSecurityEvent(String event, Map<String, dynamic> data) {
-    print('[AuthBridge] Security Event: $event');
-    print('[AuthBridge] Event Data: $data');
   }
 
   /// Log session health
   void _logSessionHealth() {
-    final health = {
-      'user': _mockAuth.currentUserEmail,
-      'session_age_minutes': _lastActivity != null
-          ? DateTime.now().difference(_lastActivity!).inMinutes
-          : 0,
-      'is_active': !_isInactive(),
-      'timestamp': DateTime.now().toIso8601String(),
-    };
-
-    print('[AuthBridge] Session Health: $health');
   }
 
   /// Cleanup resources

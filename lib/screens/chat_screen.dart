@@ -141,7 +141,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> pickFile() async {
     try {
       if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-        final typeGroup = selector.XTypeGroup(label: 'files');
+        const typeGroup = selector.XTypeGroup(label: 'files');
         final file = await selector.openFile(acceptedTypeGroups: [typeGroup]);
         if (file != null) {
           await sendMessage(filePath: file.path);
@@ -251,9 +251,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       color: Colors.red.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
+                      children: [
                         Icon(Icons.error, color: Colors.white),
                         SizedBox(width: 8),
                         Text(

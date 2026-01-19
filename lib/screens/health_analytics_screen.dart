@@ -107,7 +107,7 @@ class _HealthAnalyticsScreenState extends State<HealthAnalyticsScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [color.withOpacity(0.3), color],
+                  colors: [color.withAlpha(77), color],
                 ),
               ),
               child: Center(

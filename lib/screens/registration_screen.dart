@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../widgets/glassmorphic_card.dart';
 import '../widgets/voice_text_field.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final String userType;
@@ -26,26 +28,34 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       _error = null;
     });
     try {
-      print('DEBUG: Starting registration process');
-      print('DEBUG: Email: ${_emailController.text.trim()}');
-      print('DEBUG: Name: ${_nameController.text.trim()}');
+      // Create user in Firebase Auth
+      final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-      // Simulate registration success for testing purposes
-      await Future.delayed(const Duration(seconds: 2));
+      // Create user document in Firestore
+      if (cred.user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(cred.user!.uid).set({
+          'uid': cred.user!.uid,
+          'email': _emailController.text.trim(),
+          'displayName': _nameController.text.trim(),
+          'role': widget.userType, // 'doctor', 'patient', etc.
+          'createdAt': FieldValue.serverTimestamp(),
+          'isActive': true,
+        });
 
-      // For now, simulate successful registration
-      print('DEBUG: Registration completed successfully');
+        // Update display name in Auth
+        await cred.user!.updateDisplayName(_nameController.text.trim());
+      }
 
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration successful! Please log in.')),
+          const SnackBar(content: Text('Registration successful! Please log in.')),
         );
       }
     } catch (e) {
-      print('DEBUG: Registration error: $e');
-      print('DEBUG: Error type: ${e.runtimeType}');
-
       setState(() {
         _error = e.toString();
       });

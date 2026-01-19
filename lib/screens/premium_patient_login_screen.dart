@@ -100,27 +100,20 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
     _pulseController.repeat();
 
     try {
-      print('[DEBUG] Starting premium authentication process...');
-
       final result = await _authBridge.signInWithEmailPassword(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      print('[DEBUG] Authentication result: ${result.isSuccess}');
-
       if (result.isSuccess && mounted) {
         // Success haptic feedback
         HapticFeedback.mediumImpact();
 
-        print('[DEBUG] Navigating to dashboard...');
         Navigator.pushReplacementNamed(context, '/patient_dashboard');
-        print('[DEBUG] Navigation completed');
       } else if (result.error != null) {
         _showErrorMessage(result.error!);
       }
     } catch (e) {
-      print('[DEBUG] Login failed with error: $e');
       _showErrorMessage('An unexpected error occurred. Please try again.');
     } finally {
       if (mounted) {
@@ -389,7 +382,7 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
                                     ? null
                                     : _signInWithEmailPassword,
                                 child: _loading
-                                    ? Row(
+                                    ? const Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
@@ -404,8 +397,8 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
                                                   ),
                                             ),
                                           ),
-                                          const SizedBox(width: 12),
-                                          const Text('Authenticating...'),
+                                          SizedBox(width: 12),
+                                          Text('Authenticating...'),
                                         ],
                                       )
                                     : const Text('Login'),

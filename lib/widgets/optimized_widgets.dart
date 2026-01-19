@@ -341,7 +341,7 @@ class _LoadingPlaceholderState extends State<LoadingPlaceholder>
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
-            color: Colors.grey[300]?.withOpacity(_animation.value),
+            color: Colors.grey[300]?.withAlpha((255 * _animation.value).round()),
             borderRadius: widget.borderRadius,
           ),
         );

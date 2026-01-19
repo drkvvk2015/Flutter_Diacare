@@ -67,7 +67,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     final navigator = Navigator.of(context);
     navigator.push(
       MaterialPageRoute(
-        builder: (_) => PrescriptionScreen(),
+        builder: (_) => const PrescriptionScreen(),
         settings: RouteSettings(
           arguments: {'patient': currentPatient!, 'viewOnly': viewOnly},
         ),

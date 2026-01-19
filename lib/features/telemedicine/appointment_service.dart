@@ -245,7 +245,7 @@ class AppointmentService {
             .collection('users')
             .where('role', isEqualTo: 'doctor')
             .get()
-            .timeout(Duration(seconds: 15));
+            .timeout(const Duration(seconds: 15));
 
         logInfo('Found ${snapshot.docs.length} doctors');
 

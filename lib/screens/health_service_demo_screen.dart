@@ -78,7 +78,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
                     icon: const Icon(Icons.favorite, color: Colors.green),
                     label: const Text('Healthy Values'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green.withOpacity(0.8),
+                      backgroundColor: Colors.green.withAlpha(204),
                       foregroundColor: Colors.white,
                     ),
                   ),
@@ -90,7 +90,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
                     icon: const Icon(Icons.warning, color: Colors.orange),
                     label: const Text('Poor Values'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange.withOpacity(0.8),
+                      backgroundColor: Colors.orange.withAlpha(204),
                       foregroundColor: Colors.white,
                     ),
                   ),
@@ -105,7 +105,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
                 icon: const Icon(Icons.refresh),
                 label: const Text('Reset Data'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey.withOpacity(0.8),
+                  backgroundColor: Colors.grey.withAlpha(204),
                   foregroundColor: Colors.white,
                 ),
               ),
@@ -136,7 +136,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [color.withOpacity(0.3), color],
+                  colors: [color.withAlpha(77), color],
                 ),
                 border: Border.all(color: color, width: 3),
               ),

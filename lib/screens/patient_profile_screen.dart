@@ -202,15 +202,15 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                       children: [
                         const SizedBox(height: 8),
                         // --- Clinical History Section ---
-                        Row(
+                        const Row(
                           children: [
                             Icon(
                               Icons.medical_services,
                               color: Colors.teal,
                               size: 28,
                             ),
-                            const SizedBox(width: 10),
-                            const Text(
+                            SizedBox(width: 10),
+                            Text(
                               'Clinical History',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -222,14 +222,14 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                         ),
                         const Divider(height: 28, thickness: 1.2),
                         // --- Comorbidities ---
-                        Row(
+                        const Row(
                           children: [
                             Icon(
                               Icons.coronavirus,
                               color: Colors.teal,
                               size: 22,
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8),
                             Text(
                               'Comorbidities',
                               style: TextStyle(
@@ -299,15 +299,15 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
+                              const Row(
                                 children: [
                                   Icon(
                                     Icons.list_alt,
                                     color: Colors.teal,
                                     size: 18,
                                   ),
-                                  const SizedBox(width: 6),
-                                  const Text(
+                                  SizedBox(width: 6),
+                                  Text(
                                     'Added Comorbidities:',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -318,7 +318,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                               const SizedBox(height: 4),
                               ListView.separated(
                                 shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
+                                physics: const NeverScrollableScrollPhysics(),
                                 itemCount: _comorbiditiesList.length,
                                 separatorBuilder: (context, idx) =>
                                     Divider(height: 1, color: Colors.grey[200]),
@@ -428,14 +428,14 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                         const SizedBox(height: 24),
                         // --- Allergies Entry ---
                         const Divider(height: 32, thickness: 1),
-                        Row(
+                        const Row(
                           children: [
                             Icon(
                               Icons.warning_amber_rounded,
                               color: Colors.orange,
                               size: 22,
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8),
                             Text(
                               'Allergies',
                               style: TextStyle(
@@ -458,10 +458,10 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                         ),
                         const SizedBox(height: 24),
                         // --- Surgeries Entry ---
-                        Row(
+                        const Row(
                           children: [
                             Icon(Icons.healing, color: Colors.purple, size: 22),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8),
                             Text(
                               'Surgeries',
                               style: TextStyle(

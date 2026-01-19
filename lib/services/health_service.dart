@@ -24,7 +24,7 @@ class HealthService with ChangeNotifier {
 
   // Analytics and trends
   List<HealthDataPoint> _historicalData = [];
-  Map<HealthDataType, List<double>> _trends = {};
+  final Map<HealthDataType, List<double>> _trends = {};
 
   // Getters with proper documentation
   /// Current step count for today
@@ -161,7 +161,9 @@ class HealthService with ChangeNotifier {
 
   /// Fetch historical health data for analytics (last 7 days)
   Future<bool> fetchWeeklyData() async {
-    if (!_isInitialized) return false;
+    if (!_isInitialized) {
+      return false;
+    }
 
     try {
       logInfo('Fetching weekly health data for analytics');
@@ -204,7 +206,7 @@ class HealthService with ChangeNotifier {
       _height = _latestDouble(data, HealthDataType.HEIGHT);
 
       logInfo(
-        'Processed health data: ${_steps} steps, ${_calories.toStringAsFixed(1)} cal',
+        'Processed health data: $_steps steps, ${_calories.toStringAsFixed(1)} cal',
       );
     } catch (e, stack) {
       logError('Error processing health data', e, stack);
@@ -233,41 +235,45 @@ class HealthService with ChangeNotifier {
     int score = 50; // Base score
 
     // Steps contribution (up to +20 points)
-    if (_steps >= 10000)
+    if (_steps >= 10000) {
       score += 20;
-    else if (_steps >= 8000)
+    } else if (_steps >= 8000) {
       score += 15;
-    else if (_steps >= 5000)
+    } else if (_steps >= 5000) {
       score += 10;
+    }
 
     // Heart rate contribution (±10 points)
     if (_heartRate != null) {
-      if (_heartRate! >= 60 && _heartRate! <= 100)
+      if (_heartRate! >= 60 && _heartRate! <= 100) {
         score += 10;
-      else if (_heartRate! >= 50 && _heartRate! <= 120)
+      } else if (_heartRate! >= 50 && _heartRate! <= 120) {
         score += 5;
-      else
+      } else {
         score -= 5;
+      }
     }
 
     // Blood oxygen contribution (±10 points)
     if (_spo2 != null) {
-      if (_spo2! >= 95)
+      if (_spo2! >= 95) {
         score += 10;
-      else if (_spo2! >= 90)
+      } else if (_spo2! >= 90) {
         score += 5;
-      else
+      } else {
         score -= 10;
+      }
     }
 
     // Blood pressure contribution (±10 points)
     if (_bpSystolic != null && _bpDiastolic != null) {
-      if (_bpSystolic! <= 120 && _bpDiastolic! <= 80)
+      if (_bpSystolic! <= 120 && _bpDiastolic! <= 80) {
         score += 10;
-      else if (_bpSystolic! <= 140 && _bpDiastolic! <= 90)
+      } else if (_bpSystolic! <= 140 && _bpDiastolic! <= 90) {
         score += 5;
-      else
+      } else {
         score -= 10;
+      }
     }
 
     return score.clamp(0, 100);
@@ -338,14 +344,30 @@ class HealthService with ChangeNotifier {
     double? calories,
     double? distance,
   }) {
-    if (heartRate != null) _heartRate = heartRate;
-    if (spo2 != null) _spo2 = spo2;
-    if (bpSystolic != null) _bpSystolic = bpSystolic;
-    if (bpDiastolic != null) _bpDiastolic = bpDiastolic;
-    if (temperature != null) _temperature = temperature;
-    if (steps != null) _steps = steps;
-    if (calories != null) _calories = calories;
-    if (distance != null) _distance = distance;
+    if (heartRate != null) {
+      _heartRate = heartRate;
+    }
+    if (spo2 != null) {
+      _spo2 = spo2;
+    }
+    if (bpSystolic != null) {
+      _bpSystolic = bpSystolic;
+    }
+    if (bpDiastolic != null) {
+      _bpDiastolic = bpDiastolic;
+    }
+    if (temperature != null) {
+      _temperature = temperature;
+    }
+    if (steps != null) {
+      _steps = steps;
+    }
+    if (calories != null) {
+      _calories = calories;
+    }
+    if (distance != null) {
+      _distance = distance;
+    }
     notifyListeners();
   }
 
@@ -360,14 +382,30 @@ class HealthService with ChangeNotifier {
     double? calories,
     double? distance,
   }) {
-    if (heartRate != null) _heartRate = heartRate;
-    if (spo2 != null) _spo2 = spo2;
-    if (bpSystolic != null) _bpSystolic = bpSystolic;
-    if (bpDiastolic != null) _bpDiastolic = bpDiastolic;
-    if (temperature != null) _temperature = temperature;
-    if (steps != null) _steps = steps;
-    if (calories != null) _calories = calories;
-    if (distance != null) _distance = distance;
+    if (heartRate != null) {
+      _heartRate = heartRate;
+    }
+    if (spo2 != null) {
+      _spo2 = spo2;
+    }
+    if (bpSystolic != null) {
+      _bpSystolic = bpSystolic;
+    }
+    if (bpDiastolic != null) {
+      _bpDiastolic = bpDiastolic;
+    }
+    if (temperature != null) {
+      _temperature = temperature;
+    }
+    if (steps != null) {
+      _steps = steps;
+    }
+    if (calories != null) {
+      _calories = calories;
+    }
+    if (distance != null) {
+      _distance = distance;
+    }
     notifyListeners();
   }
 
@@ -398,7 +436,9 @@ class HealthService with ChangeNotifier {
     try {
       final filtered = data.where((d) => d.type == type).toList();
 
-      if (filtered.isEmpty) return null;
+      if (filtered.isEmpty) {
+        return null;
+      }
 
       filtered.sort((a, b) => b.dateFrom.compareTo(a.dateFrom));
       return (filtered.first.value as num).toDouble();

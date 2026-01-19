@@ -41,48 +41,50 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyB51bLGyl60Z_5rGnBtm40WVxvJrUZpa10',
-    appId: '1:699856000358:web:4f4b5d6e8d94f7a8cc24a7',
-    messagingSenderId: '699856000358',
-    projectId: 'project1-2028a',
-    authDomain: 'project1-2028a.firebaseapp.com',
-    storageBucket: 'project1-2028a.firebasestorage.app',
-    measurementId: 'G-J3X4L8MNQR',
+    apiKey: 'AIzaSyAUkfdw3Rdi7JG5XeKgBCulEuRw5c_jZ4M',
+    appId: '1:603628370602:web:5be147bc0f453be4b9aed3',
+    messagingSenderId: '603628370602',
+    projectId: 'diacareplus-e9eb3',
+    authDomain: 'diacareplus-e9eb3.firebaseapp.com',
+    storageBucket: 'diacareplus-e9eb3.firebasestorage.app',
+    measurementId: 'G-Z1RS02F6XN',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB51bLGyl60Z_5rGnBtm40WVxvJrUZpa10',
-    appId: '1:699856000358:android:bab46864e58e63a7cc24a7',
-    messagingSenderId: '699856000358',
-    projectId: 'project1-2028a',
-    storageBucket: 'project1-2028a.firebasestorage.app',
+    apiKey: 'AIzaSyAUkfdw3Rdi7JG5XeKgBCulEuRw5c_jZ4M',
+    appId: '1:603628370602:android:550de13aa48e8beeb9aed3',
+    messagingSenderId: '603628370602',
+    projectId: 'diacareplus-e9eb3',
+    storageBucket: 'diacareplus-e9eb3.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyB51bLGyl60Z_5rGnBtm40WVxvJrUZpa10',
-    appId: '1:699856000358:ios:4f4b5d6e8d94f7a8cc24a7',
-    messagingSenderId: '699856000358',
-    projectId: 'project1-2028a',
-    storageBucket: 'project1-2028a.firebasestorage.app',
+    apiKey: 'AIzaSyAUkfdw3Rdi7JG5XeKgBCulEuRw5c_jZ4M',
+    // Placeholder - iOS App ID not provided
+    appId: '1:603628370602:ios:placeholder', 
+    messagingSenderId: '603628370602',
+    projectId: 'diacareplus-e9eb3',
+    storageBucket: 'diacareplus-e9eb3.firebasestorage.app',
     iosBundleId: 'com.example.flutterDiacare',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyB51bLGyl60Z_5rGnBtm40WVxvJrUZpa10',
-    appId: '1:699856000358:ios:4f4b5d6e8d94f7a8cc24a7',
-    messagingSenderId: '699856000358',
-    projectId: 'project1-2028a',
-    storageBucket: 'project1-2028a.firebasestorage.app',
+    apiKey: 'AIzaSyAUkfdw3Rdi7JG5XeKgBCulEuRw5c_jZ4M',
+    // Placeholder - macOS App ID not provided
+    appId: '1:603628370602:ios:placeholder', 
+    messagingSenderId: '603628370602',
+    projectId: 'diacareplus-e9eb3',
+    storageBucket: 'diacareplus-e9eb3.firebasestorage.app',
     iosBundleId: 'com.example.flutterDiacare',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyB51bLGyl60Z_5rGnBtm40WVxvJrUZpa10',
-    appId: '1:699856000358:web:4f4b5d6e8d94f7a8cc24a7',
-    messagingSenderId: '699856000358',
-    projectId: 'project1-2028a',
-    authDomain: 'project1-2028a.firebaseapp.com',
-    storageBucket: 'project1-2028a.firebasestorage.app',
-    measurementId: 'G-J3X4L8MNQR',
+    apiKey: 'AIzaSyAUkfdw3Rdi7JG5XeKgBCulEuRw5c_jZ4M',
+    appId: '1:603628370602:web:5be147bc0f453be4b9aed3', // Often uses Web App ID
+    messagingSenderId: '603628370602',
+    projectId: 'diacareplus-e9eb3',
+    authDomain: 'diacareplus-e9eb3.firebaseapp.com',
+    storageBucket: 'diacareplus-e9eb3.firebasestorage.app',
+    measurementId: 'G-Z1RS02F6XN',
   );
 }

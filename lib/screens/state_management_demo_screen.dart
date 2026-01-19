@@ -171,7 +171,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withAlpha(26),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -231,7 +231,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
                   runSpacing: 8,
                   children: ThemeProvider.predefinedColors.map((color) {
                     final isSelected =
-                        color.value == themeProvider.seedColor.value;
+                        color == themeProvider.seedColor;
                     return GestureDetector(
                       onTap: () => themeProvider.setSeedColor(color),
                       child: Container(
@@ -249,7 +249,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
                           boxShadow: [
                             if (isSelected)
                               BoxShadow(
-                                color: color.withOpacity(0.5),
+                                color: color.withAlpha(128),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                               ),
@@ -495,7 +495,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withAlpha(26),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -602,9 +602,9 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha(26),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withAlpha(77)),
       ),
       child: Row(
         children: [
@@ -700,7 +700,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
                           trailing: Text(notification.formattedTime),
                           tileColor: notification.isRead
                               ? null
-                              : notification.color.withOpacity(0.1),
+                              : notification.color.withAlpha(26),
                           onTap: () {
                             notificationProvider.markAsRead(notification.id);
                             if (notification.onTap != null) {

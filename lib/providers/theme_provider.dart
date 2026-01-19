@@ -1,19 +1,40 @@
+/// Theme Management Provider
+/// 
+/// Provides dynamic theming capabilities including light/dark modes,
+/// custom color schemes, and Material Design 3 support.
+/// 
+/// Features:
+/// - Dynamic color scheme generation
+/// - System color adaptation
+/// - Material Design 3 toggle
+/// - Glassmorphic card styling
+/// - Customizable seed colors
 import 'package:flutter/material.dart';
 
 /// Theme management provider for dynamic theming
+/// 
+/// Handles theme state and generates complete ThemeData configurations
+/// for both light and dark modes with customizable color schemes.
 class ThemeProvider extends ChangeNotifier {
+  // Theme configuration properties
   Color _seedColor = const Color(0xFF43CEA2);
   ThemeMode _themeMode = ThemeMode.system;
   bool _useMaterial3 = true;
   bool _useSystemColors = true;
 
-  // Getters
+  // Public getters for theme properties
   Color get seedColor => _seedColor;
   ThemeMode get themeMode => _themeMode;
   bool get useMaterial3 => _useMaterial3;
   bool get useSystemColors => _useSystemColors;
 
-  /// Generate light theme
+  /// Generate light theme with optional dynamic color scheme
+  /// 
+  /// Args:
+  ///   dynamicColorScheme: Optional system-provided color scheme
+  /// 
+  /// Returns:
+  ///   ThemeData configured for light mode with glassmorphic styling
   ThemeData getLightTheme({ColorScheme? dynamicColorScheme}) {
     final ColorScheme lightScheme =
         _useSystemColors && dynamicColorScheme != null

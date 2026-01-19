@@ -171,15 +171,15 @@ class _AnthropometryScreenState extends State<AnthropometryScreen> {
       children: [
         Text(
           title,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         SizedBox(
           height: 200,
           child: LineChart(
             LineChartData(
-              gridData: FlGridData(show: false),
-              titlesData: FlTitlesData(
+              gridData: const FlGridData(show: false),
+              titlesData: const FlTitlesData(
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(showTitles: true),
                 ),
@@ -200,14 +200,14 @@ class _AnthropometryScreenState extends State<AnthropometryScreen> {
                   spots: spots,
                   isCurved: true,
                   color: color,
-                  dotData: FlDotData(show: false),
+                  dotData: const FlDotData(show: false),
                   belowBarData: BarAreaData(show: false),
                 ),
               ],
             ),
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
       ],
     );
   }

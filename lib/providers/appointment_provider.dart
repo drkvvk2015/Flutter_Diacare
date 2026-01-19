@@ -1,17 +1,36 @@
+/// Appointment State Management Provider
+/// 
+/// Manages appointment scheduling, filtering, and categorization.
+/// Integrates with Firestore for persistent appointment data.
+/// 
+/// Features:
+/// - Appointment CRUD operations
+/// - Automatic categorization (upcoming/past)
+/// - Date-based filtering
+/// - Real-time appointment updates
+/// - Role-based appointment queries
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Comprehensive appointment state management provider
+/// 
+/// Handles all appointment-related operations including creation,
+/// updates, filtering, and categorization for doctors and patients.
 class AppointmentProvider extends ChangeNotifier {
+  // Appointment lists organized by status
   List<AppointmentModel> _appointments = [];
   List<AppointmentModel> _upcomingAppointments = [];
   List<AppointmentModel> _pastAppointments = [];
+  
+  // Loading and error state
   bool _isLoading = false;
   String? _error;
+  
+  // Filter and date selection state
   AppointmentFilter _currentFilter = AppointmentFilter.all;
   DateTime _selectedDate = DateTime.now();
 
-  // Getters
+  // Public getters for appointment data
   List<AppointmentModel> get appointments => _appointments;
   List<AppointmentModel> get upcomingAppointments => _upcomingAppointments;
   List<AppointmentModel> get pastAppointments => _pastAppointments;
@@ -36,7 +55,11 @@ class AppointmentProvider extends ChangeNotifier {
   int get todaysCount => todaysAppointments.length;
   int get upcomingCount => _upcomingAppointments.length;
 
-  /// Initialize appointment provider
+  /// Initialize appointment provider for a specific user
+  /// 
+  /// Args:
+  ///   userId: Unique identifier for the user
+  ///   userRole: Role of the user ('doctor' or 'patient')
   Future<void> initialize(String userId, String userRole) async {
     _setLoading(true);
     await loadAppointments(userId, userRole);
@@ -133,10 +156,10 @@ class AppointmentProvider extends ChangeNotifier {
           .collection('appointments')
           .doc(appointmentId)
           .update({
-            'status': 'cancelled',
-            'cancellationReason': reason,
-            'cancelledAt': FieldValue.serverTimestamp(),
-          });
+        'status': 'cancelled',
+        'cancellationReason': reason,
+        'cancelledAt': FieldValue.serverTimestamp(),
+      });
 
       final index = _appointments.indexWhere((apt) => apt.id == appointmentId);
       if (index != -1) {
@@ -328,11 +351,6 @@ class AppointmentProvider extends ChangeNotifier {
   /// Refresh appointments
   Future<void> refresh(String userId, String userRole) async {
     await loadAppointments(userId, userRole);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }
 

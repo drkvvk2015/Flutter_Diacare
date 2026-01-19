@@ -313,9 +313,9 @@ class _PerformanceMonitorScreenState extends State<PerformanceMonitorScreen>
           else
             ...timings.entries
                 .map(
-                  (entry) => _buildStatRow('${entry.key}', '${entry.value}ms'),
+                  (entry) => _buildStatRow(entry.key, '${entry.value}ms'),
                 )
-                .toList(),
+                ,
         ],
       ),
     );
