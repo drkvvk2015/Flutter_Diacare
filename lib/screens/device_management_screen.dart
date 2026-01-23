@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:wifi_scan/wifi_scan.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:wifi_scan/wifi_scan.dart';
 
 class DeviceManagementScreen extends StatefulWidget {
   const DeviceManagementScreen({super.key});
@@ -39,7 +39,7 @@ class _DeviceManagementScreenState extends State<DeviceManagementScreen> {
           _bluetoothDevices = results.map((r) => r.device).toList();
         });
       });
-      await Future.delayed(const Duration(seconds: 4));
+      await Future<void>.delayed(const Duration(seconds: 4));
       await FlutterBluePlus.stopScan();
       await subscription.cancel();
     } catch (e) {
@@ -111,7 +111,7 @@ class _DeviceManagementScreenState extends State<DeviceManagementScreen> {
       });
 
       // Wait for scan to complete
-      await Future.delayed(const Duration(seconds: 5));
+      await Future<void>.delayed(const Duration(seconds: 5));
       await subscription.cancel();
 
     } catch (e) {
@@ -133,7 +133,7 @@ class _DeviceManagementScreenState extends State<DeviceManagementScreen> {
       appBar: AppBar(title: const Text('Device Management')),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -227,3 +227,4 @@ class _DeviceManagementScreenState extends State<DeviceManagementScreen> {
     );
   }
 }
+

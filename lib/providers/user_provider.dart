@@ -9,9 +9,10 @@
 /// - Role-based access control (doctor, patient, admin)
 /// - Automatic Firestore document creation for new users
 /// - Profile updates with Firebase Auth synchronization
-import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+library;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 /// Comprehensive user state management provider
 /// 
@@ -35,13 +36,13 @@ class UserProvider extends ChangeNotifier {
   bool get isPatient => _userRole == UserRole.patient;
 
   String get displayName =>
-      _userData?['displayName'] ??
+      (_userData?['displayName'] as String?) ??
       _currentUser?.displayName ??
       'Anonymous User';
 
-  String get email => _userData?['email'] ?? _currentUser?.email ?? '';
+  String get email => (_userData?['email'] as String?) ?? _currentUser?.email ?? '';
 
-  String get photoUrl => _userData?['photoUrl'] ?? _currentUser?.photoURL ?? '';
+  String get photoUrl => (_userData?['photoUrl'] as String?) ?? _currentUser?.photoURL ?? '';
 
   /// Initialize user state and listen to auth changes
   Future<void> initialize() async {
@@ -66,7 +67,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   /// Handle authentication state changes
-  void _onAuthStateChanged(User? user) async {
+  Future<void> _onAuthStateChanged(User? user) async {
     _currentUser = user;
 
     if (user != null) {
@@ -90,7 +91,7 @@ class UserProvider extends ChangeNotifier {
 
       if (doc.exists) {
         _userData = doc.data();
-        _userRole = _parseUserRole(_userData?['role']);
+        _userRole = _parseUserRole(_userData?['role'] as String?);
       } else {
         // Create user document if it doesn't exist
         await _createUserDocument();
@@ -281,15 +282,15 @@ class UserProvider extends ChangeNotifier {
     int completedFields = 0;
     const totalFields = 5;
 
-    if (_userData!['displayName']?.toString().isNotEmpty == true) {
+    if (_userData!['displayName']?.toString().isNotEmpty ?? false) {
       completedFields++;
     }
-    if (_userData!['email']?.toString().isNotEmpty == true) completedFields++;
-    if (_userData!['photoUrl']?.toString().isNotEmpty == true) {
+    if (_userData!['email']?.toString().isNotEmpty ?? false) completedFields++;
+    if (_userData!['photoUrl']?.toString().isNotEmpty ?? false) {
       completedFields++;
     }
-    if (_userData!['role']?.toString().isNotEmpty == true) completedFields++;
-    if (_userData!['phone']?.toString().isNotEmpty == true) completedFields++;
+    if (_userData!['role']?.toString().isNotEmpty ?? false) completedFields++;
+    if (_userData!['phone']?.toString().isNotEmpty ?? false) completedFields++;
 
     return ((completedFields / totalFields) * 100).round();
   }

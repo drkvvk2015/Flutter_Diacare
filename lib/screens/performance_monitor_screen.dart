@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/caching_provider.dart';
-import '../widgets/optimized_widgets.dart';
 import '../services/performance_service.dart';
+import '../widgets/optimized_widgets.dart';
 
 /// Screen for monitoring and controlling app performance
 class PerformanceMonitorScreen extends StatefulWidget {
@@ -190,7 +191,7 @@ class _PerformanceMonitorScreenState extends State<PerformanceMonitorScreen>
           _buildStatRow('Stale Period', '7 days'),
           const SizedBox(height: 12),
           ElevatedButton.icon(
-            onPressed: () => _clearImageCache(),
+            onPressed: _clearImageCache,
             icon: const Icon(Icons.clear_all),
             label: const Text('Clear Image Cache'),
             style: ElevatedButton.styleFrom(
@@ -224,7 +225,7 @@ class _PerformanceMonitorScreenState extends State<PerformanceMonitorScreen>
           _buildStatRow('Stale Period', '4 hours'),
           const SizedBox(height: 12),
           ElevatedButton.icon(
-            onPressed: () => _clearDataCache(),
+            onPressed: _clearDataCache,
             icon: const Icon(Icons.clear_all),
             label: const Text('Clear Data Cache'),
             style: ElevatedButton.styleFrom(
@@ -279,7 +280,7 @@ class _PerformanceMonitorScreenState extends State<PerformanceMonitorScreen>
           ),
           const SizedBox(height: 12),
           ElevatedButton.icon(
-            onPressed: () => _runPerformanceTest(),
+            onPressed: _runPerformanceTest,
             icon: const Icon(Icons.play_arrow),
             label: const Text('Run Performance Test'),
             style: ElevatedButton.styleFrom(
@@ -389,7 +390,7 @@ class _PerformanceMonitorScreenState extends State<PerformanceMonitorScreen>
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () => _clearAllCaches(),
+              onPressed: _clearAllCaches,
               icon: const Icon(Icons.delete_forever),
               label: const Text('Clear All Caches'),
               style: ElevatedButton.styleFrom(
@@ -596,10 +597,6 @@ class _PerformanceMonitorScreenState extends State<PerformanceMonitorScreen>
 }
 
 class _FeatureItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String description;
-  final bool enabled;
 
   const _FeatureItem({
     required this.icon,
@@ -607,6 +604,10 @@ class _FeatureItem extends StatelessWidget {
     required this.description,
     this.enabled = false,
   });
+  final IconData icon;
+  final String title;
+  final String description;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {

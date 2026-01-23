@@ -7,6 +7,7 @@
 /// - Message history persistence
 /// - Offline chat functionality
 /// - Simple key-value message structure
+library;
 import 'package:hive/hive.dart';
 part 'chat_hive.g.dart';
 
@@ -15,6 +16,8 @@ part 'chat_hive.g.dart';
 /// TypeId: 2 - Unique identifier for Hive type system
 @HiveType(typeId: 2)
 class ChatHive extends HiveObject {
+
+  ChatHive({required this.id, required this.messages});
   /// Unique chat/conversation identifier
   @HiveField(0)
   String id;
@@ -22,6 +25,4 @@ class ChatHive extends HiveObject {
   /// List of messages (each message as key-value pairs)
   @HiveField(1)
   List<Map<String, String>> messages;
-
-  ChatHive({required this.id, required this.messages});
 }

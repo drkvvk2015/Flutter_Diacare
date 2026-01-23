@@ -1,26 +1,25 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
 import '../models/patient.dart';
+import '../widgets/glassmorphic_card.dart';
 import '../widgets/voice_text_field.dart';
 import 'exercise_video_library_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../widgets/glassmorphic_card.dart';
 
 // --- New Tabs moved to top-level below ---
 
 class EPrescriptionTab extends StatelessWidget {
+  const EPrescriptionTab({required this.patient, super.key});
   final Patient patient;
-  const EPrescriptionTab({super.key, required this.patient});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -28,7 +27,7 @@ class EPrescriptionTab extends StatelessWidget {
             tag: 'eprescription-card',
             child: GlassmorphicCard(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -57,7 +56,7 @@ class EPrescriptionTab extends StatelessWidget {
                                   },
                                 );
                               } catch (e) {
-                                showDialog(
+                                showDialog<void>(
                                   context: context,
                                   builder: (context) => AlertDialog(
                                     shape: RoundedRectangleBorder(
@@ -97,7 +96,7 @@ class EPrescriptionTab extends StatelessWidget {
                                   },
                                 );
                               } catch (e) {
-                                showDialog(
+                                showDialog<void>(
                                   context: context,
                                   builder: (context) => AlertDialog(
                                     shape: RoundedRectangleBorder(
@@ -135,7 +134,7 @@ class EPrescriptionTab extends StatelessWidget {
               label: 'Recent Prescriptions List',
               child: GlassmorphicCard(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 400),
                     child: ListView(
@@ -193,8 +192,8 @@ class EPrescriptionTab extends StatelessWidget {
 }
 
 class DietAdviceTab extends StatefulWidget {
+  const DietAdviceTab({required this.patient, super.key});
   final Patient patient;
-  const DietAdviceTab({super.key, required this.patient});
 
   @override
   State<DietAdviceTab> createState() => _DietAdviceTabState();
@@ -238,14 +237,14 @@ class _DietAdviceTabState extends State<DietAdviceTab> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Quick Diet Advice Input
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -302,13 +301,13 @@ class _DietAdviceTabState extends State<DietAdviceTab> {
                       Icons.restaurant_menu,
                       color: Colors.green,
                     ),
-                    title: Text(plan['title']),
+                    title: Text(plan['title'] as String),
                     subtitle: Text(
                       '${plan['calories']} cal/day • ${plan['description']}',
                     ),
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -318,7 +317,7 @@ class _DietAdviceTabState extends State<DietAdviceTab> {
                             ),
                             const SizedBox(height: 8),
                             ...List.generate(
-                              plan['meals'].length,
+                              (plan['meals'] as List).length,
                               (mealIndex) => Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
                                 child: Text('• ${plan['meals'][mealIndex]}'),
@@ -361,8 +360,8 @@ class _DietAdviceTabState extends State<DietAdviceTab> {
 }
 
 class ExerciseAdviceTab extends StatefulWidget {
+  const ExerciseAdviceTab({required this.patient, super.key});
   final Patient patient;
-  const ExerciseAdviceTab({super.key, required this.patient});
 
   @override
   State<ExerciseAdviceTab> createState() => _ExerciseAdviceTabState();
@@ -409,8 +408,6 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
@@ -454,14 +451,14 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Custom Exercise Advice Input
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -497,7 +494,7 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
                                 'exerciseAdvice': advice,
                                 'exerciseAdviceDate':
                                     DateTime.now().toIso8601String(),
-                              }, SetOptions(merge: true));
+                              }, SetOptions(merge: true),);
                               if (!mounted) return;
                               messenger.showSnackBar(
                                 const SnackBar(
@@ -524,7 +521,7 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
+                            MaterialPageRoute<void>(
                               builder: (_) => ExerciseVideoLibraryScreen(),
                             ),
                           );
@@ -557,13 +554,13 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
                       Icons.fitness_center,
                       color: Colors.blue,
                     ),
-                    title: Text(plan['title']),
+                    title: Text(plan['title'] as String),
                     subtitle: Text(
                       '${plan['duration']} • ${plan['frequency']} • ${plan['description']}',
                     ),
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -573,7 +570,7 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
                             ),
                             const SizedBox(height: 8),
                             ...List.generate(
-                              plan['exercises'].length,
+                              (plan['exercises'] as List).length,
                               (exerciseIndex) => Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
                                 child: Row(
@@ -586,7 +583,7 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        plan['exercises'][exerciseIndex],
+                                        (plan['exercises'] as List)[exerciseIndex] as String,
                                       ),
                                     ),
                                   ],
@@ -611,7 +608,7 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
                                         'assignedExercisePlan': plan,
                                         'assignedExercisePlanDate':
                                             DateTime.now().toIso8601String(),
-                                      }, SetOptions(merge: true));
+                                      }, SetOptions(merge: true),);
                                       if (!mounted) return;
                                       messenger.showSnackBar(
                                         SnackBar(
@@ -645,7 +642,7 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
                                     );
                                     try {
                                       await _scheduleExerciseReminder(
-                                        plan['title'],
+                                        plan['title'] as String,
                                       );
                                       if (!mounted) return;
                                       messenger.showSnackBar(
@@ -691,8 +688,8 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
 }
 
 class NextVisitTab extends StatefulWidget {
+  const NextVisitTab({required this.patient, super.key});
   final Patient patient;
-  const NextVisitTab({super.key, required this.patient});
 
   @override
   State<NextVisitTab> createState() => _NextVisitTabState();
@@ -719,8 +716,8 @@ class _NextVisitTabState extends State<NextVisitTab> {
       if (!mounted) return;
       if (doc.exists && doc.data()?['nextVisit'] != null) {
         setState(() {
-          _lastVisit = doc.data()!['nextVisit'];
-          _lastReason = doc.data()!['nextVisitReason'];
+          _lastVisit = doc.data()!['nextVisit'] as String?;
+          _lastReason = doc.data()!['nextVisitReason'] as String?;
         });
       }
     } catch (e) {
@@ -740,7 +737,7 @@ class _NextVisitTabState extends State<NextVisitTab> {
           .set({
         'nextVisit': _dateController.text,
         'nextVisitReason': _reasonController.text,
-      }, SetOptions(merge: true));
+      }, SetOptions(merge: true),);
       if (!mounted) return;
       setState(() {
         _lastVisit = _dateController.text;
@@ -760,7 +757,7 @@ class _NextVisitTabState extends State<NextVisitTab> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -809,8 +806,8 @@ class _NextVisitTabState extends State<NextVisitTab> {
 }
 
 class NextVisitInvestigationTab extends StatefulWidget {
+  const NextVisitInvestigationTab({required this.patient, super.key});
   final Patient patient;
-  const NextVisitInvestigationTab({super.key, required this.patient});
 
   @override
   State<NextVisitInvestigationTab> createState() =>
@@ -838,7 +835,7 @@ class _NextVisitInvestigationTabState extends State<NextVisitInvestigationTab> {
       if (doc.exists && doc.data()?['nextVisitInvestigations'] != null) {
         setState(() {
           _investigations = List<String>.from(
-            doc.data()!['nextVisitInvestigations'],
+            doc.data()!['nextVisitInvestigations'] as List? ?? [],
           );
         });
       }
@@ -860,7 +857,7 @@ class _NextVisitInvestigationTabState extends State<NextVisitInvestigationTab> {
           .doc(widget.patient.id)
           .set({
         'nextVisitInvestigations': _investigations,
-      }, SetOptions(merge: true));
+      }, SetOptions(merge: true),);
       if (!mounted) return;
       _investigationController.clear();
       setState(() {});
@@ -876,7 +873,7 @@ class _NextVisitInvestigationTabState extends State<NextVisitInvestigationTab> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -921,8 +918,8 @@ class _NextVisitInvestigationTabState extends State<NextVisitInvestigationTab> {
 // Then run: flutter pub get
 
 class PatientDetailScreen extends StatefulWidget {
+  const PatientDetailScreen({required this.patient, super.key});
   final Patient patient;
-  const PatientDetailScreen({super.key, required this.patient});
 
   @override
   State<PatientDetailScreen> createState() => _PatientDetailScreenState();
@@ -977,8 +974,8 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
 }
 
 class DeviceIntegrationSection extends StatefulWidget {
+  const DeviceIntegrationSection({required this.patient, super.key});
   final Patient patient;
-  const DeviceIntegrationSection({super.key, required this.patient});
 
   @override
   State<DeviceIntegrationSection> createState() =>
@@ -989,7 +986,7 @@ class _DeviceIntegrationSectionState extends State<DeviceIntegrationSection> {
   bool scanning = false;
   List<BluetoothDevice> foundDevices = [];
 
-  void scanBluetoothDevices() async {
+  Future<void> scanBluetoothDevices() async {
     setState(() {
       scanning = true;
       foundDevices.clear();
@@ -1002,7 +999,7 @@ class _DeviceIntegrationSectionState extends State<DeviceIntegrationSection> {
     });
     try {
       await FlutterBluePlus.startScan(timeout: const Duration(seconds: 4));
-      await Future.delayed(const Duration(seconds: 4));
+      await Future<void>.delayed(const Duration(seconds: 4));
       await FlutterBluePlus.stopScan();
     } catch (e) {
       if (mounted) {
@@ -1079,8 +1076,8 @@ class _DeviceIntegrationSectionState extends State<DeviceIntegrationSection> {
 }
 
 class AnthropometryTab extends StatefulWidget {
+  const AnthropometryTab({required this.patient, super.key});
   final Patient patient;
-  const AnthropometryTab({super.key, required this.patient});
 
   @override
   AnthropometryTabState createState() => AnthropometryTabState();
@@ -1113,7 +1110,7 @@ class AnthropometryTabState extends State<AnthropometryTab> {
   Widget build(BuildContext context) {
     final history = widget.patient.anthropometryHistory;
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1217,8 +1214,8 @@ class AnthropometryTabState extends State<AnthropometryTab> {
 }
 
 class BPHistoryTab extends StatefulWidget {
+  const BPHistoryTab({required this.patient, super.key});
   final Patient patient;
-  const BPHistoryTab({super.key, required this.patient});
 
   @override
   BPHistoryTabState createState() => BPHistoryTabState();
@@ -1248,7 +1245,7 @@ class BPHistoryTabState extends State<BPHistoryTab> {
   Widget build(BuildContext context) {
     final history = widget.patient.bpHistory;
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1322,7 +1319,7 @@ class BPHistoryTabState extends State<BPHistoryTab> {
                   ),
                   trailing: i > 0
                       ? Text(
-                          'ΔSys: ${(entry.systolic - history[i - 1].systolic)}, ΔDia: ${(entry.diastolic - history[i - 1].diastolic)}',
+                          'ΔSys: ${entry.systolic - history[i - 1].systolic}, ΔDia: ${entry.diastolic - history[i - 1].diastolic}',
                         )
                       : null,
                 );
@@ -1340,8 +1337,8 @@ class BPHistoryTabState extends State<BPHistoryTab> {
 }
 
 class SMBGHistoryTab extends StatefulWidget {
+  const SMBGHistoryTab({required this.patient, super.key});
   final Patient patient;
-  const SMBGHistoryTab({super.key, required this.patient});
 
   @override
   SMBGHistoryTabState createState() => SMBGHistoryTabState();
@@ -1373,7 +1370,7 @@ class SMBGHistoryTabState extends State<SMBGHistoryTab> {
   Widget build(BuildContext context) {
     final history = widget.patient.smbgHistory;
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1473,3 +1470,6 @@ class SMBGHistoryTabState extends State<SMBGHistoryTab> {
     );
   }
 }
+
+
+

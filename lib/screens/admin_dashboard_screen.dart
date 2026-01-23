@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+import '../widgets/dashboard_card.dart';
 import 'appointment_screen.dart';
 import 'patient_list_screen.dart';
-import 'records_screen.dart';
-import '../widgets/dashboard_card.dart';
 import 'pharmacy_dashboard_screen.dart';
+import 'records_screen.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -47,8 +48,7 @@ class AdminDashboardScreen extends StatelessWidget {
             child: ListView(
               children: [
                 // Stat cards
-                isWide
-                    ? Row(
+                if (isWide) Row(
                         children: [
                           Expanded(
                             child: Semantics(
@@ -80,8 +80,7 @@ class AdminDashboardScreen extends StatelessWidget {
                             ),
                           ),
                         ],
-                      )
-                    : Column(
+                      ) else Column(
                         children: [
                           Semantics(
                             label: 'Total Doctors: 24',
@@ -111,8 +110,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         ],
                       ),
                 SizedBox(height: cardSpacing),
-                isWide
-                    ? Row(
+                if (isWide) Row(
                         children: [
                           Expanded(
                             child: Semantics(
@@ -131,10 +129,10 @@ class AdminDashboardScreen extends StatelessWidget {
                           SizedBox(width: cardSpacing),
                           Expanded(
                             child: Semantics(
-                              label: 'Revenue Today: \$1,240',
+                              label: r'Revenue Today: $1,240',
                               child: _buildStatCard(
                                 'Revenue Today',
-                                '\$1,240',
+                                r'$1,240',
                                 Icons.attach_money,
                                 Colors.purple,
                                 key: const Key(
@@ -144,8 +142,7 @@ class AdminDashboardScreen extends StatelessWidget {
                             ),
                           ),
                         ],
-                      )
-                    : Column(
+                      ) else Column(
                         children: [
                           Semantics(
                             label: 'Appointments Today: 12',
@@ -161,10 +158,10 @@ class AdminDashboardScreen extends StatelessWidget {
                           ),
                           SizedBox(height: cardSpacing),
                           Semantics(
-                            label: 'Revenue Today: \$1,240',
+                            label: r'Revenue Today: $1,240',
                             child: _buildStatCard(
                               'Revenue Today',
-                              '\$1,240',
+                              r'$1,240',
                               Icons.attach_money,
                               Colors.purple,
                               key: const Key(
@@ -205,7 +202,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         subtitle: 'View and manage all patients.',
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          MaterialPageRoute<void>(
                             builder: (_) => const PatientListScreen(),
                           ),
                         ),
@@ -223,11 +220,11 @@ class AdminDashboardScreen extends StatelessWidget {
                         subtitle: 'View and manage all appointments.',
                         onTap: () async {
                           final user = FirebaseAuth.instance.currentUser;
-                          String userId = user?.uid ?? '';
+                          final String userId = user?.uid ?? '';
                           if (context.mounted) {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
+                              MaterialPageRoute<void>(
                                 builder: (_) => AppointmentScreen(
                                   userRole: 'admin',
                                   userId: userId,
@@ -261,7 +258,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         subtitle: 'Access all health records.',
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          MaterialPageRoute<void>(
                             builder: (_) => const RecordsScreen(),
                           ),
                         ),
@@ -290,7 +287,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         subtitle: 'Access pharmacy management and inventory.',
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          MaterialPageRoute<void>(
                             builder: (_) => const PharmacyDashboardScreen(),
                           ),
                         ),
@@ -340,7 +337,7 @@ class AdminDashboardScreen extends StatelessWidget {
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Icon(icon, color: color, size: 32),
@@ -366,7 +363,7 @@ class AdminDashboardScreen extends StatelessWidget {
   }
 
   void _showDoctorManagement(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Doctor Management'),
@@ -406,7 +403,7 @@ class AdminDashboardScreen extends StatelessWidget {
     final emailController = TextEditingController();
     final specialtyController = TextEditingController();
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Add New Doctor'),
@@ -455,7 +452,7 @@ class AdminDashboardScreen extends StatelessWidget {
   }
 
   void _showDoctorsList(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('All Doctors'),
@@ -472,9 +469,9 @@ class AdminDashboardScreen extends StatelessWidget {
               }
               return ListView(
                 children: snapshot.data!.docs.map((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
+                  final data = doc.data()! as Map<String, dynamic>;
                   return ListTile(
-                    title: Text(data['name'] ?? 'Unknown'),
+                    title: Text(data['name'] as String? ?? data['displayName'] as String? ?? 'Unknown'),
                     subtitle: Text(
                       '${data['specialty'] ?? 'General'} - ${data['email'] ?? ''}',
                     ),
@@ -501,7 +498,7 @@ class AdminDashboardScreen extends StatelessWidget {
   }
 
   void _showAnalytics(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Analytics & Reports'),
@@ -536,7 +533,7 @@ class AdminDashboardScreen extends StatelessWidget {
   }
 
   void _showSystemSettings(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('System Settings'),
@@ -572,7 +569,7 @@ class AdminDashboardScreen extends StatelessWidget {
 
   void _showHelpFeedbackDialog(BuildContext context) {
     final TextEditingController feedbackController = TextEditingController();
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Help & Feedback'),
@@ -614,7 +611,7 @@ class AdminDashboardScreen extends StatelessWidget {
   /// Shows the user management dialog with options to view all users,
   /// filter by role, and manage individual users.
   void _showUserManagement(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('User Management'),
@@ -671,7 +668,7 @@ class AdminDashboardScreen extends StatelessWidget {
 
   /// Displays all users from Firestore with options to edit or delete.
   void _showAllUsers(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('All Users'),
@@ -694,7 +691,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
                   final doc = snapshot.data!.docs[index];
-                  final data = doc.data() as Map<String, dynamic>;
+                  final data = doc.data()! as Map<String, dynamic>;
                   return _buildUserTile(context, doc.id, data);
                 },
               );
@@ -714,7 +711,7 @@ class AdminDashboardScreen extends StatelessWidget {
   /// Displays users filtered by role.
   void _showUsersByRole(BuildContext context, String role) {
     final roleTitle = role[0].toUpperCase() + role.substring(1);
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('$roleTitle Users'),
@@ -737,7 +734,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
                   final doc = snapshot.data!.docs[index];
-                  final data = doc.data() as Map<String, dynamic>;
+                  final data = doc.data()! as Map<String, dynamic>;
                   return _buildUserTile(context, doc.id, data);
                 },
               );
@@ -756,11 +753,11 @@ class AdminDashboardScreen extends StatelessWidget {
 
   /// Builds a user list tile with edit and delete options.
   Widget _buildUserTile(
-      BuildContext context, String docId, Map<String, dynamic> data) {
-    final name = data['displayName'] ?? data['name'] ?? 'Unknown';
-    final email = data['email'] ?? 'No email';
-    final role = data['role'] ?? 'user';
-    final isActive = data['isActive'] ?? true;
+      BuildContext context, String docId, Map<String, dynamic> data,) {
+    final name = data['displayName'] as String? ?? data['name'] as String? ?? 'Unknown';
+    final email = data['email'] as String? ?? 'No email';
+    final role = data['role'] as String? ?? 'user';
+    final isActive = data['isActive'] as bool? ?? true;
 
     Color roleColor;
     switch (role) {
@@ -903,14 +900,14 @@ class AdminDashboardScreen extends StatelessWidget {
 
   /// Shows dialog to edit user details.
   void _showEditUserDialog(
-      BuildContext context, String docId, Map<String, dynamic> data) {
+      BuildContext context, String docId, Map<String, dynamic> data,) {
     final nameController =
-        TextEditingController(text: data['displayName'] ?? data['name'] ?? '');
+        TextEditingController(text: data['displayName'] as String? ?? data['name'] as String? ?? '');
     final emailController =
-        TextEditingController(text: data['email'] ?? '');
-    String selectedRole = data['role'] ?? 'patient';
+        TextEditingController(text: data['email'] as String? ?? '');
+    String selectedRole = data['role'] as String? ?? 'patient';
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
@@ -936,7 +933,7 @@ class AdminDashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: selectedRole,
+                initialValue: selectedRole,
                 decoration: const InputDecoration(
                   labelText: 'Role',
                   prefixIcon: Icon(Icons.badge),
@@ -987,7 +984,7 @@ class AdminDashboardScreen extends StatelessWidget {
 
   /// Toggles user active status.
   Future<void> _toggleUserStatus(
-      BuildContext context, String docId, bool currentStatus) async {
+      BuildContext context, String docId, bool currentStatus,) async {
     await FirebaseFirestore.instance.collection('users').doc(docId).update({
       'isActive': !currentStatus,
       'updatedAt': FieldValue.serverTimestamp(),
@@ -1005,7 +1002,7 @@ class AdminDashboardScreen extends StatelessWidget {
 
   /// Confirms and deletes a user.
   void _confirmDeleteUser(BuildContext context, String docId, String userName) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete User'),
@@ -1038,3 +1035,5 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 }
+
+

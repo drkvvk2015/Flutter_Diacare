@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'registration_screen.dart';
-import '../widgets/voice_text_field.dart';
+
 import '../services/auth_bridge_service.dart';
-import 'dart:async';
+import '../widgets/voice_text_field.dart';
+import 'registration_screen.dart';
 
 class PatientLoginScreen extends StatefulWidget {
   const PatientLoginScreen({super.key});
@@ -27,7 +29,7 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
   bool _loading = false;
   String? _error;
   String? _successMessage;
-  StreamSubscription? _authEventSubscription;
+  StreamSubscription<dynamic>? _authEventSubscription;
   Timer? _errorTimer;
   Timer? _successTimer;
 
@@ -68,7 +70,7 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
             _showSuccessMessage('Welcome back, ${event.data['email']}!');
             break;
           case 'sign_in_failure':
-            _showErrorMessage(event.data['error']);
+            _showErrorMessage(event.data['error'] as String);
             break;
         }
       }
@@ -136,7 +138,7 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
 
     try {
       // Simulate Google sign-in with AuthBridge
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
 
       if (mounted) {
         HapticFeedback.mediumImpact();
@@ -206,7 +208,7 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFF43CEA2), Color(0xFF185A9D)],
@@ -235,7 +237,7 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
                 ),
                 margin: const EdgeInsets.symmetric(horizontal: 32),
                 child: Padding(
-                  padding: const EdgeInsets.all(28.0),
+                  padding: const EdgeInsets.all(28),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -516,7 +518,7 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
+                              MaterialPageRoute<void>(
                                 builder: (_) => const RegistrationScreen(
                                   userType: 'Patient',
                                 ),
@@ -537,3 +539,5 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
     );
   }
 }
+
+

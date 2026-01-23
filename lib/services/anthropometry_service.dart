@@ -14,12 +14,12 @@ class AnthropometryService {
     return snapshot.docs.map((doc) {
       final data = doc.data();
       return Anthropometry(
-        height: (data['height'] ?? 0).toDouble(),
-        weight: (data['weight'] ?? 0).toDouble(),
-        bmi: (data['bmi'] ?? 0).toDouble(),
-        waist: (data['waist'] ?? 0).toDouble(),
-        hip: (data['hip'] ?? 0).toDouble(),
-        date: DateTime.parse(data['date'] ?? DateTime.now().toIso8601String()),
+        height: ((data['height'] as num?) ?? 0).toDouble(),
+        weight: ((data['weight'] as num?) ?? 0).toDouble(),
+        bmi: ((data['bmi'] as num?) ?? 0).toDouble(),
+        waist: ((data['waist'] as num?) ?? 0).toDouble(),
+        hip: ((data['hip'] as num?) ?? 0).toDouble(),
+        date: DateTime.parse(data['date'] as String? ?? DateTime.now().toIso8601String()),
       );
     }).toList();
   }

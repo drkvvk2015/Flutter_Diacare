@@ -1,6 +1,7 @@
 /// Build Context Extensions
 /// 
 /// Useful extensions for BuildContext to access theme, navigation, and media query.
+library;
 
 import 'package:flutter/material.dart';
 
@@ -120,7 +121,7 @@ extension BuildContextExtensions on BuildContext {
 
   /// Show loading dialog
   void showLoadingDialog() {
-    showDialog(
+    showDialog<void>(
       context: this,
       barrierDismissible: false,
       builder: (_) => const Center(
@@ -214,3 +215,4 @@ extension BuildContextExtensions on BuildContext {
     FocusScope.of(this).requestFocus(node);
   }
 }
+

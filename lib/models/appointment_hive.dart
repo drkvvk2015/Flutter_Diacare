@@ -8,6 +8,7 @@
 /// - Status tracking
 /// - Fee information
 /// - Appointment notes
+library;
 import 'package:hive/hive.dart';
 part 'appointment_hive.g.dart';
 
@@ -16,6 +17,16 @@ part 'appointment_hive.g.dart';
 /// TypeId: 1 - Unique identifier for Hive type system
 @HiveType(typeId: 1)
 class AppointmentHive extends HiveObject {
+
+  AppointmentHive({
+    required this.id,
+    required this.patientId,
+    required this.doctorId,
+    required this.time,
+    required this.status,
+    this.notes,
+    this.fee,
+  });
   /// Unique appointment identifier
   @HiveField(0)
   String id;
@@ -43,14 +54,4 @@ class AppointmentHive extends HiveObject {
   /// Optional consultation fee
   @HiveField(6)
   double? fee;
-
-  AppointmentHive({
-    required this.id,
-    required this.patientId,
-    required this.doctorId,
-    required this.time,
-    required this.status,
-    this.notes,
-    this.fee,
-  });
 }

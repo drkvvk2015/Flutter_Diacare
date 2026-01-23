@@ -1,10 +1,11 @@
-import '../services/smbg_service.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+
+import '../models/patient.dart';
 import '../services/anthropometry_service.dart';
 import '../services/bp_service.dart';
-import '../models/patient.dart';
-import 'package:fl_chart/fl_chart.dart';
+import '../services/smbg_service.dart';
 
 class AnthropometryScreen extends StatefulWidget {
   const AnthropometryScreen({super.key});
@@ -80,7 +81,7 @@ class _AnthropometryScreenState extends State<AnthropometryScreen> {
   String _generateSMBGAIInsights(List<SMBGReading> history) {
     if (history.isEmpty) return 'No glucose data available.';
     final latest = history.first;
-    String fastingStatus = latest.fasting < 100
+    final String fastingStatus = latest.fasting < 100
         ? 'Normal'
         : (latest.fasting < 126 ? 'Prediabetes' : 'Diabetes');
     String trend = '';
@@ -189,7 +190,7 @@ class _AnthropometryScreenState extends State<AnthropometryScreen> {
               ),
               borderData: FlBorderData(
                 show: true,
-                border: Border.all(color: Colors.black, width: 1),
+                border: Border.all(),
               ),
               minX: 0,
               maxX: spots.length.toDouble() - 1,
@@ -201,7 +202,7 @@ class _AnthropometryScreenState extends State<AnthropometryScreen> {
                   isCurved: true,
                   color: color,
                   dotData: const FlDotData(show: false),
-                  belowBarData: BarAreaData(show: false),
+                  belowBarData: BarAreaData(),
                 ),
               ],
             ),

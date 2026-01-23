@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../widgets/quick_prescription_widgets.dart';
 
 class PrescriptionScreen extends StatefulWidget {
   const PrescriptionScreen({super.key});
@@ -18,7 +20,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
   // Mock price comparison data for demo
   Future<List<Map<String, dynamic>>> fetchPharmacyPrices(String drug) async {
     // In production, call real APIs for each pharmacy
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     return [
       {
         'pharmacy': '1mg',
@@ -38,9 +40,9 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
     ];
   }
 
-  void _showPharmacyComparison(BuildContext context, String drug) async {
+  Future<void> _showPharmacyComparison(BuildContext context, String drug) async {
     final messenger = ScaffoldMessenger.of(context);
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       builder: (ctx) => FutureBuilder<List<Map<String, dynamic>>>(
         future: fetchPharmacyPrices(drug),
@@ -73,7 +75,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                   trailing: ElevatedButton(
                     child: const Text('Buy'),
                     onPressed: () async {
-                      final url = Uri.parse(p['url']);
+                      final url = Uri.parse(p['url'] as String);
                       try {
                         final can = await canLaunchUrl(url);
                         if (!can) {
@@ -164,7 +166,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                           .map(
                             (cell) => pw.Padding(
                               padding: const pw.EdgeInsets.all(4),
-                              child: pw.Text(cell.toString()),
+                              child: pw.Text(cell),
                             ),
                           )
                           .toList(),
@@ -178,7 +180,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
               'Doctor Notes:',
               style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
             ),
-            ...doctorNotes.map((n) => pw.Bullet(text: n['note'] ?? '')),
+            ...doctorNotes.map((n) => pw.Bullet(text: n['note'] as String? ?? '')),
           ],
         ],
       ),
@@ -217,7 +219,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
         doc.data()!['doctorNotes'] != null) {
       setState(() {
         doctorNotes = List<Map<String, dynamic>>.from(
-          doc.data()!['doctorNotes'],
+          doc.data()!['doctorNotes'] as List? ?? [],
         );
       });
     }
@@ -252,7 +254,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
         doc.data()!['attachments'] != null) {
       setState(() {
         attachments = List<Map<String, dynamic>>.from(
-          doc.data()!['attachments'],
+          doc.data()!['attachments'] as List? ?? [],
         );
       });
     }
@@ -276,6 +278,8 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
   final TextEditingController durationController = TextEditingController();
   String selectedDrugType = 'Tablet';
   String selectedFoodRelation = 'After Food';
+  Map<String, dynamic>? _selectedDrug;
+  bool _showQuickTemplates = true;
 
   final List<String> drugTypes = [
     'Tablet',
@@ -344,27 +348,27 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
     {
       'generic': 'SITAGLIPTIN',
       'brands': ['Januvia', 'Istavel', 'Zita'],
-      'interactions': [],
+      'interactions': <String>[],
     },
     {
       'generic': 'VILDAGLIPTIN',
       'brands': ['Galvus', 'Vysov'],
-      'interactions': [],
+      'interactions': <String>[],
     },
     {
       'generic': 'TENELIGLIPTIN',
       'brands': ['Teneligliptin', 'Teneza', 'Tenglyn'],
-      'interactions': [],
+      'interactions': <String>[],
     },
     {
       'generic': 'DAPAGLIFLOZIN',
       'brands': ['Forxiga', 'Dapafloz', 'Dapaglyn'],
-      'interactions': [],
+      'interactions': <String>[],
     },
     {
       'generic': 'EMPAGLIFLOZIN',
       'brands': ['Jardiance', 'Empaone', 'Glyxambi'],
-      'interactions': [],
+      'interactions': <String>[],
     },
     {
       'generic': 'INSULIN',
@@ -389,22 +393,22 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
     {
       'generic': 'GLARGINE',
       'brands': ['Lantus', 'Basalog', 'Glaritus'],
-      'interactions': [],
+      'interactions': <String>[],
     },
     {
       'generic': 'DEGLUDEC',
       'brands': ['Tresiba'],
-      'interactions': [],
+      'interactions': <String>[],
     },
     {
       'generic': 'LIRAGLUTIDE',
       'brands': ['Victoza', 'Lira'],
-      'interactions': [],
+      'interactions': <String>[],
     },
     {
       'generic': 'GLUCAGON',
       'brands': ['Glucagen', 'Glucagon'],
-      'interactions': [],
+      'interactions': <String>[],
     },
     // Add more as needed
   ];
@@ -414,9 +418,9 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
     return drugDatabase
         .where(
           (drug) =>
-              drug['generic'].contains(query.toUpperCase()) ||
-              drug['brands'].any(
-                (b) => b.toLowerCase().contains(query.toLowerCase()),
+              (drug['generic'] as String? ?? '').contains(query.toUpperCase()) ||
+              (drug['brands'] as List? ?? []).any(
+                (b) => (b as String).toLowerCase().contains(query.toLowerCase()),
               ),
         )
         .toList();
@@ -424,13 +428,13 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
 
   // Checks for interactions among selected drugs
   List<String> checkInteractions() {
-    List<String> warnings = [];
+    final List<String> warnings = [];
     final selectedGenerics = prescriptions
         .map((p) => p['generic'] ?? '')
         .toSet();
     for (final drug in drugDatabase) {
-      if (selectedGenerics.contains(drug['generic'])) {
-        for (final interact in drug['interactions']) {
+      if (selectedGenerics.contains(drug['generic'] as String? ?? '')) {
+        for (final interact in (drug['interactions'] as List? ?? [])) {
           if (selectedGenerics.contains(interact)) {
             warnings.add('Interaction: ${drug['generic']} ↔ $interact');
           }
@@ -445,8 +449,8 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
       setState(() {
         prescriptions.add({
           'type': selectedDrugType,
-          'generic': drug['generic'],
-          'brand': drug['brands'].isNotEmpty ? drug['brands'][0] : '',
+          'generic': drug['generic'] as String? ?? '',
+          'brand': (drug['brands'] as List?)?.isNotEmpty ?? false ? (drug['brands'] as List)[0] as String : '',
           'dose': doseController.text,
           'route': routeController.text,
           'freq': freqController.text,
@@ -462,8 +466,32 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
         durationController.clear();
         selectedDrugType = 'Tablet';
         selectedFoodRelation = 'After Food';
+        _selectedDrug = null;
       });
     }
+  }
+
+  /// Add prescription from quick template
+  void addFromTemplate(Map<String, String> template) {
+    setState(() {
+      prescriptions.add({
+        'type': template['type'] ?? 'Tablet',
+        'generic': template['generic'] ?? '',
+        'brand': template['brand'] ?? '',
+        'dose': template['dose'] ?? '',
+        'route': template['route'] ?? 'Oral',
+        'freq': template['freq'] ?? '',
+        'food': template['food'] ?? 'After Food',
+        'instructions': template['instructions'] ?? '',
+        'duration': template['duration'] ?? '',
+      });
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Added: ${template['name']}'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
   }
 
   // Firestore integration
@@ -482,10 +510,10 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
     if (!mounted) return;
     if (doc.exists && doc.data() != null) {
       final data = doc.data()!;
-      final items = List<Map<String, dynamic>>.from(data['items'] ?? []);
+      final items = List<Map<String, dynamic>>.from(data['items'] as List? ?? []);
       setState(() {
         prescriptions.clear();
-        prescriptions.addAll(items.map((e) => Map<String, String>.from(e)));
+        prescriptions.addAll(items.map((e) => Map<String, String>.from(e as Map? ?? {})));
       });
     }
   }
@@ -494,15 +522,15 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final bool viewOnly = args?['viewOnly'] ?? false;
+    final bool viewOnly = args?['viewOnly'] as bool? ?? false;
     final patient = args?['patient'];
     final patientId = patient?.id;
     final user = FirebaseAuth.instance.currentUser;
     final doctorId = user?.uid;
 
     // Toggle for general prescription
-    bool isGeneral = args?['general'] == true;
-    String? generalDocId = doctorId != null ? '${doctorId}_general' : null;
+    final bool isGeneral = args?['general'] == true;
+    final String? generalDocId = doctorId != null ? '${doctorId}_general' : null;
 
     // Load prescription on open
     if (prescriptions.isEmpty) {
@@ -511,7 +539,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
         loadDoctorNotes(generalDocId);
         loadAttachments(generalDocId);
       } else if (patientId != null) {
-        loadPrescriptionFromFirestore(patientId);
+        loadPrescriptionFromFirestore(patientId as String);
         loadDoctorNotes(patientId);
         loadAttachments(patientId);
       }
@@ -531,7 +559,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                     : patientId;
                 if (docId != null) {
                   final messenger = ScaffoldMessenger.of(context);
-                  await savePrescriptionToFirestore(docId);
+                  await savePrescriptionToFirestore(docId as String);
                   if (!mounted) return;
                   messenger.showSnackBar(
                     const SnackBar(
@@ -546,7 +574,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
               icon: const Icon(Icons.print),
               tooltip: 'Print',
               onPressed: () async {
-                await _downloadPrescriptionPdf(patient.name ?? 'Patient');
+                await _downloadPrescriptionPdf(patient.name as String? ?? 'Patient');
               },
             ),
           if (viewOnly && prescriptions.isNotEmpty && patient != null)
@@ -554,14 +582,14 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
               icon: const Icon(Icons.download),
               tooltip: 'Download PDF',
               onPressed: () async {
-                await _downloadPrescriptionPdf(patient.name ?? 'Patient');
+                await _downloadPrescriptionPdf(patient.name as String? ?? 'Patient');
               },
             ),
         ],
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -610,10 +638,62 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
+                  // Quick Templates Section
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        '⚡ Quick Add (One-Click)',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      TextButton.icon(
+                        icon: Icon(
+                          _showQuickTemplates
+                              ? Icons.expand_less
+                              : Icons.expand_more,
+                        ),
+                        label: Text(_showQuickTemplates ? 'Hide' : 'Show'),
+                        onPressed: () {
+                          setState(() {
+                            _showQuickTemplates = !_showQuickTemplates;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  if (_showQuickTemplates) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: QuickPrescriptionData.quickTemplates.length,
+                        itemBuilder: (context, index) {
+                          final template =
+                              QuickPrescriptionData.quickTemplates[index];
+                          return SizedBox(
+                            width: 180,
+                            child: QuickTemplateCard(
+                              template: template,
+                              onTap: () => addFromTemplate(template),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 16),
                   const Text(
-                    'Add Diabetic Drug',
+                    'Add Custom Drug',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
+                  const SizedBox(height: 8),
+                  // Drug Type and Search
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -632,28 +712,28 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                             setState(() => selectedDrugType = v ?? 'Tablet'),
                       ),
                       SizedBox(
-                        width: 220,
+                        width: 250,
                         child: TypeAheadField<Map<String, dynamic>>(
-                          suggestionsCallback: (pattern) =>
-                              searchDrugs(pattern),
+                          suggestionsCallback: searchDrugs,
                           itemBuilder: (context, suggestion) {
                             return ListTile(
                               title: Text(
-                                suggestion['generic'],
+                                suggestion['generic'] as String,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               subtitle: Text(
-                                'Brands: ${(suggestion['brands'] as List).join(', ')}',
+                                'Brands: ${((suggestion['brands'] as List?) ?? []).join(', ')}',
                               ),
                             );
                           },
                           onSelected: (suggestion) {
                             setState(() {
-                              medicineController.text = suggestion['generic'];
+                              _selectedDrug = suggestion;
+                              medicineController.text =
+                                  suggestion['generic'] as String;
                             });
-                            addPrescription(suggestion);
                           },
                           controller: medicineController,
                           builder: (context, controller, focusNode) {
@@ -662,64 +742,214 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                               focusNode: focusNode,
                               decoration: const InputDecoration(
                                 labelText: 'Search Drug (Generic/Brand)',
+                                prefixIcon: Icon(Icons.search),
                               ),
                             );
                           },
                         ),
                       ),
-                      SizedBox(
-                        width: 90,
-                        child: TextField(
-                          controller: doseController,
-                          decoration: const InputDecoration(labelText: 'Dose'),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 90,
-                        child: TextField(
-                          controller: routeController,
-                          decoration: const InputDecoration(labelText: 'Route'),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 90,
-                        child: TextField(
-                          controller: freqController,
-                          decoration: const InputDecoration(
-                            labelText: 'Frequency',
-                          ),
-                        ),
-                      ),
-                      DropdownButton<String>(
-                        value: selectedFoodRelation,
-                        items: foodRelations
-                            .map(
-                              (f) => DropdownMenuItem(value: f, child: Text(f)),
-                            )
-                            .toList(),
-                        onChanged: (v) => setState(
-                          () => selectedFoodRelation = v ?? 'After Food',
-                        ),
-                      ),
-                      SizedBox(
-                        width: 120,
-                        child: TextField(
-                          controller: instructionsController,
-                          decoration: const InputDecoration(
-                            labelText: 'Instructions',
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 80,
-                        child: TextField(
-                          controller: durationController,
-                          decoration: const InputDecoration(
-                            labelText: 'Duration',
-                          ),
-                        ),
-                      ),
                     ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Quick Select Dose
+                  QuickSelectChips(
+                    label: '💊 Quick Dose',
+                    options: QuickPrescriptionData.commonDoses.take(10).toList(),
+                    selectedValue: doseController.text.isNotEmpty
+                        ? doseController.text
+                        : null,
+                    onSelected: (value) {
+                      setState(() {
+                        doseController.text = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: 150,
+                    child: TextField(
+                      controller: doseController,
+                      decoration: const InputDecoration(
+                        labelText: 'Dose (or type custom)',
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Quick Select Route
+                  QuickSelectChips(
+                    label: '💉 Quick Route',
+                    options: QuickPrescriptionData.commonRoutes,
+                    selectedValue: routeController.text.isNotEmpty
+                        ? routeController.text
+                        : null,
+                    onSelected: (value) {
+                      setState(() {
+                        routeController.text = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: 150,
+                    child: TextField(
+                      controller: routeController,
+                      decoration: const InputDecoration(
+                        labelText: 'Route (or type custom)',
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Quick Select Frequency
+                  QuickSelectChips(
+                    label: '⏰ Quick Frequency',
+                    options: QuickPrescriptionData.commonFrequencies,
+                    selectedValue: freqController.text.isNotEmpty
+                        ? freqController.text
+                        : null,
+                    onSelected: (value) {
+                      setState(() {
+                        freqController.text = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: 200,
+                    child: TextField(
+                      controller: freqController,
+                      decoration: const InputDecoration(
+                        labelText: 'Frequency (or type custom)',
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Food Relation
+                  const Text(
+                    '🍽️ Food Relation',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: foodRelations.map((food) {
+                      final isSelected = selectedFoodRelation == food;
+                      return ActionChip(
+                        label: Text(
+                          food,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isSelected ? Colors.white : null,
+                          ),
+                        ),
+                        backgroundColor: isSelected
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey[200],
+                        onPressed: () {
+                          setState(() {
+                            selectedFoodRelation = food;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  // Quick Select Duration
+                  QuickSelectChips(
+                    label: '📅 Quick Duration',
+                    options: QuickPrescriptionData.commonDurations,
+                    selectedValue: durationController.text.isNotEmpty
+                        ? durationController.text
+                        : null,
+                    onSelected: (value) {
+                      setState(() {
+                        durationController.text = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: 150,
+                    child: TextField(
+                      controller: durationController,
+                      decoration: const InputDecoration(
+                        labelText: 'Duration (or type custom)',
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Quick Select Instructions
+                  QuickSelectChips(
+                    label: '📝 Quick Instructions',
+                    options: QuickPrescriptionData.commonInstructions,
+                    selectedValue: instructionsController.text.isNotEmpty
+                        ? instructionsController.text
+                        : null,
+                    onSelected: (value) {
+                      setState(() {
+                        instructionsController.text = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: 250,
+                    child: TextField(
+                      controller: instructionsController,
+                      decoration: const InputDecoration(
+                        labelText: 'Instructions (or type custom)',
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Add Drug Button
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add to Prescription'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    onPressed: () {
+                      if (_selectedDrug != null ||
+                          medicineController.text.isNotEmpty) {
+                        final drug = _selectedDrug ??
+                            {
+                              'generic': medicineController.text,
+                              'brands': <String>[],
+                            };
+                        if (doseController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please enter a dose'),
+                            ),
+                          );
+                          return;
+                        }
+                        addPrescription(drug);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Added: ${drug['generic']} ${doseController.text}',
+                            ),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select or enter a drug'),
+                          ),
+                        );
+                      }
+                    },
                   ),
                   const SizedBox(height: 16),
                   Builder(
@@ -762,11 +992,16 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                       DataColumn(label: Text('Food Relation')),
                       DataColumn(label: Text('Instructions')),
                       DataColumn(label: Text('Duration')),
-                      DataColumn(label: Text('Buy')), // New column
+                      DataColumn(label: Text('Actions')),
                     ],
                     rows: prescriptions
+                        .asMap()
+                        .entries
                         .map(
-                          (item) => DataRow(
+                          (entry) {
+                            final index = entry.key;
+                            final item = entry.value;
+                            return DataRow(
                             color: getSmartAlertColor(item) != null
                                 ? WidgetStateProperty.all(
                                     getSmartAlertColor(item),
@@ -786,9 +1021,12 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                               DataCell(Text(item['instructions'] ?? '')),
                               DataCell(Text(item['duration'] ?? '')),
                               DataCell(
-                                viewOnly
-                                    ? ElevatedButton.icon(
-                                        icon: const Icon(Icons.shopping_cart),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (viewOnly)
+                                      ElevatedButton.icon(
+                                        icon: const Icon(Icons.shopping_cart, size: 16),
                                         label: const Text('Buy'),
                                         onPressed: () =>
                                             _showPharmacyComparison(
@@ -796,10 +1034,28 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                                               item['generic'] ?? '',
                                             ),
                                       )
-                                    : const SizedBox.shrink(),
+                                    else
+                                      IconButton(
+                                        icon: const Icon(Icons.delete, color: Colors.red),
+                                        tooltip: 'Remove',
+                                        onPressed: () {
+                                          setState(() {
+                                            prescriptions.removeAt(index);
+                                          });
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Drug removed from prescription'),
+                                              duration: Duration(seconds: 1),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                  ],
+                                ),
                               ),
                             ],
-                          ),
+                          );
+                          },
                         )
                         .toList(),
                   ),
@@ -828,7 +1084,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                         onPressed: () async {
                           if (doctorNoteController.text.trim().isNotEmpty) {
                             await saveDoctorNote(
-                              patientId,
+                              patientId as String,
                               doctorNoteController.text.trim(),
                             );
                             doctorNoteController.clear();
@@ -841,7 +1097,7 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                 ...doctorNotes.reversed.map(
                   (note) => ListTile(
                     leading: const Icon(Icons.note),
-                    title: Text(note['note'] ?? ''),
+                    title: Text(note['note'] as String? ?? ''),
                     subtitle: Text(
                       note['date'] != null
                           ? note['date'].toString().substring(0, 16)
@@ -862,13 +1118,13 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                     icon: const Icon(Icons.attach_file),
                     label: const Text('Upload Attachment'),
                     onPressed: () async {
-                      await uploadAttachment(patientId);
+                      await uploadAttachment(patientId as String);
                     },
                   ),
                 ...attachments.reversed.map(
                   (att) => ListTile(
                     leading: const Icon(Icons.insert_drive_file),
-                    title: Text(att['name'] ?? ''),
+                    title: Text(att['name'] as String? ?? ''),
                     subtitle: Text(
                       att['date'] != null
                           ? att['date'].toString().substring(0, 16)
@@ -894,3 +1150,6 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
     ); // <-- closes Scaffold
   }
 }
+
+
+

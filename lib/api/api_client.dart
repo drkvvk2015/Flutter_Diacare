@@ -8,18 +8,21 @@
 /// - Request/response logging
 /// - Error standardization
 /// - Retry logic for failed requests
+library;
 import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+
 import '../core/error/api_exception.dart';
 import '../utils/logger.dart';
 
 /// HTTP API client with interceptors and error handling
 class ApiClient {
-  static final ApiClient _instance = ApiClient._internal();
   factory ApiClient() => _instance;
   ApiClient._internal();
+  static final ApiClient _instance = ApiClient._internal();
 
   final http.Client _client = http.Client();
   String? _baseUrl;
@@ -155,7 +158,7 @@ class ApiClient {
             statusCode: 408,
           );
         }
-        await Future.delayed(Duration(seconds: attempts));
+        await Future<void>.delayed(Duration(seconds: attempts));
       } catch (e) {
         if (e is ApiException) rethrow;
         throw ApiException('Network error: $e');
@@ -185,7 +188,7 @@ class ApiClient {
     String errorMessage = 'Request failed';
     try {
       final errorData = jsonDecode(response.body);
-      errorMessage = errorData['message'] ?? errorMessage;
+      errorMessage = (errorData['message'] as String?) ?? errorMessage;
     } catch (_) {
       errorMessage = response.body;
     }

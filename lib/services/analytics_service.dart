@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_performance/firebase_performance.dart';
+import 'package:flutter/foundation.dart';
 
 /// Comprehensive analytics and monitoring service for Flutter Diacare app
 /// Handles Firebase Analytics, Crashlytics, Performance monitoring, and custom metrics
 class AnalyticsService {
-  static final AnalyticsService _instance = AnalyticsService._internal();
   factory AnalyticsService() => _instance;
   AnalyticsService._internal();
+  static final AnalyticsService _instance = AnalyticsService._internal();
 
   // Firebase services
   late final FirebaseAnalytics _analytics;
@@ -107,7 +108,7 @@ class AnalyticsService {
         analyticsParameters = <String, Object>{};
         parameters.forEach((key, value) {
           if (value != null) {
-            analyticsParameters![key] = value;
+            analyticsParameters![key] = value as Object;
           }
         });
       }
@@ -208,9 +209,7 @@ class AnalyticsService {
       final trace = _activeTraces.remove(name);
       if (trace != null) {
         if (attributes != null) {
-          attributes.forEach((key, value) {
-            trace.putAttribute(key, value);
-          });
+          attributes.forEach(trace.putAttribute);
         }
         await trace.stop();
         _log('Performance trace stopped: $name');

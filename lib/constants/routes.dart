@@ -1,6 +1,7 @@
 /// Route Constants
 /// 
 /// Centralized route names for navigation.
+library;
 
 /// Application route names
 class Routes {

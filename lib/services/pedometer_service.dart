@@ -1,11 +1,11 @@
-import 'package:pedometer/pedometer.dart';
 import 'package:flutter/foundation.dart';
+import 'package:pedometer/pedometer.dart';
 
 class StepData {
+  StepData({required this.steps, required this.date, required this.calories});
   final int steps;
   final DateTime date;
   final double calories;
-  StepData({required this.steps, required this.date, required this.calories});
 }
 
 class PedometerService with ChangeNotifier {

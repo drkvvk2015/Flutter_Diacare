@@ -2,10 +2,12 @@
 /// 
 /// Centralized logging service with multiple log levels.
 /// Provides structured logging with timestamps and context.
+library;
 
 import 'dart:developer' as developer;
-import 'package:flutter/foundation.dart';
+
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 
 /// Log levels for categorizing log messages
 enum LogLevel {
@@ -23,9 +25,9 @@ enum LogLevel {
 
 /// Centralized logging service
 class LoggerService {
-  static final LoggerService _instance = LoggerService._internal();
   factory LoggerService() => _instance;
   LoggerService._internal();
+  static final LoggerService _instance = LoggerService._internal();
 
   /// Current minimum log level (logs below this will be ignored)
   LogLevel _minLevel = kDebugMode ? LogLevel.debug : LogLevel.info;
@@ -273,10 +275,10 @@ class LoggerService {
 
 /// Tagged logger for scoped logging
 class TaggedLogger {
-  final String _tag;
-  final LoggerService _logger;
 
   TaggedLogger(this._tag, this._logger);
+  final String _tag;
+  final LoggerService _logger;
 
   void debug(String message, {Map<String, dynamic>? data}) {
     _logger.debug(message, tag: _tag, data: data);

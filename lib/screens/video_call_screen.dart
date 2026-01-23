@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'prescription_screen.dart';
+
 import '../models/patient.dart';
+import 'prescription_screen.dart';
 
 class VideoCallScreen extends StatefulWidget {
+  const VideoCallScreen({
+    required this.userId, required this.userRole, super.key,
+    this.participantName,
+    this.participantRole,
+  });
   final String userId;
   final String userRole; // 'doctor' or 'patient'
   final String? participantName;
   final String? participantRole;
-  const VideoCallScreen({
-    super.key,
-    required this.userId,
-    required this.userRole,
-    this.participantName,
-    this.participantRole,
-  });
 
   @override
   State<VideoCallScreen> createState() => _VideoCallScreenState();
@@ -29,7 +28,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
       });
 
       // Simulate connection delay
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
 
       setState(() {
         connecting = false;
@@ -66,7 +65,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     }
     final navigator = Navigator.of(context);
     navigator.push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (_) => const PrescriptionScreen(),
         settings: RouteSettings(
           arguments: {'patient': currentPatient!, 'viewOnly': viewOnly},
@@ -183,7 +182,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                   ),
                   if (isDoctor)
                     Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
+                      padding: const EdgeInsets.only(top: 24),
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.receipt_long),
                         label: const Text('Create Prescription'),
@@ -257,3 +256,5 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     );
   }
 }
+
+

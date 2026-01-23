@@ -1,6 +1,7 @@
 /// Test Helpers
 /// 
 /// Common utilities and helpers for testing.
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -82,7 +83,7 @@ Future<T> mockDelayedResponse<T>(
   T response, {
   Duration delay = const Duration(milliseconds: 100),
 }) async {
-  await Future.delayed(delay);
+  await Future<void>.delayed(delay);
   return response;
 }
 
@@ -91,6 +92,7 @@ Future<T> mockErrorResponse<T>(
   Exception error, {
   Duration delay = const Duration(milliseconds: 100),
 }) async {
-  await Future.delayed(delay);
+  await Future<void>.delayed(delay);
   throw error;
 }
+

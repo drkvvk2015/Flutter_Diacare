@@ -2,9 +2,11 @@
 /// 
 /// Developer dashboard for monitoring app performance, analytics, and diagnostics.
 /// Available in debug mode only.
+library;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
 import '../constants/ui_constants.dart';
 import '../services/analytics_service.dart';
 import '../services/performance_service.dart';
@@ -19,7 +21,9 @@ class DevToolsScreen extends StatefulWidget {
 }
 
 class _DevToolsScreenState extends State<DevToolsScreen> {
+  // ignore: unused_field
   final AnalyticsService _analyticsService = AnalyticsService();
+  // ignore: unused_field
   final PerformanceService _performanceService = PerformanceService();
 
   @override
@@ -44,7 +48,7 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
         ],
       ),
       body: ListView(
-        padding: EdgeInsets.all(UIConstants.spacingMd),
+        padding: const EdgeInsets.all(UIConstants.spacingMd),
         children: [
           _buildSection(
             'Performance Metrics',
@@ -55,7 +59,7 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
               _buildMetricTile('Jank Count', '0', Icons.warning_amber),
             ],
           ),
-          SizedBox(height: UIConstants.spacingLg),
+          const SizedBox(height: UIConstants.spacingLg),
           _buildSection(
             'Analytics',
             Icons.analytics,
@@ -64,23 +68,23 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
                 'View Events',
                 'See all logged analytics events',
                 Icons.event,
-                () => _showAnalyticsEvents(),
+                _showAnalyticsEvents,
               ),
               _buildActionTile(
                 'View Screen Times',
                 'See time spent on each screen',
                 Icons.timer,
-                () => _showScreenTimes(),
+                _showScreenTimes,
               ),
               _buildActionTile(
                 'User Properties',
                 'View current user properties',
                 Icons.person_outline,
-                () => _showUserProperties(),
+                _showUserProperties,
               ),
             ],
           ),
-          SizedBox(height: UIConstants.spacingLg),
+          const SizedBox(height: UIConstants.spacingLg),
           _buildSection(
             'Error Tracking',
             Icons.bug_report,
@@ -89,17 +93,17 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
                 'View Errors',
                 'See all logged errors and warnings',
                 Icons.error_outline,
-                () => _navigateToErrorTracking(),
+                _navigateToErrorTracking,
               ),
               _buildActionTile(
                 'Test Error',
                 'Trigger a test error for debugging',
                 Icons.science,
-                () => _triggerTestError(),
+                _triggerTestError,
               ),
             ],
           ),
-          SizedBox(height: UIConstants.spacingLg),
+          const SizedBox(height: UIConstants.spacingLg),
           _buildSection(
             'Cache Management',
             Icons.storage,
@@ -108,23 +112,23 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
                 'Clear Image Cache',
                 'Remove all cached images',
                 Icons.image,
-                () => _clearImageCache(),
+                _clearImageCache,
               ),
               _buildActionTile(
                 'Clear Data Cache',
                 'Remove all cached API data',
                 Icons.data_usage,
-                () => _clearDataCache(),
+                _clearDataCache,
               ),
               _buildActionTile(
                 'Clear All Caches',
                 'Remove all cached data',
                 Icons.delete_sweep,
-                () => _clearAllCaches(),
+                _clearAllCaches,
               ),
             ],
           ),
-          SizedBox(height: UIConstants.spacingLg),
+          const SizedBox(height: UIConstants.spacingLg),
           _buildSection(
             'Network',
             Icons.network_check,
@@ -134,7 +138,7 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
               _buildMetricTile('Avg Response Time', '245ms', Icons.timer),
             ],
           ),
-          SizedBox(height: UIConstants.spacingLg),
+          const SizedBox(height: UIConstants.spacingLg),
           _buildSection(
             'Tools',
             Icons.build,
@@ -143,19 +147,19 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
                 'Force Crash',
                 'Test crash reporting (use with caution)',
                 Icons.dangerous,
-                () => _forceCrash(),
+                _forceCrash,
               ),
               _buildActionTile(
                 'Reset Onboarding',
                 'Clear onboarding completion flag',
                 Icons.restart_alt,
-                () => _resetOnboarding(),
+                _resetOnboarding,
               ),
               _buildActionTile(
                 'App Info',
                 'View app version and build info',
                 Icons.info,
-                () => _showAppInfo(),
+                _showAppInfo,
               ),
             ],
           ),
@@ -167,14 +171,14 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
   Widget _buildSection(String title, IconData icon, List<Widget> children) {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(UIConstants.spacingMd),
+        padding: const EdgeInsets.all(UIConstants.spacingMd),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(icon, color: Theme.of(context).colorScheme.primary),
-                SizedBox(width: UIConstants.spacingSm),
+                const SizedBox(width: UIConstants.spacingSm),
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -183,7 +187,7 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
                 ),
               ],
             ),
-            Divider(height: UIConstants.spacingLg * 2),
+            const Divider(height: UIConstants.spacingLg * 2),
             ...children,
           ],
         ),
@@ -229,14 +233,14 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
 
   void _navigateToErrorTracking() {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => const ErrorTrackingScreen(),
       ),
     );
   }
 
   void _showAnalyticsEvents() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Analytics Events'),
@@ -252,7 +256,7 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
   }
 
   void _showScreenTimes() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Screen Times'),
@@ -268,7 +272,7 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
   }
 
   void _showUserProperties() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('User Properties'),
@@ -284,7 +288,7 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
   }
 
   void _triggerTestError() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Trigger Test Error'),
@@ -328,7 +332,7 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
   }
 
   void _forceCrash() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Force Crash'),
@@ -343,7 +347,7 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              Future.delayed(const Duration(seconds: 1), () {
+              Future<void>.delayed(const Duration(seconds: 1), () {
                 throw Exception('Forced crash from Dev Tools');
               });
             },
@@ -362,7 +366,7 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
   }
 
   void _showAppInfo() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('App Information'),
@@ -387,7 +391,7 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
   }
 
   void _showAbout() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('About Dev Tools'),
@@ -407,7 +411,7 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
   }
 
   void _showConfirmation(String title, String message, VoidCallback onConfirm) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(title),
@@ -438,3 +442,6 @@ class _DevToolsScreenState extends State<DevToolsScreen> {
     );
   }
 }
+
+
+

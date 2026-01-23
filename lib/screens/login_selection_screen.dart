@@ -27,7 +27,7 @@ Widget _buildLoginColumn(BuildContext context, {required bool isDoctor}) {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<void>(
               builder: (_) =>
                   isDoctor ? const LoginScreen() : const PatientLoginScreen(),
               settings: RouteSettings(
@@ -41,7 +41,7 @@ Widget _buildLoginColumn(BuildContext context, {required bool isDoctor}) {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<void>(
               builder: (_) =>
                   RegistrationScreen(userType: isDoctor ? 'Doctor' : 'Patient'),
             ),
@@ -66,7 +66,7 @@ class LoginSelectionScreen extends StatelessWidget {
           final isWide = constraints.maxWidth > 600;
           final cardWidth = isWide ? 500.0 : double.infinity;
           final horizontalPadding = isWide ? 0.0 : 32.0;
-          return Container(
+          return DecoratedBox(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [Color(0xFF43CEA2), Color(0xFF185A9D)],
@@ -83,7 +83,7 @@ class LoginSelectionScreen extends StatelessWidget {
                 margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
                 child: Container(
                   width: cardWidth,
-                  padding: const EdgeInsets.all(32.0),
+                  padding: const EdgeInsets.all(32),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -118,15 +118,13 @@ class LoginSelectionScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      isWide
-                          ? Row(
+                      if (isWide) Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 _buildLoginColumn(context, isDoctor: true),
                                 _buildLoginColumn(context, isDoctor: false),
                               ],
-                            )
-                          : Column(
+                            ) else Column(
                               children: [
                                 _buildLoginColumn(context, isDoctor: true),
                                 const SizedBox(height: 24),
@@ -144,3 +142,4 @@ class LoginSelectionScreen extends StatelessWidget {
     );
   }
 }
+

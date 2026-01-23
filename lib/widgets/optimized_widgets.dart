@@ -1,19 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+
 import '../services/performance_service.dart';
 
 /// Optimized image widget with lazy loading and caching
 class OptimizedImage extends StatelessWidget {
-  final String? imageUrl;
-  final String? assetPath;
-  final double? width;
-  final double? height;
-  final BoxFit fit;
-  final Widget? placeholder;
-  final Widget? errorWidget;
-  final bool enableLazyLoading;
-  final BorderRadius? borderRadius;
 
   const OptimizedImage({
     super.key,
@@ -30,6 +22,15 @@ class OptimizedImage extends StatelessWidget {
          imageUrl != null || assetPath != null,
          'Either imageUrl or assetPath must be provided',
        );
+  final String? imageUrl;
+  final String? assetPath;
+  final double? width;
+  final double? height;
+  final BoxFit fit;
+  final Widget? placeholder;
+  final Widget? errorWidget;
+  final bool enableLazyLoading;
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -101,14 +102,13 @@ class OptimizedImage extends StatelessWidget {
 
 /// Lazy loading wrapper that loads content when visible
 class LazyLoadWrapper extends StatefulWidget {
-  final Widget child;
-  final double visibilityFraction;
 
   const LazyLoadWrapper({
-    super.key,
-    required this.child,
+    required this.child, super.key,
     this.visibilityFraction = 0.1,
   });
+  final Widget child;
+  final double visibilityFraction;
 
   @override
   State<LazyLoadWrapper> createState() => _LazyLoadWrapperState();
@@ -148,22 +148,21 @@ class _LazyLoadWrapperState extends State<LazyLoadWrapper> {
 
 /// Optimized list view with lazy loading and performance optimizations
 class OptimizedListView extends StatefulWidget {
-  final List<Widget> children;
-  final ScrollController? controller;
-  final EdgeInsetsGeometry? padding;
-  final bool shrinkWrap;
-  final ScrollPhysics? physics;
-  final Axis scrollDirection;
 
   const OptimizedListView({
-    super.key,
-    required this.children,
+    required this.children, super.key,
     this.controller,
     this.padding,
     this.shrinkWrap = false,
     this.physics,
     this.scrollDirection = Axis.vertical,
   });
+  final List<Widget> children;
+  final ScrollController? controller;
+  final EdgeInsetsGeometry? padding;
+  final bool shrinkWrap;
+  final ScrollPhysics? physics;
+  final Axis scrollDirection;
 
   @override
   State<OptimizedListView> createState() => _OptimizedListViewState();
@@ -200,6 +199,16 @@ class _OptimizedListViewState extends State<OptimizedListView> {
 
 /// Memory-efficient grid view with lazy loading
 class OptimizedGridView extends StatelessWidget {
+
+  const OptimizedGridView({
+    required this.children, required this.crossAxisCount, super.key,
+    this.mainAxisSpacing = 8.0,
+    this.crossAxisSpacing = 8.0,
+    this.childAspectRatio = 1.0,
+    this.padding,
+    this.controller,
+    this.shrinkWrap = false,
+  });
   final List<Widget> children;
   final int crossAxisCount;
   final double mainAxisSpacing;
@@ -208,18 +217,6 @@ class OptimizedGridView extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final ScrollController? controller;
   final bool shrinkWrap;
-
-  const OptimizedGridView({
-    super.key,
-    required this.children,
-    required this.crossAxisCount,
-    this.mainAxisSpacing = 8.0,
-    this.crossAxisSpacing = 8.0,
-    this.childAspectRatio = 1.0,
-    this.padding,
-    this.controller,
-    this.shrinkWrap = false,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -243,6 +240,17 @@ class OptimizedGridView extends StatelessWidget {
 
 /// Performance-optimized card widget
 class OptimizedCard extends StatelessWidget {
+
+  const OptimizedCard({
+    required this.child, super.key,
+    this.margin,
+    this.padding,
+    this.color,
+    this.elevation = 2.0,
+    this.borderRadius,
+    this.onTap,
+    this.enableLazyLoading = false,
+  });
   final Widget child;
   final EdgeInsetsGeometry? margin;
   final EdgeInsetsGeometry? padding;
@@ -252,21 +260,9 @@ class OptimizedCard extends StatelessWidget {
   final VoidCallback? onTap;
   final bool enableLazyLoading;
 
-  const OptimizedCard({
-    super.key,
-    required this.child,
-    this.margin,
-    this.padding,
-    this.color,
-    this.elevation = 2.0,
-    this.borderRadius,
-    this.onTap,
-    this.enableLazyLoading = false,
-  });
-
   @override
   Widget build(BuildContext context) {
-    Widget cardWidget = Card(
+    final Widget cardWidget = Card(
       margin: margin,
       color: color,
       elevation: elevation,
@@ -277,7 +273,7 @@ class OptimizedCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: borderRadius,
         child: Padding(
-          padding: padding ?? const EdgeInsets.all(16.0),
+          padding: padding ?? const EdgeInsets.all(16),
           child: child,
         ),
       ),
@@ -293,9 +289,6 @@ class OptimizedCard extends StatelessWidget {
 
 /// Animated loading placeholder
 class LoadingPlaceholder extends StatefulWidget {
-  final double? width;
-  final double? height;
-  final BorderRadius? borderRadius;
 
   const LoadingPlaceholder({
     super.key,
@@ -303,6 +296,9 @@ class LoadingPlaceholder extends StatefulWidget {
     this.height,
     this.borderRadius,
   });
+  final double? width;
+  final double? height;
+  final BorderRadius? borderRadius;
 
   @override
   State<LoadingPlaceholder> createState() => _LoadingPlaceholderState();
@@ -320,7 +316,7 @@ class _LoadingPlaceholderState extends State<LoadingPlaceholder>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    _animation = Tween<double>(begin: 0.3, end: 1.0).animate(
+    _animation = Tween<double>(begin: 0.3, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _animationController.repeat(reverse: true);

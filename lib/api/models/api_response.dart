@@ -1,14 +1,10 @@
 /// API Response Model
 /// 
 /// Generic response wrapper for API responses.
+library;
 
 /// Generic API response wrapper
 class ApiResponse<T> {
-  final bool success;
-  final String? message;
-  final T? data;
-  final Map<String, dynamic>? metadata;
-  final ApiError? error;
 
   ApiResponse({
     required this.success,
@@ -69,6 +65,11 @@ class ApiResponse<T> {
       );
     }
   }
+  final bool success;
+  final String? message;
+  final T? data;
+  final Map<String, dynamic>? metadata;
+  final ApiError? error;
 
   /// Convert to JSON
   Map<String, dynamic> toJson(Object Function(T)? toJsonT) {
@@ -85,9 +86,6 @@ class ApiResponse<T> {
 
 /// API error model
 class ApiError {
-  final String message;
-  final String? code;
-  final Map<String, dynamic>? details;
 
   ApiError({
     required this.message,
@@ -102,6 +100,9 @@ class ApiError {
       details: json['details'] as Map<String, dynamic>?,
     );
   }
+  final String message;
+  final String? code;
+  final Map<String, dynamic>? details;
 
   Map<String, dynamic> toJson() {
     return {
@@ -114,13 +115,6 @@ class ApiError {
 
 /// Paginated response wrapper
 class PaginatedResponse<T> {
-  final List<T> items;
-  final int total;
-  final int page;
-  final int pageSize;
-  final int totalPages;
-  final bool hasNext;
-  final bool hasPrevious;
 
   PaginatedResponse({
     required this.items,
@@ -152,6 +146,13 @@ class PaginatedResponse<T> {
       hasPrevious: page > 1,
     );
   }
+  final List<T> items;
+  final int total;
+  final int page;
+  final int pageSize;
+  final int totalPages;
+  final bool hasNext;
+  final bool hasPrevious;
 
   Map<String, dynamic> toJson(Object Function(T) toJsonT) {
     return {

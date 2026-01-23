@@ -1,6 +1,7 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:fl_chart/fl_chart.dart';
+
 import '../services/health_service.dart';
 import '../widgets/glassmorphic_card.dart';
 
@@ -53,7 +54,7 @@ class _HealthAnalyticsScreenState extends State<HealthAnalyticsScreen> {
         ],
       ),
       extendBodyBehindAppBar: true,
-      body: Container(
+      body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFF43CEA2), Color(0xFF185A9D)],
@@ -69,7 +70,7 @@ class _HealthAnalyticsScreenState extends State<HealthAnalyticsScreen> {
               : Consumer<HealthService>(
                   builder: (context, healthService, child) {
                     return SingleChildScrollView(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -98,7 +99,7 @@ class _HealthAnalyticsScreenState extends State<HealthAnalyticsScreen> {
 
     return GlassmorphicCard(
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20),
         child: Row(
           children: [
             Container(
@@ -202,7 +203,7 @@ class _HealthAnalyticsScreenState extends State<HealthAnalyticsScreen> {
   ) {
     return GlassmorphicCard(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -241,7 +242,7 @@ class _HealthAnalyticsScreenState extends State<HealthAnalyticsScreen> {
   Widget _buildTrendsChart(HealthService healthService) {
     return GlassmorphicCard(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -254,7 +255,6 @@ class _HealthAnalyticsScreenState extends State<HealthAnalyticsScreen> {
               height: 200,
               child: LineChart(
                 LineChartData(
-                  gridData: const FlGridData(show: true),
                   titlesData: FlTitlesData(
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
@@ -279,10 +279,10 @@ class _HealthAnalyticsScreenState extends State<HealthAnalyticsScreen> {
                       ),
                     ),
                     topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
+                      
                     ),
                     rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
+                      
                     ),
                   ),
                   borderData: FlBorderData(show: true),
@@ -292,7 +292,6 @@ class _HealthAnalyticsScreenState extends State<HealthAnalyticsScreen> {
                       isCurved: true,
                       color: Colors.blue,
                       barWidth: 3,
-                      dotData: const FlDotData(show: true),
                     ),
                   ],
                 ),
@@ -309,7 +308,7 @@ class _HealthAnalyticsScreenState extends State<HealthAnalyticsScreen> {
 
     return GlassmorphicCard(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -326,7 +325,7 @@ class _HealthAnalyticsScreenState extends State<HealthAnalyticsScreen> {
             else
               ...insights.map(
                 (insight) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                  padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -355,7 +354,7 @@ class _HealthAnalyticsScreenState extends State<HealthAnalyticsScreen> {
   Widget _buildActivityCard(HealthService healthService) {
     return GlassmorphicCard(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

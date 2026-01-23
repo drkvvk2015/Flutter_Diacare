@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     try {
       // Simulate authentication for testing purposes
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
 
       // Basic validation
       if (emailController.text.trim().isEmpty ||
@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     try {
       // Simulate Google authentication for testing purposes
-      await Future.delayed(const Duration(seconds: 3));
+      await Future<void>.delayed(const Duration(seconds: 3));
 
       if (!mounted) return; // context safety
       Navigator.pushReplacementNamed(
@@ -119,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             child: Center(
               child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.8, end: 1.0),
+                tween: Tween(begin: 0.8, end: 1),
                 duration: const Duration(milliseconds: 700),
                 curve: Curves.elasticOut,
                 builder: (context, scale, child) =>
@@ -136,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
                     child: Container(
                       width: cardWidth,
-                      padding: const EdgeInsets.all(28.0),
+                      padding: const EdgeInsets.all(28),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -175,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     padding: const EdgeInsets.only(bottom: 16),
                                     child: GestureDetector(
                                       onTap: () {
-                                        showDialog(
+                                        showDialog<void>(
                                           context: context,
                                           builder: (context) => AlertDialog(
                                             shape: RoundedRectangleBorder(
@@ -341,3 +341,5 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+
+

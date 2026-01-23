@@ -5,6 +5,7 @@
 /// 
 /// Note: This is a simplified version of the Patient model
 /// optimized for Hive's NoSQL structure.
+library;
 import 'package:hive/hive.dart';
 part 'patient_hive.g.dart';
 
@@ -13,6 +14,8 @@ part 'patient_hive.g.dart';
 /// TypeId: 0 - Unique identifier for Hive type system
 @HiveType(typeId: 0)
 class PatientHive extends HiveObject {
+
+  PatientHive({required this.id, required this.uhid, required this.name});
   /// Unique patient identifier
   @HiveField(0)
   String id;
@@ -24,6 +27,4 @@ class PatientHive extends HiveObject {
   /// Patient's full name
   @HiveField(2)
   String name;
-
-  PatientHive({required this.id, required this.uhid, required this.name});
 }

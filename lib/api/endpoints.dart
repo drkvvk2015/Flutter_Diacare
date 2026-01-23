@@ -2,6 +2,7 @@
 /// 
 /// Centralized definition of all API endpoints.
 /// Provides type-safe endpoint construction with parameters.
+library;
 
 /// API endpoint constants for DiaCare backend
 class ApiEndpoints {

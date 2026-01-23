@@ -1,9 +1,10 @@
 /// String Extensions Tests
 /// 
 /// Unit tests for string extensions
+library;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_diacare/extensions/string_extensions.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('String Extensions Tests', () {
@@ -23,7 +24,7 @@ void main() {
       test('capitalizes first letter of each word', () {
         expect('hello world'.capitalizeWords(), equals('Hello World'));
         expect('the quick brown fox'.capitalizeWords(), 
-            equals('The Quick Brown Fox'));
+            equals('The Quick Brown Fox'),);
       });
 
       test('handles single word', () {
@@ -112,7 +113,7 @@ void main() {
       test('masks email addresses', () {
         expect('test@example.com'.maskEmail(), equals('te***@example.com'));
         expect('john.doe@domain.com'.maskEmail(), 
-            equals('jo***@domain.com'));
+            equals('jo***@domain.com'),);
       });
 
       test('handles short names', () {

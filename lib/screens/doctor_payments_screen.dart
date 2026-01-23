@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class DoctorPaymentsScreen extends StatelessWidget {
+  const DoctorPaymentsScreen({required this.doctorId, super.key});
   final String doctorId;
-  const DoctorPaymentsScreen({super.key, required this.doctorId});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class DoctorPaymentsScreen extends StatelessWidget {
             itemCount: payments.length,
             separatorBuilder: (context, index) => const Divider(),
             itemBuilder: (context, i) {
-              final p = payments[i].data() as Map<String, dynamic>;
+              final p = payments[i].data()! as Map<String, dynamic>;
               return ListTile(
                 leading: const Icon(Icons.payment, color: Colors.green),
                 title: Text('₹${p['amount'] ?? ''} - ${p['status'] ?? ''}'),

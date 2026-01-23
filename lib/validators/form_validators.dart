@@ -2,6 +2,7 @@
 /// 
 /// Reusable validation functions for form inputs.
 /// Provides common validation logic for the entire application.
+library;
 
 /// Form field validators
 class Validators {
@@ -35,15 +36,15 @@ class Validators {
       return 'Password must be at least 8 characters';
     }
 
-    if (!value.contains(RegExp(r'[A-Z]'))) {
+    if (!value.contains(RegExp('[A-Z]'))) {
       return 'Password must contain at least one uppercase letter';
     }
 
-    if (!value.contains(RegExp(r'[a-z]'))) {
+    if (!value.contains(RegExp('[a-z]'))) {
       return 'Password must contain at least one lowercase letter';
     }
 
-    if (!value.contains(RegExp(r'[0-9]'))) {
+    if (!value.contains(RegExp('[0-9]'))) {
       return 'Password must contain at least one number';
     }
 

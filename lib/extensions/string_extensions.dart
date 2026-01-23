@@ -1,6 +1,7 @@
 /// String Extensions
 /// 
 /// Useful extensions for String manipulation and formatting.
+library;
 
 /// Extensions for String class
 extension StringExtensions on String {
@@ -85,9 +86,9 @@ extension StringExtensions on String {
   /// Convert to snake_case
   String toSnakeCase() {
     return replaceAllMapped(
-      RegExp(r'[A-Z]'),
+      RegExp('[A-Z]'),
       (match) => '_${match.group(0)!.toLowerCase()}',
-    ).replaceFirst(RegExp(r'^_'), '');
+    ).replaceFirst(RegExp('^_'), '');
   }
 
   /// Convert to camelCase
@@ -110,14 +111,14 @@ extension StringExtensions on String {
   /// Convert to kebab-case
   String toKebabCase() {
     return replaceAllMapped(
-      RegExp(r'[A-Z]'),
+      RegExp('[A-Z]'),
       (match) => '-${match.group(0)!.toLowerCase()}',
-    ).replaceFirst(RegExp(r'^-'), '');
+    ).replaceFirst(RegExp('^-'), '');
   }
 
   /// Remove HTML tags
   String removeHtmlTags() {
-    return replaceAll(RegExp(r'<[^>]*>'), '');
+    return replaceAll(RegExp('<[^>]*>'), '');
   }
 
   /// Mask email (show only first 2 chars and domain)
@@ -140,7 +141,7 @@ extension StringExtensions on String {
   }
 
   /// Format as currency
-  String formatAsCurrency({String symbol = '\$'}) {
+  String formatAsCurrency({String symbol = r'$'}) {
     final number = double.tryParse(this);
     if (number == null) return this;
     return '$symbol${number.toStringAsFixed(2)}';

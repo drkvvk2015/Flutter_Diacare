@@ -1,13 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Appointment {
-  final String id;
-  final String patientId;
-  final String doctorId;
-  final DateTime time;
-  final String status; // scheduled, completed, cancelled
-  final String? notes;
-  final double? fee;
 
   Appointment({
     required this.id,
@@ -20,17 +13,24 @@ class Appointment {
   });
 
   factory Appointment.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data()! as Map<String, dynamic>;
     return Appointment(
       id: doc.id,
-      patientId: data['patientId'] ?? '',
-      doctorId: data['doctorId'] ?? '',
+      patientId: data['patientId'] as String? ?? '',
+      doctorId: data['doctorId'] as String? ?? '',
       time: (data['time'] as Timestamp).toDate(),
-      status: data['status'] ?? 'scheduled',
-      notes: data['notes'],
+      status: data['status'] as String? ?? 'scheduled',
+      notes: data['notes'] as String?,
       fee: (data['fee'] != null) ? (data['fee'] as num).toDouble() : null,
     );
   }
+  final String id;
+  final String patientId;
+  final String doctorId;
+  final DateTime time;
+  final String status; // scheduled, completed, cancelled
+  final String? notes;
+  final double? fee;
 
   Map<String, dynamic> toMap() {
     return {

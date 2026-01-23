@@ -1,23 +1,23 @@
-import 'package:flutter/material.dart';
 import 'dart:ui';
+
+import 'package:flutter/material.dart';
 
 /// A unified GlassmorphicCard widget for vibrant, modern glassmorphism effect.
 /// Use this everywhere instead of local duplicates.
 class GlassmorphicCard extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-  final double borderRadius;
-  final Color? color;
-  final double blur;
 
   const GlassmorphicCard({
-    super.key,
-    required this.child,
+    required this.child, super.key,
     this.padding,
     this.borderRadius = 24,
     this.color,
     this.blur = 18,
   });
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final double borderRadius;
+  final Color? color;
+  final double blur;
 
   @override
   Widget build(BuildContext context) {

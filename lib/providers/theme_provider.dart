@@ -9,6 +9,7 @@
 /// - Material Design 3 toggle
 /// - Glassmorphic card styling
 /// - Customizable seed colors
+library;
 import 'package:flutter/material.dart';
 
 /// Theme management provider for dynamic theming
@@ -41,7 +42,6 @@ class ThemeProvider extends ChangeNotifier {
         ? dynamicColorScheme
         : ColorScheme.fromSeed(
             seedColor: _seedColor,
-            brightness: Brightness.light,
           );
 
     return ThemeData(

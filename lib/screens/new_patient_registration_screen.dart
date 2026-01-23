@@ -1,7 +1,9 @@
 import 'dart:ui'; // Added for ImageFilter
-import 'package:flutter/material.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart'; // Futuristic animations
+
 // import 'package:flutter/services.dart'; // Unused
 import 'patient_dashboard_screen.dart';
 
@@ -30,7 +32,7 @@ class _NewPatientRegistrationScreenState
   bool loading = false;
   String? error;
 
-  void _registerPatient() async {
+  Future<void> _registerPatient() async {
     setState(() {
       loading = true;
       error = null;
@@ -57,7 +59,7 @@ class _NewPatientRegistrationScreenState
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const PatientDashboardScreen()),
+          MaterialPageRoute<void>(builder: (_) => const PatientDashboardScreen()),
         );
       }
     } catch (e) {
@@ -88,7 +90,7 @@ class _NewPatientRegistrationScreenState
           color: Colors.white,
           fontSize: 22,
           fontWeight: FontWeight.bold,
-          letterSpacing: 1.0,
+          letterSpacing: 1,
         ),
       ),
       body: Stack(
@@ -131,13 +133,13 @@ class _NewPatientRegistrationScreenState
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(24),
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: Container(
-                      padding: const EdgeInsets.all(24.0),
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(24),
@@ -329,9 +331,7 @@ class _NewPatientRegistrationScreenState
                                 padding: const EdgeInsets.only(bottom: 16),
                                 child: Text(error!, style: const TextStyle(color: Colors.redAccent)),
                               ),
-                            loading
-                                ? const Center(child: CircularProgressIndicator(color: Colors.cyanAccent))
-                                : ElevatedButton(
+                            if (loading) const Center(child: CircularProgressIndicator(color: Colors.cyanAccent)) else ElevatedButton(
                                     onPressed: () {
                                       if (_formKey.currentState!.validate()) {
                                         _registerPatient();
@@ -352,7 +352,7 @@ class _NewPatientRegistrationScreenState
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
-                                        letterSpacing: 1.0,
+                                        letterSpacing: 1,
                                       ),
                                     ),
                                   ).animate().scale(delay: 1400.ms, duration: 400.ms, curve: Curves.elasticOut),
@@ -373,10 +373,9 @@ class _NewPatientRegistrationScreenState
   Widget _buildFuturisticTextField({
     required TextEditingController controller,
     required String label,
-    IconData? icon,
+    required int delay, IconData? icon,
     bool isNumber = false,
     int maxLines = 1,
-    required int delay,
   }) {
     return TextFormField(
       controller: controller,
@@ -406,3 +405,4 @@ class _NewPatientRegistrationScreenState
     ).animate().fadeIn(delay: delay.ms).slideX(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOut);
   }
 }
+

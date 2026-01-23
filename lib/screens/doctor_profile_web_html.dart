@@ -1,12 +1,13 @@
 // Only imported on web - modernized to use package:web
-import 'package:web/web.dart' as web;
-import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:typed_data';
 import 'dart:js_interop';
+import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:web/web.dart' as web;
 
 Future<void> pickAndUploadPhotoWeb(
   String userId,
-  Function(String url) onUploaded,
+  void Function(String url) onUploaded,
 ) async {
   final uploadInput = web.HTMLInputElement()
     ..type = 'file'
@@ -15,7 +16,7 @@ Future<void> pickAndUploadPhotoWeb(
 
   // Use a more compatible event handling approach
   uploadInput.onchange = (web.Event e) {
-    final target = e.target as web.HTMLInputElement;
+    final target = e.target! as web.HTMLInputElement;
     final files = target.files;
     if (files == null || files.length == 0) return;
 
@@ -24,7 +25,7 @@ Future<void> pickAndUploadPhotoWeb(
 
     // Set up the onload callback
     reader.onload = (web.ProgressEvent e) {
-      final data = reader.result as JSArrayBuffer;
+      final data = reader.result! as JSArrayBuffer;
       final uint8List = data.toDart.asUint8List();
 
       // Upload the file (fire and forget)
@@ -38,7 +39,7 @@ Future<void> pickAndUploadPhotoWeb(
 Future<void> _uploadFile(
   String userId,
   Uint8List data,
-  Function(String url) onUploaded,
+  void Function(String url) onUploaded,
 ) async {
   final ref = FirebaseStorage.instance.ref().child(
     'profile_photos/$userId.jpg',

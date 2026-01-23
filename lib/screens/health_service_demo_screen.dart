@@ -22,7 +22,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
         elevation: 0,
       ),
       extendBodyBehindAppBar: true,
-      body: Container(
+      body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFF667eea), Color(0xFFf093fb)],
@@ -32,7 +32,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 _buildDemoControls(),
@@ -61,7 +61,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
   Widget _buildDemoControls() {
     return GlassmorphicCard(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -74,7 +74,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _simulateHealthyData(),
+                    onPressed: _simulateHealthyData,
                     icon: const Icon(Icons.favorite, color: Colors.green),
                     label: const Text('Healthy Values'),
                     style: ElevatedButton.styleFrom(
@@ -86,7 +86,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _simulateUnhealthyData(),
+                    onPressed: _simulateUnhealthyData,
                     icon: const Icon(Icons.warning, color: Colors.orange),
                     label: const Text('Poor Values'),
                     style: ElevatedButton.styleFrom(
@@ -101,7 +101,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => _clearData(),
+                onPressed: _clearData,
                 icon: const Icon(Icons.refresh),
                 label: const Text('Reset Data'),
                 style: ElevatedButton.styleFrom(
@@ -122,7 +122,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
 
     return GlassmorphicCard(
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             const Text(
@@ -175,7 +175,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
   Widget _buildVitalsDemo(HealthService healthService) {
     return GlassmorphicCard(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -229,7 +229,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
     Color color,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Icon(icon, color: color, size: 24),
@@ -263,7 +263,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
 
     return GlassmorphicCard(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -280,7 +280,7 @@ class _HealthServiceDemoScreenState extends State<HealthServiceDemoScreen> {
             else
               ...insights.map(
                 (insight) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                  padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

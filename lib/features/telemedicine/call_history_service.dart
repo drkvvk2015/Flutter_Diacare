@@ -20,7 +20,7 @@ class CallHistoryService {
           .orderBy('startTime', descending: true)
           .get();
     }
-    return snapshot.docs.map((doc) => CallHistory.fromFirestore(doc)).toList();
+    return snapshot.docs.map(CallHistory.fromFirestore).toList();
   }
 
   Future<void> addCall(CallHistory call) async {

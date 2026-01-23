@@ -2,12 +2,14 @@
 /// 
 /// Introduces new users to the DiaCare app features.
 /// Shows key features and benefits before first use.
+library;
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../constants/app_constants.dart';
-import '../constants/ui_constants.dart';
 import '../constants/routes.dart';
+import '../constants/ui_constants.dart';
 
 /// Onboarding flow for new users
 class OnboardingScreen extends StatefulWidget {
@@ -95,7 +97,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildTopBar() {
     return Padding(
-      padding: EdgeInsets.all(UIConstants.spacingMd),
+      padding: const EdgeInsets.all(UIConstants.spacingMd),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -111,7 +113,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildPage(OnboardingPage page) {
     return Padding(
-      padding: EdgeInsets.all(UIConstants.spacingXl),
+      padding: const EdgeInsets.all(UIConstants.spacingXl),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -119,7 +121,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             width: 200,
             height: 200,
             decoration: BoxDecoration(
-              color: page.color.withOpacity(0.1),
+              color: page.color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -128,7 +130,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               color: page.color,
             ),
           ),
-          SizedBox(height: UIConstants.spacingXl),
+          const SizedBox(height: UIConstants.spacingXl),
           Text(
             page.title,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -136,7 +138,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: UIConstants.spacingMd),
+          const SizedBox(height: UIConstants.spacingMd),
           Text(
             page.description,
             style: Theme.of(context).textTheme.bodyLarge,
@@ -149,11 +151,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildBottomControls() {
     return Padding(
-      padding: EdgeInsets.all(UIConstants.spacingXl),
+      padding: const EdgeInsets.all(UIConstants.spacingXl),
       child: Column(
         children: [
           _buildPageIndicator(),
-          SizedBox(height: UIConstants.spacingXl),
+          const SizedBox(height: UIConstants.spacingXl),
           SizedBox(
             width: double.infinity,
             height: UIConstants.buttonHeightLg,
@@ -176,7 +178,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
           if (_currentPage > 0) ...[
-            SizedBox(height: UIConstants.spacingMd),
+            const SizedBox(height: UIConstants.spacingMd),
             TextButton(
               onPressed: _previousPage,
               child: const Text('Previous'),
@@ -192,7 +194,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
         _pages.length,
-        (index) => _buildDot(index),
+        _buildDot,
       ),
     );
   }
@@ -201,7 +203,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isActive = index == _currentPage;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      margin: EdgeInsets.symmetric(horizontal: UIConstants.spacingXs),
+      margin: const EdgeInsets.symmetric(horizontal: UIConstants.spacingXs),
       width: isActive ? 32 : 8,
       height: 8,
       decoration: BoxDecoration(
@@ -241,10 +243,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 /// Onboarding page model
 class OnboardingPage {
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color color;
 
   OnboardingPage({
     required this.title,
@@ -252,4 +250,9 @@ class OnboardingPage {
     required this.icon,
     required this.color,
   });
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color color;
 }
+

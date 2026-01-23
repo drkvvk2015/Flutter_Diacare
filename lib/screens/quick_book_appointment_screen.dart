@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'patient_dashboard_screen.dart';
-import '../features/telemedicine/appointment_service.dart';
+import 'package:flutter/material.dart';
+
 import '../features/telemedicine/appointment_model.dart';
-import 'appointment_screen.dart';
+import '../features/telemedicine/appointment_service.dart';
 // Removed unused direct cloud_firestore import (service handles it)
 import '../utils/logger.dart';
+import 'appointment_screen.dart';
+import 'patient_dashboard_screen.dart';
 
 class QuickBookAppointmentScreen extends StatefulWidget {
   const QuickBookAppointmentScreen({super.key});
@@ -20,7 +21,7 @@ class _QuickBookAppointmentScreenState
   final _formKey = GlobalKey<FormState>();
   final AppointmentService _service = AppointmentService();
   bool _isLoading = false;
-  String _status = "";
+  String _status = '';
 
   // Form data
   String? _selectedDoctorId;
@@ -40,7 +41,7 @@ class _QuickBookAppointmentScreenState
   Future<void> _fetchDoctors() async {
     setState(() {
       _isLoading = true;
-      _status = "Loading doctors...";
+      _status = 'Loading doctors...';
     });
 
     try {
@@ -63,18 +64,18 @@ class _QuickBookAppointmentScreenState
       setState(() {
         _doctors = doctors;
         if (_doctors.isNotEmpty) {
-          _selectedDoctorId = _doctors[0]['id'];
-          _selectedDoctorName = _doctors[0]['name'];
+          _selectedDoctorId = _doctors[0]['id'] as String?;
+          _selectedDoctorName = _doctors[0]['name'] as String?;
           _fee = (_doctors[0]['fee'] as num).toDouble();
-          _status = "Found ${_doctors.length} doctors";
+          _status = 'Found ${_doctors.length} doctors';
         } else {
-          _status = "No doctors available";
+          _status = 'No doctors available';
         }
       });
     } catch (e) {
       logError('Error fetching doctors in UI', e);
       setState(() {
-        _status = "ERROR LOADING DOCTORS: $e";
+        _status = 'ERROR LOADING DOCTORS: $e';
 
         // Add a fallback doctor for UI to prevent errors
         _doctors = [
@@ -85,8 +86,8 @@ class _QuickBookAppointmentScreenState
             'fee': 0.0,
           },
         ];
-        _selectedDoctorId = _doctors[0]['id'];
-        _selectedDoctorName = _doctors[0]['name'];
+        _selectedDoctorId = _doctors[0]['id'] as String?;
+        _selectedDoctorName = _doctors[0]['name'] as String?;
       });
     } finally {
       setState(() {
@@ -101,23 +102,23 @@ class _QuickBookAppointmentScreenState
     }
 
     if (_selectedDate == null) {
-      _showError("Please select a date");
+      _showError('Please select a date');
       return;
     }
 
     if (_selectedTime == null) {
-      _showError("Please select a time");
+      _showError('Please select a time');
       return;
     }
 
     if (_selectedDoctorId == null) {
-      _showError("Please select a doctor");
+      _showError('Please select a doctor');
       return;
     }
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      _showError("You need to be logged in");
+      _showError('You need to be logged in');
       return;
     }
 
@@ -125,7 +126,7 @@ class _QuickBookAppointmentScreenState
 
     setState(() {
       _isLoading = true;
-      _status = "Booking appointment...";
+      _status = 'Booking appointment...';
     });
 
     try {
@@ -156,12 +157,12 @@ class _QuickBookAppointmentScreenState
       setState(() {
         _isLoading = false;
         _status =
-            "✅ Success! Appointment booked successfully. ID: $appointmentId";
+            '✅ Success! Appointment booked successfully. ID: $appointmentId';
       });
 
       // Show success dialog
       if (mounted) {
-        showDialog(
+        showDialog<void>(
           context: context,
           builder: (ctx) => AlertDialog(
             title: const Text('Appointment Booked'),
@@ -180,7 +181,7 @@ class _QuickBookAppointmentScreenState
                   Navigator.pop(ctx);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
+                    MaterialPageRoute<void>(
                       builder: (_) => AppointmentScreen(
                         userRole: 'patient',
                         userId: user.uid,
@@ -201,9 +202,9 @@ class _QuickBookAppointmentScreenState
       logError('Error booking appointment', e);
       setState(() {
         _isLoading = false;
-        _status = "❌ Error booking appointment: $e";
+        _status = '❌ Error booking appointment: $e';
       });
-      _showError("Failed to book appointment: $e");
+      _showError('Failed to book appointment: $e');
     }
   }
 
@@ -217,10 +218,10 @@ class _QuickBookAppointmentScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Quick Book Appointment"),
+        title: const Text('Quick Book Appointment'),
         backgroundColor: Colors.teal,
       ),
-      body: Container(
+      body: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -229,14 +230,14 @@ class _QuickBookAppointmentScreenState
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Card(
             elevation: 8,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: _isLoading && _doctors.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : Form(
@@ -246,7 +247,7 @@ class _QuickBookAppointmentScreenState
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             const Text(
-                              "Book Appointment",
+                              'Book Appointment',
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -289,7 +290,7 @@ class _QuickBookAppointmentScreenState
                               )
                             else
                               const Text(
-                                "No doctors available",
+                                'No doctors available',
                                 style: TextStyle(color: Colors.red),
                               ),
                             const SizedBox(height: 16),
@@ -395,18 +396,18 @@ class _QuickBookAppointmentScreenState
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
-                                  color: _status.startsWith("❌")
+                                  color: _status.startsWith('❌')
                                       ? Colors.red.shade50
-                                      : _status.startsWith("✅")
+                                      : _status.startsWith('✅')
                                       ? Colors.green.shade50
                                       : Colors.grey.shade100,
                                 ),
                                 child: Text(
                                   _status,
                                   style: TextStyle(
-                                    color: _status.startsWith("❌")
+                                    color: _status.startsWith('❌')
                                         ? Colors.red
-                                        : _status.startsWith("✅")
+                                        : _status.startsWith('✅')
                                         ? Colors.green
                                         : Colors.black87,
                                   ),
@@ -430,7 +431,7 @@ class _QuickBookAppointmentScreenState
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(
+                  MaterialPageRoute<void>(
                     builder: (_) => const PatientDashboardScreen(),
                   ),
                 );
@@ -447,7 +448,7 @@ class _QuickBookAppointmentScreenState
                 if (user != null) {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
+                    MaterialPageRoute<void>(
                       builder: (_) => AppointmentScreen(
                         userRole: 'patient',
                         userId: user.uid,
@@ -468,3 +469,5 @@ class _QuickBookAppointmentScreenState
     );
   }
 }
+
+

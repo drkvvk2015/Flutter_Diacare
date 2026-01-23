@@ -1,9 +1,10 @@
 /// Error Recovery
 /// 
 /// Utilities for error recovery and retry logic.
+library;
 
 import 'dart:async';
-import '../services/logger_service.dart';
+import '../../services/logger_service.dart';
 
 /// Error recovery strategy
 enum RecoveryStrategy {
@@ -22,9 +23,9 @@ enum RecoveryStrategy {
 
 /// Error recovery manager
 class ErrorRecovery {
-  static final ErrorRecovery _instance = ErrorRecovery._internal();
   factory ErrorRecovery() => _instance;
   ErrorRecovery._internal();
+  static final ErrorRecovery _instance = ErrorRecovery._internal();
 
   final LoggerService _logger = LoggerService();
 
@@ -59,7 +60,7 @@ class ErrorRecovery {
           error: error,
         );
 
-        await Future.delayed(currentDelay);
+        await Future<void>.delayed(currentDelay);
         currentDelay *= backoffMultiplier;
       }
     }
@@ -94,7 +95,7 @@ class ErrorRecovery {
       _logger.warning('Operation timed out after $timeout', error: e);
 
       if (fallbackOperation != null) {
-        return await fallbackOperation();
+        return fallbackOperation();
       }
 
       if (fallbackValue != null) {
@@ -154,6 +155,12 @@ class ErrorRecovery {
 
 /// Circuit breaker implementation
 class _CircuitBreaker {
+
+  _CircuitBreaker({
+    required this.name,
+    required this.failureThreshold,
+    required this.resetTimeout,
+  });
   final String name;
   final int failureThreshold;
   final Duration resetTimeout;
@@ -161,12 +168,6 @@ class _CircuitBreaker {
   int _failureCount = 0;
   DateTime? _lastFailureTime;
   bool _isOpen = false;
-
-  _CircuitBreaker({
-    required this.name,
-    required this.failureThreshold,
-    required this.resetTimeout,
-  });
 
   Future<T> execute<T>(Future<T> Function() operation) async {
     if (_isOpen) {
@@ -224,9 +225,9 @@ class _CircuitBreaker {
 
 /// Circuit breaker open exception
 class CircuitBreakerOpenException implements Exception {
-  final String message;
 
   CircuitBreakerOpenException(this.message);
+  final String message;
 
   @override
   String toString() => message;

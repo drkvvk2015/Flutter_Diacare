@@ -3,13 +3,11 @@ import '../features/telemedicine/call_history_model.dart';
 import '../features/telemedicine/call_history_service.dart';
 
 class CallHistoryScreen extends StatefulWidget {
+  const CallHistoryScreen({
+    required this.userRole, required this.userId, super.key,
+  });
   final String userRole;
   final String userId;
-  const CallHistoryScreen({
-    super.key,
-    required this.userRole,
-    required this.userId,
-  });
 
   @override
   State<CallHistoryScreen> createState() => _CallHistoryScreenState();
@@ -40,10 +38,10 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> {
     });
   }
 
-  void _addNotesDialog(CallHistory call) async {
+  Future<void> _addNotesDialog(CallHistory call) async {
     final controller = TextEditingController(text: call.notes ?? '');
     final navigator = Navigator.of(context);
-    await showDialog(
+    await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Add Call Notes'),
@@ -54,7 +52,7 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => navigator.pop(),
+            onPressed: navigator.pop,
             child: const Text('Cancel'),
           ),
           ElevatedButton(
@@ -100,3 +98,4 @@ class _CallHistoryScreenState extends State<CallHistoryScreen> {
     );
   }
 }
+

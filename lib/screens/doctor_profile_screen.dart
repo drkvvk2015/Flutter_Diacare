@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
 // ignore: avoid_web_libraries_in_flutter
 // Only import dart:html on web
 // ignore: uri_does_not_exist
@@ -10,8 +11,8 @@ import 'doctor_profile_web_stub.dart'
     if (dart.library.html) 'doctor_profile_web_html.dart';
 
 class DoctorProfileScreen extends StatefulWidget {
+  const DoctorProfileScreen({required this.userId, super.key});
   final String userId;
-  const DoctorProfileScreen({super.key, required this.userId});
 
   @override
   State<DoctorProfileScreen> createState() => _DoctorProfileScreenState();
@@ -51,8 +52,8 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
           .doc(widget.userId);
       final doc = await docRef.get();
       if (!mounted) return; // ensure safe before setState
-      Map<String, dynamic> data = doc.data() ?? {};
-      final requiredFields = {
+      final Map<String, dynamic> data = doc.data() ?? {};
+      final Map<String, Object> requiredFields = {
         'name': '',
         'degree': '',
         'specialty': '',
@@ -60,7 +61,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
         'about': '',
         'photoUrl': '',
         'fee': 0.0,
-        'availability': {},
+        'availability': <String, dynamic>{},
         'registrationNumber': '',
         'hospitalOrClinic': '',
         'role': 'doctor',
@@ -77,7 +78,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
         needsUpdate = true;
       }
       if (data['availability'] is! Map) {
-        data['availability'] = {};
+        data['availability'] = <String, dynamic>{};
         needsUpdate = true;
       }
       if (needsUpdate) {
@@ -87,17 +88,17 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
       profile = data;
       if (!mounted) return;
       setState(() {
-        nameController.text = profile?['name'] ?? '';
-        degreeController.text = profile?['degree'] ?? '';
-        specialtyController.text = profile?['specialty'] ?? '';
-        contactController.text = profile?['contact'] ?? '';
-        aboutController.text = profile?['about'] ?? '';
-        photoUrl = profile?['photoUrl'];
+        nameController.text = profile?['name'] as String? ?? '';
+        degreeController.text = profile?['degree'] as String? ?? '';
+        specialtyController.text = profile?['specialty'] as String? ?? '';
+        contactController.text = profile?['contact'] as String? ?? '';
+        aboutController.text = profile?['about'] as String? ?? '';
+        photoUrl = profile?['photoUrl'] as String?;
         feeController.text = profile?['fee'] != null
             ? (profile?['fee']).toString()
             : '';
-        regNumberController.text = profile?['registrationNumber'] ?? '';
-        hospitalController.text = profile?['hospitalOrClinic'] ?? '';
+        regNumberController.text = profile?['registrationNumber'] as String? ?? '';
+        hospitalController.text = profile?['hospitalOrClinic'] as String? ?? '';
         Map<String, dynamic>? availRaw;
         try {
           availRaw = profile?['availability'] as Map<String, dynamic>?;
@@ -147,27 +148,70 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
-    final data = {
-      'name': nameController.text.trim(),
-      'degree': degreeController.text.trim(),
-      'specialty': specialtyController.text.trim(),
-      'contact': contactController.text.trim(),
-      'about': aboutController.text.trim(),
-      'photoUrl': photoUrl ?? '',
-      'availability': availability ?? {},
-      'fee': double.tryParse(feeController.text.trim()) ?? 0.0,
-      'registrationNumber': regNumberController.text.trim(),
-      'hospitalOrClinic': hospitalController.text.trim(),
-      'role': 'doctor',
-    };
-    if (data['fee'] is String || data['fee'] == '') data['fee'] = 0.0;
-    if (data['availability'] is! Map) data['availability'] = {};
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.userId)
-        .set(data, SetOptions(merge: true));
-    if (!mounted) return;
-    _fetch();
+    // Show loading indicator
+    setState(() {
+      loading = true;
+      errorMsg = null;
+    });
+    
+    try {
+      final data = {
+        'name': nameController.text.trim(),
+        'displayName': nameController.text.trim(), // Also update displayName
+        'degree': degreeController.text.trim(),
+        'specialty': specialtyController.text.trim(),
+        'contact': contactController.text.trim(),
+        'about': aboutController.text.trim(),
+        'photoUrl': photoUrl ?? '',
+        'availability': availability ?? {},
+        'fee': double.tryParse(feeController.text.trim()) ?? 0.0,
+        'registrationNumber': regNumberController.text.trim(),
+        'hospitalOrClinic': hospitalController.text.trim(),
+        'role': 'doctor',
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+      if (data['fee'] is String || data['fee'] == '') data['fee'] = 0.0;
+      if (data['availability'] is! Map) data['availability'] = {};
+      
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .set(data, SetOptions(merge: true));
+      
+      if (!mounted) return;
+      
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ Profile saved successfully!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      
+      _fetch();
+    } catch (e) {
+      if (!mounted) return;
+      
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Failed to save profile: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      
+      setState(() {
+        errorMsg = 'Failed to save profile: $e';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
+    }
   }
 
   Future<void> _pickAndUploadPhoto() async {
@@ -316,12 +360,21 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: loading ? null : () {
                           if (_formKey.currentState?.validate() ?? false) {
                             _saveProfile();
                           }
                         },
-                        child: const Text('Save'),
+                        child: loading 
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Save Profile'),
                       ),
                     ),
                   ],
@@ -333,13 +386,11 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
 }
 
 class AvailabilityPicker extends StatefulWidget {
+  const AvailabilityPicker({
+    required this.initial, required this.onChanged, super.key,
+  });
   final Map<String, List<Map<String, String>>> initial;
   final void Function(Map<String, List<Map<String, String>>> avail) onChanged;
-  const AvailabilityPicker({
-    super.key,
-    required this.initial,
-    required this.onChanged,
-  });
 
   @override
   State<AvailabilityPicker> createState() => _AvailabilityPickerState();
@@ -366,7 +417,7 @@ class _AvailabilityPickerState extends State<AvailabilityPicker> {
       avail[d] = [
         for (final slot in slots)
           if (slot.containsKey('from') && slot.containsKey('to'))
-            {'from': slot['from'] as String, 'to': slot['to'] as String},
+            {'from': slot['from']!, 'to': slot['to']!},
       ];
     }
   }
@@ -412,7 +463,7 @@ class _AvailabilityPickerState extends State<AvailabilityPicker> {
                 value: avail[day]!.isNotEmpty,
                 onChanged: (val) {
                   setState(() {
-                    if (val == true && avail[day]!.isEmpty) {
+                    if ((val ?? false) && avail[day]!.isEmpty) {
                       avail[day]!.add({'from': '09:00', 'to': '10:00'});
                     } else if (val == false) {
                       avail[day] = [];

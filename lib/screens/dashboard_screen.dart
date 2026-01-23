@@ -1,23 +1,24 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'doctor_profile_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+import '../services/analytics_service.dart';
+import '../widgets/glassmorphic_card.dart';
+import 'analytics_monitor_screen.dart';
 import 'appointment_screen.dart';
-import 'patient_list_screen.dart';
-import 'video_call_screen.dart';
-import 'chat_screen.dart';
-import 'prescription_screen.dart';
 import 'call_history_screen.dart';
+import 'chat_screen.dart';
 import 'doctor_payments_screen.dart';
-import 'records_screen.dart';
+import 'doctor_profile_screen.dart';
 import 'health_analytics_screen.dart';
 import 'health_service_demo_screen.dart';
-import 'state_management_demo_screen.dart';
+import 'patient_list_screen.dart';
 import 'performance_monitor_screen.dart';
-import 'analytics_monitor_screen.dart';
+import 'prescription_screen.dart';
+import 'records_screen.dart';
 import 'security_settings_screen.dart';
-import '../widgets/glassmorphic_card.dart';
-import '../services/analytics_service.dart';
+import 'state_management_demo_screen.dart';
+import 'video_call_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -56,7 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           if (user != null) {
             Navigator.push(
               context,
-              MaterialPageRoute(
+              MaterialPageRoute<void>(
                 builder: (_) => DoctorProfileScreen(userId: user.uid),
               ),
             );
@@ -77,14 +78,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 .doc(userId)
                 .get();
             if (doc.exists) {
-              userRole = doc.data()?['role'] ?? 'doctor';
+              userRole = doc.data()?['role'] as String? ?? 'doctor';
             }
           } catch (e) {
             debugPrint('Error fetching user role: $e');
           }
           if (context.mounted) {
             navigator.push(
-              MaterialPageRoute(
+              MaterialPageRoute<void>(
                 builder: (_) =>
                     AppointmentScreen(userRole: userRole, userId: userId),
               ),
@@ -100,7 +101,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const PatientListScreen()),
+            MaterialPageRoute<void>(builder: (_) => const PatientListScreen()),
           );
         },
       ),
@@ -113,7 +114,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           if (user != null) {
             Navigator.push(
               context,
-              MaterialPageRoute(
+              MaterialPageRoute<void>(
                 builder: (_) =>
                     VideoCallScreen(userId: user.uid, userRole: 'doctor'),
               ),
@@ -129,7 +130,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const ChatScreen()),
+            MaterialPageRoute<void>(builder: (_) => const ChatScreen()),
           );
         },
       ),
@@ -142,7 +143,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const PrescriptionScreen()),
+            MaterialPageRoute<void>(builder: (_) => const PrescriptionScreen()),
           );
         },
       ),
@@ -160,14 +161,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 .doc(userId)
                 .get();
             if (doc.exists) {
-              userRole = doc.data()?['role'] ?? 'doctor';
+              userRole = doc.data()?['role'] as String? ?? 'doctor';
             }
           } catch (e) {
             debugPrint('Error fetching user role: $e');
           }
           if (context.mounted) {
             navigator.push(
-              MaterialPageRoute(
+              MaterialPageRoute<void>(
                 builder: (_) =>
                     CallHistoryScreen(userRole: userRole, userId: userId),
               ),
@@ -183,7 +184,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<void>(
               builder: (_) => DoctorPaymentsScreen(doctorId: userId),
             ),
           );
@@ -197,7 +198,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const RecordsScreen()),
+            MaterialPageRoute<void>(builder: (_) => const RecordsScreen()),
           );
         },
       ),
@@ -209,7 +210,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const HealthAnalyticsScreen()),
+            MaterialPageRoute<void>(builder: (_) => const HealthAnalyticsScreen()),
           );
         },
       ),
@@ -221,7 +222,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const HealthServiceDemoScreen()),
+            MaterialPageRoute<void>(builder: (_) => const HealthServiceDemoScreen()),
           );
         },
       ),
@@ -233,7 +234,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<void>(
               builder: (_) => const StateManagementDemoScreen(),
             ),
           );
@@ -247,7 +248,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const PerformanceMonitorScreen()),
+            MaterialPageRoute<void>(builder: (_) => const PerformanceMonitorScreen()),
           );
         },
       ),
@@ -259,7 +260,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const AnalyticsMonitorScreen()),
+            MaterialPageRoute<void>(builder: (_) => const AnalyticsMonitorScreen()),
           );
         },
       ),
@@ -271,7 +272,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const SecuritySettingsScreen()),
+            MaterialPageRoute<void>(builder: (_) => const SecuritySettingsScreen()),
           );
         },
       ),
@@ -316,7 +317,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 }
               } catch (e) {
                 if (!context.mounted) return;
-                showDialog(
+                showDialog<void>(
                   context: context,
                   builder: (dialogCtx) => AlertDialog(
                     shape: RoundedRectangleBorder(
@@ -348,12 +349,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(24),
             child: ListView.builder(
               itemCount: cards.length,
               itemBuilder: (context, i) {
                 return TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.8, end: 1.0),
+                  tween: Tween(begin: 0.8, end: 1),
                   duration: Duration(milliseconds: 400 + i * 80),
                   curve: Curves.elasticOut,
                   builder: (context, scale, child) =>
@@ -373,11 +374,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 class _DashboardCard extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
   const _DashboardCard({
     required this.icon,
     required this.iconColor,
@@ -385,6 +381,11 @@ class _DashboardCard extends StatelessWidget {
     required this.subtitle,
     required this.onTap,
   });
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -436,3 +437,5 @@ class _DashboardCard extends StatelessWidget {
     );
   }
 }
+
+

@@ -6,9 +6,9 @@ import 'dart:async';
 /// while maintaining full authentication functionality for demo purposes.
 /// Perfect for Play Store submission and testing scenarios.
 class MockAuthService {
-  static final MockAuthService _instance = MockAuthService._internal();
   factory MockAuthService() => _instance;
   MockAuthService._internal();
+  static final MockAuthService _instance = MockAuthService._internal();
 
   bool _isLoggedIn = false;
   String? _currentUserEmail;
@@ -51,7 +51,7 @@ class MockAuthService {
   /// Sign in with email and password
   Future<bool> signInWithEmailPassword(String email, String password) async {
     // Simulate network delay for realistic experience
-    await Future.delayed(const Duration(seconds: 2));
+    await Future<void>.delayed(const Duration(seconds: 2));
 
     // Normalize email to lowercase for consistent matching
     final normalizedEmail = email.toLowerCase().trim();
@@ -74,7 +74,7 @@ class MockAuthService {
   /// Sign in with Google (simulated)
   Future<bool> signInWithGoogle() async {
     // Simulate Google sign-in process
-    await Future.delayed(const Duration(seconds: 3));
+    await Future<void>.delayed(const Duration(seconds: 3));
 
     _isLoggedIn = true;
     _currentUserEmail = 'google.user@gmail.com';
@@ -85,7 +85,7 @@ class MockAuthService {
 
   /// Sign out current user
   Future<void> signOut() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
 
     _isLoggedIn = false;
     _currentUserEmail = null;
@@ -99,7 +99,7 @@ class MockAuthService {
     String? name,
     String userType = 'patient',
   }) async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future<void>.delayed(const Duration(seconds: 2));
 
     if (_validCredentials.containsKey(email)) {
       throw Exception('An account already exists with this email address.');
@@ -122,7 +122,7 @@ class MockAuthService {
 
   /// Reset password (simulated)
   Future<void> sendPasswordResetEmail(String email) async {
-    await Future.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(seconds: 1));
 
     if (!_validCredentials.containsKey(email)) {
       throw Exception('No account found for this email address.');
@@ -135,7 +135,7 @@ class MockAuthService {
       throw Exception('No user is currently signed in.');
     }
 
-    await Future.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(seconds: 1));
 
     _validCredentials[_currentUserEmail!]!['password'] = newPassword;
   }
@@ -169,3 +169,4 @@ class MockAuthService {
     };
   }
 }
+

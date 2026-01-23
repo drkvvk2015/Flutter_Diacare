@@ -9,6 +9,7 @@
 /// - Google Fonts integration (Outfit font family)
 /// - Cyber-themed color palette
 /// - Consistent styling across all screens
+library;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -30,7 +31,7 @@ class AppTheme {
   static ThemeData lightTheme() {
     // Create color scheme from primary color with light brightness
     final ColorScheme colorScheme =
-        ColorScheme.fromSeed(seedColor: _primary, brightness: Brightness.light)
+        ColorScheme.fromSeed(seedColor: _primary)
             .copyWith(surface: _surface);
     
     return ThemeData(

@@ -8,28 +8,29 @@
 /// - Dynamic user ID retrieval for authenticated routes
 /// - Role-based navigation (doctor, patient, admin)
 /// - Fallback to role selection for unknown routes
-import 'package:flutter/material.dart';
+library;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
-// Core screens
-import 'screens/splash_screen.dart';
-import 'screens/onboarding_screen.dart';
-import 'screens/role_selection_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/patient_dashboard_screen.dart';
 import 'screens/admin_dashboard_screen.dart';
-import 'screens/health_analytics_screen.dart';
-import 'screens/doctor_profile_screen.dart';
-import 'screens/records_screen.dart';
 import 'screens/appointment_screen.dart';
-import 'screens/prescription_screen.dart';
+import 'screens/chat_screen.dart';
+import 'screens/dashboard_screen.dart';
+import 'screens/dev_tools_screen.dart';
 import 'screens/device_management_screen.dart';
 import 'screens/diagnostic_screen.dart';
-import 'screens/chat_screen.dart';
-import 'screens/pharmacy_dashboard_screen.dart';
+import 'screens/doctor_profile_screen.dart';
 import 'screens/error_tracking_screen.dart';
-import 'screens/dev_tools_screen.dart';
+import 'screens/health_analytics_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/onboarding_screen.dart';
+import 'screens/patient_dashboard_screen.dart';
+import 'screens/pharmacy_dashboard_screen.dart';
+import 'screens/prescription_screen.dart';
+import 'screens/records_screen.dart';
+import 'screens/role_selection_screen.dart';
+// Core screens
+import 'screens/splash_screen.dart';
 
 /// Central router class for application navigation
 /// 
@@ -49,19 +50,19 @@ class AppRouter {
     switch (settings.name) {
       // Initial splash screen
       case '/splash':
-        return MaterialPageRoute(builder: (_) => const SplashScreen());
+        return MaterialPageRoute<void>(builder: (_) => const SplashScreen());
       
       // Onboarding flow for new users
       case '/onboarding':
-        return MaterialPageRoute(builder: (_) => const OnboardingScreen());
+        return MaterialPageRoute<void>(builder: (_) => const OnboardingScreen());
       
       // Root route - role selection for new users
       case '/':
-        return MaterialPageRoute(builder: (_) => const RoleSelectionScreen());
+        return MaterialPageRoute<void>(builder: (_) => const RoleSelectionScreen());
       
       // Authentication route
       case '/login':
-        return MaterialPageRoute(builder: (_) => const LoginScreen());
+        return MaterialPageRoute<void>(builder: (_) => const LoginScreen());
       
       // Doctor profile route - requires authenticated user
       case '/doctorProfile':
@@ -69,34 +70,34 @@ class AppRouter {
           // Get currently authenticated user from Firebase
           final user = FirebaseAuth.instance.currentUser;
           final userId = user?.uid ?? '';
-          return MaterialPageRoute(
-              builder: (_) => DoctorProfileScreen(userId: userId));
+          return MaterialPageRoute<void>(
+              builder: (_) => DoctorProfileScreen(userId: userId),);
         }
       
       // Doctor dashboard route
       case '/dashboard':
-        return MaterialPageRoute(builder: (_) => const DashboardScreen());
+        return MaterialPageRoute<void>(builder: (_) => const DashboardScreen());
       
       // Patient dashboard route
       case '/patientDashboard':
-        return MaterialPageRoute(
-            builder: (_) => const PatientDashboardScreen());
+        return MaterialPageRoute<void>(
+            builder: (_) => const PatientDashboardScreen(),);
       
       // Admin dashboard route
       case '/adminDashboard':
-        return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
+        return MaterialPageRoute<void>(builder: (_) => const AdminDashboardScreen());
       
       // Health analytics and reporting route
       case '/healthAnalytics':
-        return MaterialPageRoute(builder: (_) => const HealthAnalyticsScreen());
+        return MaterialPageRoute<void>(builder: (_) => const HealthAnalyticsScreen());
       
       // Medical records viewing route
       case '/records':
-        return MaterialPageRoute(builder: (_) => const RecordsScreen());
+        return MaterialPageRoute<void>(builder: (_) => const RecordsScreen());
       
       // Prescription management route
       case '/prescription':
-        return MaterialPageRoute(builder: (_) => const PrescriptionScreen());
+        return MaterialPageRoute<void>(builder: (_) => const PrescriptionScreen());
       
       // Appointment scheduling route - requires authenticated user
       case '/appointments':
@@ -105,40 +106,41 @@ class AppRouter {
           final userId = user?.uid ?? '';
           // Default role is doctor; can be refined with actual role check
           const userRole = 'doctor';
-          return MaterialPageRoute(
+          return MaterialPageRoute<void>(
               builder: (_) =>
-                  AppointmentScreen(userRole: userRole, userId: userId));
+                  AppointmentScreen(userRole: userRole, userId: userId),);
         }
       
       // Device management route (glucose monitors, etc.)
       case '/deviceManagement':
-        return MaterialPageRoute(
-            builder: (_) => const DeviceManagementScreen());
+        return MaterialPageRoute<void>(
+            builder: (_) => const DeviceManagementScreen(),);
       
       // Diagnostic tools route
       case '/diagnostics':
-        return MaterialPageRoute(builder: (_) => const DiagnosticScreen());
+        return MaterialPageRoute<void>(builder: (_) => const DiagnosticScreen());
       
-      // Chat/messaging route
-      casError tracking route (debug only)
+      // Error tracking route (debug only)
       case '/errorTracking':
-        return MaterialPageRoute(builder: (_) => const ErrorTrackingScreen());
+        return MaterialPageRoute<void>(builder: (_) => const ErrorTrackingScreen());
       
       // Developer tools route (debug only)
       case '/devTools':
-        return MaterialPageRoute(builder: (_) => const DevToolsScreen());
+        return MaterialPageRoute<void>(builder: (_) => const DevToolsScreen());
       
-      // e '/chat':
-        return MaterialPageRoute(builder: (_) => const ChatScreen());
+      // Chat route
+      case '/chat':
+        return MaterialPageRoute<void>(builder: (_) => const ChatScreen());
       
       // Pharmacy dashboard route
       case '/pharmacy':
-        return MaterialPageRoute(
-            builder: (_) => const PharmacyDashboardScreen());
+        return MaterialPageRoute<void>(
+            builder: (_) => const PharmacyDashboardScreen(),);
       
       // Default fallback for unknown routes
       default:
-        return MaterialPageRoute(builder: (_) => const RoleSelectionScreen());
+        return MaterialPageRoute<void>(builder: (_) => const RoleSelectionScreen());
     }
   }
 }
+

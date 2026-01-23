@@ -2,17 +2,19 @@
 /// 
 /// Wrappers for monitoring performance of operations, functions, and widgets.
 /// Integrates with Firebase Performance Monitoring and custom logging.
+library;
 
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:firebase_performance/firebase_performance.dart';
-import 'logger_service.dart';
+
+import '../services/logger_service.dart';
 
 /// Performance monitoring wrapper for async operations
 class PerformanceMonitor {
-  static final PerformanceMonitor _instance = PerformanceMonitor._internal();
   factory PerformanceMonitor() => _instance;
   PerformanceMonitor._internal();
+  static final PerformanceMonitor _instance = PerformanceMonitor._internal();
 
   final FirebasePerformance _performance = FirebasePerformance.instance;
   final LoggerService _logger = LoggerService();
@@ -101,13 +103,13 @@ class PerformanceMonitor {
 
 /// Wrapper for Firebase Performance Trace
 class PerformanceTrace {
-  final Trace _trace;
-  final String _name;
-  final Stopwatch _stopwatch = Stopwatch();
 
   PerformanceTrace(this._trace, this._name) {
     _stopwatch.start();
   }
+  final Trace _trace;
+  final String _name;
+  final Stopwatch _stopwatch = Stopwatch();
 
   /// Add custom attribute
   void setAttribute(String key, String value) {
@@ -132,9 +134,6 @@ class PerformanceTrace {
 
 /// Widget wrapper for monitoring widget performance
 class PerformanceWidget extends StatelessWidget {
-  final String name;
-  final Widget child;
-  final bool enabled;
 
   const PerformanceWidget({
     required this.name,
@@ -142,6 +141,9 @@ class PerformanceWidget extends StatelessWidget {
     this.enabled = kDebugMode,
     super.key,
   });
+  final String name;
+  final Widget child;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -157,13 +159,13 @@ class PerformanceWidget extends StatelessWidget {
 }
 
 class _PerformanceTracker extends StatefulWidget {
-  final String name;
-  final Widget child;
 
   const _PerformanceTracker({
     required this.name,
     required this.child,
   });
+  final String name;
+  final Widget child;
 
   @override
   State<_PerformanceTracker> createState() => _PerformanceTrackerState();

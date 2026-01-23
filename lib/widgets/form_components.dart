@@ -2,6 +2,7 @@
 /// 
 /// Pre-built form widgets with validation, styling, and consistent behavior.
 /// Reduces code duplication and ensures UI consistency across the app.
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,28 +11,6 @@ import '../validators/form_validators.dart';
 
 /// Custom text form field with consistent styling
 class AppTextFormField extends StatelessWidget {
-  final String? label;
-  final String? hint;
-  final String? initialValue;
-  final TextEditingController? controller;
-  final String? Function(String?)? validator;
-  final void Function(String)? onChanged;
-  final void Function(String?)? onSaved;
-  final TextInputType? keyboardType;
-  final bool obscureText;
-  final bool enabled;
-  final bool readOnly;
-  final int? maxLines;
-  final int? maxLength;
-  final Widget? prefixIcon;
-  final Widget? suffixIcon;
-  final List<TextInputFormatter>? inputFormatters;
-  final TextCapitalization textCapitalization;
-  final FocusNode? focusNode;
-  final TextInputAction? textInputAction;
-  final void Function()? onEditingComplete;
-  final void Function(String)? onFieldSubmitted;
-  final AutovalidateMode? autovalidateMode;
 
   const AppTextFormField({
     this.label,
@@ -58,6 +37,28 @@ class AppTextFormField extends StatelessWidget {
     this.autovalidateMode,
     super.key,
   });
+  final String? label;
+  final String? hint;
+  final String? initialValue;
+  final TextEditingController? controller;
+  final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
+  final void Function(String?)? onSaved;
+  final TextInputType? keyboardType;
+  final bool obscureText;
+  final bool enabled;
+  final bool readOnly;
+  final int? maxLines;
+  final int? maxLength;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextCapitalization textCapitalization;
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
+  final void Function()? onEditingComplete;
+  final void Function(String)? onFieldSubmitted;
+  final AutovalidateMode? autovalidateMode;
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +109,7 @@ class AppTextFormField extends StatelessWidget {
           ),
         ),
         filled: !enabled,
-        fillColor: enabled ? null : Theme.of(context).disabledColor.withOpacity(0.1),
+        fillColor: enabled ? null : Theme.of(context).disabledColor.withValues(alpha: 0.1),
       ),
     );
   }
@@ -116,12 +117,6 @@ class AppTextFormField extends StatelessWidget {
 
 /// Email input field with validation
 class EmailFormField extends StatelessWidget {
-  final TextEditingController? controller;
-  final String? initialValue;
-  final void Function(String)? onChanged;
-  final void Function(String?)? onSaved;
-  final bool enabled;
-  final AutovalidateMode? autovalidateMode;
 
   const EmailFormField({
     this.controller,
@@ -132,6 +127,12 @@ class EmailFormField extends StatelessWidget {
     this.autovalidateMode,
     super.key,
   });
+  final TextEditingController? controller;
+  final String? initialValue;
+  final void Function(String)? onChanged;
+  final void Function(String?)? onSaved;
+  final bool enabled;
+  final AutovalidateMode? autovalidateMode;
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +146,6 @@ class EmailFormField extends StatelessWidget {
       onSaved: onSaved,
       keyboardType: TextInputType.emailAddress,
       prefixIcon: const Icon(Icons.email_outlined),
-      textCapitalization: TextCapitalization.none,
       enabled: enabled,
       autovalidateMode: autovalidateMode,
     );
@@ -154,16 +154,6 @@ class EmailFormField extends StatelessWidget {
 
 /// Password input field with show/hide toggle
 class PasswordFormField extends StatefulWidget {
-  final String? label;
-  final TextEditingController? controller;
-  final String? initialValue;
-  final String? Function(String?)? validator;
-  final void Function(String)? onChanged;
-  final void Function(String?)? onSaved;
-  final bool enabled;
-  final TextInputAction? textInputAction;
-  final void Function(String)? onFieldSubmitted;
-  final AutovalidateMode? autovalidateMode;
 
   const PasswordFormField({
     this.label,
@@ -178,6 +168,16 @@ class PasswordFormField extends StatefulWidget {
     this.autovalidateMode,
     super.key,
   });
+  final String? label;
+  final TextEditingController? controller;
+  final String? initialValue;
+  final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
+  final void Function(String?)? onSaved;
+  final bool enabled;
+  final TextInputAction? textInputAction;
+  final void Function(String)? onFieldSubmitted;
+  final AutovalidateMode? autovalidateMode;
 
   @override
   State<PasswordFormField> createState() => _PasswordFormFieldState();
@@ -218,12 +218,6 @@ class _PasswordFormFieldState extends State<PasswordFormField> {
 
 /// Phone number input field with formatting
 class PhoneFormField extends StatelessWidget {
-  final TextEditingController? controller;
-  final String? initialValue;
-  final void Function(String)? onChanged;
-  final void Function(String?)? onSaved;
-  final bool enabled;
-  final AutovalidateMode? autovalidateMode;
 
   const PhoneFormField({
     this.controller,
@@ -234,6 +228,12 @@ class PhoneFormField extends StatelessWidget {
     this.autovalidateMode,
     super.key,
   });
+  final TextEditingController? controller;
+  final String? initialValue;
+  final void Function(String)? onChanged;
+  final void Function(String?)? onSaved;
+  final bool enabled;
+  final AutovalidateMode? autovalidateMode;
 
   @override
   Widget build(BuildContext context) {
@@ -259,6 +259,18 @@ class PhoneFormField extends StatelessWidget {
 
 /// Dropdown form field with consistent styling
 class AppDropdownFormField<T> extends StatelessWidget {
+
+  const AppDropdownFormField({
+    required this.items, this.label,
+    this.hint,
+    this.value,
+    this.onChanged,
+    this.onSaved,
+    this.validator,
+    this.enabled = true,
+    this.prefixIcon,
+    super.key,
+  });
   final String? label;
   final String? hint;
   final T? value;
@@ -269,23 +281,10 @@ class AppDropdownFormField<T> extends StatelessWidget {
   final bool enabled;
   final Widget? prefixIcon;
 
-  const AppDropdownFormField({
-    this.label,
-    this.hint,
-    this.value,
-    required this.items,
-    this.onChanged,
-    this.onSaved,
-    this.validator,
-    this.enabled = true,
-    this.prefixIcon,
-    super.key,
-  });
-
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T>(
-      value: value,
+      initialValue: value,
       items: items,
       onChanged: enabled ? onChanged : null,
       onSaved: onSaved,
@@ -311,7 +310,7 @@ class AppDropdownFormField<T> extends StatelessWidget {
           ),
         ),
         filled: !enabled,
-        fillColor: enabled ? null : Theme.of(context).disabledColor.withOpacity(0.1),
+        fillColor: enabled ? null : Theme.of(context).disabledColor.withValues(alpha: 0.1),
       ),
     );
   }
@@ -319,16 +318,6 @@ class AppDropdownFormField<T> extends StatelessWidget {
 
 /// Date picker form field
 class DateFormField extends StatefulWidget {
-  final String? label;
-  final String? hint;
-  final DateTime? initialDate;
-  final DateTime? firstDate;
-  final DateTime? lastDate;
-  final void Function(DateTime)? onChanged;
-  final void Function(DateTime?)? onSaved;
-  final String? Function(DateTime?)? validator;
-  final bool enabled;
-  final TextEditingController? controller;
 
   const DateFormField({
     this.label,
@@ -343,6 +332,16 @@ class DateFormField extends StatefulWidget {
     this.controller,
     super.key,
   });
+  final String? label;
+  final String? hint;
+  final DateTime? initialDate;
+  final DateTime? firstDate;
+  final DateTime? lastDate;
+  final void Function(DateTime)? onChanged;
+  final void Function(DateTime?)? onSaved;
+  final String? Function(DateTime?)? validator;
+  final bool enabled;
+  final TextEditingController? controller;
 
   @override
   State<DateFormField> createState() => _DateFormFieldState();
@@ -421,16 +420,13 @@ class _DateFormFieldState extends State<DateFormField> {
 class CheckboxFormField extends FormField<bool> {
   CheckboxFormField({
     required String label,
-    bool initialValue = false,
+    bool super.initialValue = false,
     void Function(bool?)? onChanged,
-    void Function(bool?)? onSaved,
-    String? Function(bool?)? validator,
+    super.onSaved,
+    super.validator,
     bool enabled = true,
     super.key,
   }) : super(
-          initialValue: initialValue,
-          onSaved: onSaved,
-          validator: validator,
           builder: (FormFieldState<bool> state) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -484,9 +480,6 @@ class CheckboxFormField extends FormField<bool> {
 
 /// Form section header
 class FormSectionHeader extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final Widget? trailing;
 
   const FormSectionHeader({
     required this.title,
@@ -494,11 +487,14 @@ class FormSectionHeader extends StatelessWidget {
     this.trailing,
     super.key,
   });
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: UIConstants.spacingMd),
+      padding: const EdgeInsets.symmetric(vertical: UIConstants.spacingMd),
       child: Row(
         children: [
           Expanded(
@@ -512,7 +508,7 @@ class FormSectionHeader extends StatelessWidget {
                       ),
                 ),
                 if (subtitle != null) ...[
-                  SizedBox(height: UIConstants.spacingXs),
+                  const SizedBox(height: UIConstants.spacingXs),
                   Text(
                     subtitle!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -532,11 +528,6 @@ class FormSectionHeader extends StatelessWidget {
 
 /// Form submit button
 class FormSubmitButton extends StatelessWidget {
-  final String label;
-  final VoidCallback? onPressed;
-  final bool isLoading;
-  final bool enabled;
-  final IconData? icon;
 
   const FormSubmitButton({
     required this.label,
@@ -546,6 +537,11 @@ class FormSubmitButton extends StatelessWidget {
     this.icon,
     super.key,
   });
+  final String label;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final bool enabled;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -573,7 +569,7 @@ class FormSubmitButton extends StatelessWidget {
                 children: [
                   if (icon != null) ...[
                     Icon(icon),
-                    SizedBox(width: UIConstants.spacingSm),
+                    const SizedBox(width: UIConstants.spacingSm),
                   ],
                   Text(
                     label,
@@ -588,3 +584,4 @@ class FormSubmitButton extends StatelessWidget {
     );
   }
 }
+

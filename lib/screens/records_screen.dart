@@ -1,12 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-
-import 'package:fl_chart/fl_chart.dart';
-import '../models/patient.dart';
-import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+
+import '../models/patient.dart';
 import '../widgets/glassmorphic_card.dart';
 
 class RecordsScreen extends StatefulWidget {
@@ -18,10 +18,10 @@ class RecordsScreen extends StatefulWidget {
 
 class _RecordsScreenState extends State<RecordsScreen> {
   List<Widget> _buildRecordWidgets() {
-    List<Widget> widgets = [];
+    final List<Widget> widgets = [];
     // --- Smart Alerts Section ---
-    List<Widget> alerts = [];
-    if (bpHistory.isNotEmpty && (bpHistory.last['systolic'] ?? 0) > 140) {
+    final List<Widget> alerts = [];
+    if (bpHistory.isNotEmpty && ((bpHistory.last['systolic'] as num?) ?? 0) > 140) {
       alerts.add(
         Container(
           color: Colors.red[100],
@@ -37,7 +37,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
         ),
       );
     }
-    if (smbgHistory.isNotEmpty && (smbgHistory.last['fasting'] ?? 0) > 180) {
+    if (smbgHistory.isNotEmpty && ((smbgHistory.last['fasting'] as num?) ?? 0) > 180) {
       alerts.add(
         Container(
           color: Colors.red[100],
@@ -54,7 +54,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
       );
     }
     if (anthropometryHistory.isNotEmpty &&
-        (anthropometryHistory.last['bmi'] ?? 0) > 30) {
+        ((anthropometryHistory.last['bmi'] as num?) ?? 0) > 30) {
       alerts.add(
         Container(
           color: Colors.orange[100],
@@ -76,7 +76,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
     if (labReports.isNotEmpty) {
       final lastLab = labReports.last;
       final lastLabDate =
-          DateTime.tryParse(lastLab['date'] ?? '') ?? DateTime.now();
+          DateTime.tryParse(lastLab['date'] as String? ?? '') ?? DateTime.now();
       if (DateTime.now().difference(lastLabDate).inDays > 90) {
         alerts.add(
           Container(
@@ -135,7 +135,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
             color: Colors.yellow[50],
             margin: const EdgeInsets.only(bottom: 16),
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -164,7 +164,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
                                 final args =
                                     ModalRoute.of(context)?.settings.arguments
                                         as Map<String, dynamic>?;
-                                final pid = args?['patient']?.id ?? '';
+                                final pid = args?['patient']?.id as String? ?? '';
                                 await approvePendingEntry(entry, pid);
                                 await fetchData(pid);
                               },
@@ -179,7 +179,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
                                 final args =
                                     ModalRoute.of(context)?.settings.arguments
                                         as Map<String, dynamic>?;
-                                final pid = args?['patient']?.id ?? '';
+                                final pid = args?['patient']?.id as String? ?? '';
                                 await rejectPendingEntry(entry, pid);
                                 await fetchData(pid);
                               },
@@ -197,8 +197,8 @@ class _RecordsScreenState extends State<RecordsScreen> {
       );
     }
     // --- Timeline Section ---
-    List<Map<String, dynamic>> eventList = [];
-    for (var a in anthropometryHistory) {
+    final List<Map<String, dynamic>> eventList = [];
+    for (final a in anthropometryHistory) {
       eventList.add({
         'date': a['date'] ?? '',
         'widget': ListTile(
@@ -212,7 +212,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
         ),
       });
     }
-    for (var bp in bpHistory) {
+    for (final bp in bpHistory) {
       eventList.add({
         'date': bp['date'] ?? '',
         'widget': ListTile(
@@ -224,7 +224,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
         ),
       });
     }
-    for (var s in smbgHistory) {
+    for (final s in smbgHistory) {
       eventList.add({
         'date': s['date'] ?? '',
         'widget': ListTile(
@@ -236,7 +236,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
         ),
       });
     }
-    for (var lab in labReports) {
+    for (final lab in labReports) {
       eventList.add({
         'date': lab['date'] ?? '',
         'widget': ListTile(
@@ -359,7 +359,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
           ...doctorNotes.map(
             (note) => ListTile(
               leading: const Icon(Icons.note),
-              title: Text(note['note'] ?? ''),
+              title: Text(note['note'] as String? ?? ''),
               subtitle: Text(
                 'Date: ${note['date']?.toString().substring(0, 16) ?? ''}',
               ),
@@ -384,7 +384,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
           ...attachments.map(
             (a) => ListTile(
               leading: const Icon(Icons.attachment),
-              title: Text(a['name'] ?? ''),
+              title: Text(a['name'] as String? ?? ''),
               subtitle: Text(
                 'Date: ${a['date']?.toString().substring(0, 16) ?? ''}',
               ),
@@ -451,7 +451,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
           .get();
       if (!mounted) return;
       setState(() {
-        userRole = doc.data()?['role'] ?? 'doctor';
+        userRole = doc.data()?['role'] as String? ?? 'doctor';
       });
     }
   }
@@ -478,8 +478,8 @@ class _RecordsScreenState extends State<RecordsScreen> {
     // Move entry to appropriate section
     if (entry['type'] == 'BP') {
       bpHistory.add({
-        'systolic': int.tryParse(entry['value'].split('/')[0]) ?? 0,
-        'diastolic': int.tryParse(entry['value'].split('/')[1]) ?? 0,
+        'systolic': int.tryParse((entry['value'] as String? ?? '').split('/')[0]) ?? 0,
+        'diastolic': int.tryParse((entry['value'] as String? ?? '').split('/')[1]) ?? 0,
         'date': entry['date'],
       });
       await FirebaseFirestore.instance
@@ -488,7 +488,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
           .set({'bpHistory': bpHistory}, SetOptions(merge: true));
     } else if (entry['type'] == 'Glucose') {
       smbgHistory.add({
-        'fasting': double.tryParse(entry['value']) ?? 0,
+        'fasting': double.tryParse(entry['value'] as String? ?? '') ?? 0,
         'date': entry['date'],
       });
       await FirebaseFirestore.instance
@@ -497,7 +497,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
           .set({'smbgHistory': smbgHistory}, SetOptions(merge: true));
     } else if (entry['type'] == 'Weight') {
       anthropometryHistory.add({
-        'weight': double.tryParse(entry['value']) ?? 0,
+        'weight': double.tryParse(entry['value'] as String? ?? '') ?? 0,
         'date': entry['date'],
       });
       await FirebaseFirestore.instance
@@ -505,11 +505,11 @@ class _RecordsScreenState extends State<RecordsScreen> {
           .doc(patientId)
           .set({
             'anthropometryHistory': anthropometryHistory,
-          }, SetOptions(merge: true));
+          }, SetOptions(merge: true),);
     } else if (entry['type'] == 'Lab') {
       labReports.add({
         'test': 'Patient Lab',
-        'value': double.tryParse(entry['value']) ?? 0,
+        'value': double.tryParse(entry['value'] as String? ?? '') ?? 0,
         'date': entry['date'],
       });
       await FirebaseFirestore.instance
@@ -520,7 +520,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
     // Remove from pending
     await FirebaseFirestore.instance
         .collection('pending_entries')
-        .doc(entry['id'])
+        .doc(entry['id'] as String?)
         .delete();
     await fetchPendingEntries(patientId);
     if (!mounted) return;
@@ -533,7 +533,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
   ) async {
     await FirebaseFirestore.instance
         .collection('pending_entries')
-        .doc(entry['id'])
+        .doc(entry['id'] as String?)
         .delete();
     await fetchPendingEntries(patientId);
     if (!mounted) return;
@@ -543,18 +543,18 @@ class _RecordsScreenState extends State<RecordsScreen> {
   // Calculate a simple risk score based on available data
   int getRiskScore() {
     int score = 0;
-    if (bpHistory.isNotEmpty && (bpHistory.last['systolic'] ?? 0) > 140) {
+    if (bpHistory.isNotEmpty && ((bpHistory.last['systolic'] as num?) ?? 0) > 140) {
       score++;
     }
-    if (smbgHistory.isNotEmpty && (smbgHistory.last['fasting'] ?? 0) > 180) {
+    if (smbgHistory.isNotEmpty && ((smbgHistory.last['fasting'] as num?) ?? 0) > 180) {
       score++;
     }
     if (anthropometryHistory.isNotEmpty &&
-        (anthropometryHistory.last['bmi'] ?? 0) > 30) {
+        ((anthropometryHistory.last['bmi'] as num?) ?? 0) > 30) {
       score++;
     }
     if (labReports.any(
-      (lab) => lab['test'] == 'HbA1c' && (lab['value'] ?? 0) > 8,
+      (lab) => lab['test'] == 'HbA1c' && ((lab['value'] as num?) ?? 0) > 8,
     )) {
       score++;
     }
@@ -597,16 +597,16 @@ class _RecordsScreenState extends State<RecordsScreen> {
     if (doc.exists && doc.data() != null) {
       final data = doc.data()!;
       setState(() {
-        clinicalHistory = data['clinicalHistory'] ?? {};
-        labReports = List<Map<String, dynamic>>.from(data['labReports'] ?? []);
-        anthropometryHistory = List.from(data['anthropometryHistory'] ?? []);
-        bpHistory = List.from(data['bpHistory'] ?? []);
-        smbgHistory = List.from(data['smbgHistory'] ?? []);
+        clinicalHistory = data['clinicalHistory'] as Map<String, dynamic>? ?? {};
+        labReports = List<Map<String, dynamic>>.from(data['labReports'] as List? ?? []);
+        anthropometryHistory = List.from(data['anthropometryHistory'] as List? ?? []);
+        bpHistory = List.from(data['bpHistory'] as List? ?? []);
+        smbgHistory = List.from(data['smbgHistory'] as List? ?? []);
         doctorNotes = List<Map<String, dynamic>>.from(
-          data['doctorNotes'] ?? [],
+          data['doctorNotes'] as List? ?? [],
         );
         attachments = List<Map<String, dynamic>>.from(
-          data['attachments'] ?? [],
+          data['attachments'] as List? ?? [],
         );
         loading = false;
       });
@@ -671,14 +671,14 @@ class _RecordsScreenState extends State<RecordsScreen> {
     return null;
   }
 
-  String getAnthropometryAI(List history) {
+  String getAnthropometryAI(List<dynamic> history) {
     if (history.length < 2) return 'Add more data for insights.';
     final last = history.last;
     final prev = history[history.length - 2];
-    if ((last['bmi'] ?? 0) > (prev['bmi'] ?? 0)) {
+    if (((last['bmi'] as num?) ?? 0) > ((prev['bmi'] as num?) ?? 0)) {
       return 'BMI is increasing. Advise weight management.';
     }
-    if ((last['bmi'] ?? 0) < (prev['bmi'] ?? 0)) {
+    if (((last['bmi'] as num?) ?? 0) < ((prev['bmi'] as num?) ?? 0)) {
       return 'BMI is improving. Keep it up!';
     }
     return 'BMI is stable.';
@@ -687,18 +687,18 @@ class _RecordsScreenState extends State<RecordsScreen> {
   String getLabAI(List<Map<String, dynamic>> labs) {
     if (labs.isEmpty) return 'No lab data.';
     final fbs = labs.lastWhere(
-      (e) => e['test'] == 'FBS',
+      (e) => e['test'] == 'FBS' && ((e['value'] as num?) ?? 0) > 126,
       orElse: () => <String, dynamic>{},
     );
-    if (fbs.isNotEmpty && fbs['value'] != null && fbs['value'] > 126) {
+    if (fbs.isNotEmpty && fbs['value'] != null && ((fbs['value'] as num?) ?? 0) > 126) {
       return 'FBS is high. Review glycemic control.';
     }
     return 'Labs within normal limits.';
   }
 
   Widget buildTimeline() {
-    List<Map<String, dynamic>> eventList = [];
-    for (var a in anthropometryHistory) {
+    final List<Map<String, dynamic>> eventList = [];
+    for (final a in anthropometryHistory) {
       eventList.add({
         'date': a['date'] ?? '',
         'widget': ListTile(
@@ -712,7 +712,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
         ),
       });
     }
-    for (var bp in bpHistory) {
+    for (final bp in bpHistory) {
       eventList.add({
         'date': bp['date'] ?? '',
         'widget': ListTile(
@@ -724,7 +724,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
         ),
       });
     }
-    for (var s in smbgHistory) {
+    for (final s in smbgHistory) {
       eventList.add({
         'date': s['date'] ?? '',
         'widget': ListTile(
@@ -736,7 +736,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
         ),
       });
     }
-    for (var lab in labReports) {
+    for (final lab in labReports) {
       eventList.add({
         'date': lab['date'] ?? '',
         'widget': ListTile(
@@ -779,13 +779,13 @@ class _RecordsScreenState extends State<RecordsScreen> {
                   sideTitles: SideTitles(showTitles: true, reservedSize: 40),
                 ),
                 bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
+                  
                 ),
                 rightTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
+                  
                 ),
                 topTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
+                  
                 ),
               ),
               borderData: FlBorderData(show: true),
@@ -798,7 +798,6 @@ class _RecordsScreenState extends State<RecordsScreen> {
                   isCurved: true,
                   color: Colors.teal,
                   barWidth: 3,
-                  dotData: const FlDotData(show: true),
                 ),
               ],
             ),
@@ -814,7 +813,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final Patient? patient = args?['patient'];
+    final Patient? patient = args?['patient'] as Patient?;
     final patientId = patient?.id;
     if (userRole == null) {
       fetchUserRole();
@@ -866,9 +865,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
             duration: const Duration(milliseconds: 800),
             decoration: BoxDecoration(gradient: gradient),
           ),
-          patient == null
-              ? const Center(child: Text('No patient selected.'))
-              : AnimatedSwitcher(
+          if (patient == null) const Center(child: Text('No patient selected.')) else AnimatedSwitcher(
                   duration: const Duration(milliseconds: 400),
                   child: loading
                       ? const Center(child: CircularProgressIndicator())
@@ -893,3 +890,4 @@ class _RecordsScreenState extends State<RecordsScreen> {
     );
   }
 }
+

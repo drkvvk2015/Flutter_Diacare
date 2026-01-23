@@ -2,16 +2,14 @@
 /// 
 /// Handles all patient-related data operations.
 /// Manages patient records, health history, and medical data.
+library;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../api/api_client.dart';
-import '../api/endpoints.dart';
 import '../models/patient.dart';
 import '../utils/logger.dart';
 
 /// Repository for patient data management
 class PatientRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final ApiClient _apiClient = ApiClient();
 
   /// Get all patients
   Future<List<Map<String, dynamic>>> getAllPatients() async {
@@ -20,7 +18,7 @@ class PatientRepository {
       return snapshot.docs.map((doc) => {
         'id': doc.id,
         ...doc.data(),
-      }).toList();
+      },).toList();
     } catch (e) {
       logError('Error fetching patients', e);
       rethrow;
@@ -33,7 +31,7 @@ class PatientRepository {
       final doc = await _firestore.collection('patients').doc(patientId).get();
       
       if (!doc.exists) {
-        logWarning('Patient not found: $patientId');
+        logInfo('Patient not found: $patientId');
         return null;
       }
 

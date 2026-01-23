@@ -1,13 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/glassmorphic_card.dart';
 import '../widgets/voice_text_field.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegistrationScreen extends StatefulWidget {
+  const RegistrationScreen({required this.userType, super.key});
   final String userType;
-  const RegistrationScreen({super.key, required this.userType});
 
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();
@@ -21,41 +21,106 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _loading = false;
   String? _error;
 
+  /// Convert Firebase Auth error codes to user-friendly messages
+  String _getFirebaseAuthErrorMessage(String code) {
+    switch (code) {
+      case 'email-already-in-use':
+        return 'This email is already registered. Please try logging in.';
+      case 'invalid-email':
+        return 'Please enter a valid email address.';
+      case 'operation-not-allowed':
+        return 'Email/password registration is not enabled.';
+      case 'weak-password':
+        return 'Password is too weak. Use at least 6 characters.';
+      case 'network-request-failed':
+        return 'Network error. Please check your internet connection.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      default:
+        return 'Registration failed: $code';
+    }
+  }
+
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() {
       _loading = true;
       _error = null;
     });
+    
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final name = _nameController.text.trim();
+    final role = widget.userType.toLowerCase();
+    
+    debugPrint('=== REGISTRATION ATTEMPT ===');
+    debugPrint('Email: $email');
+    debugPrint('Name: $name');
+    debugPrint('Role: $role');
+    
     try {
       // Create user in Firebase Auth
+      debugPrint('Creating Firebase Auth user...');
       final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+        email: email,
+        password: password,
       );
+      debugPrint('Firebase Auth user created: ${cred.user?.uid}');
 
       // Create user document in Firestore
       if (cred.user != null) {
-        await FirebaseFirestore.instance.collection('users').doc(cred.user!.uid).set({
+        debugPrint('Creating Firestore document...');
+        
+        // Base user data
+        final userData = <String, dynamic>{
           'uid': cred.user!.uid,
-          'email': _emailController.text.trim(),
-          'displayName': _nameController.text.trim(),
-          'role': widget.userType, // 'doctor', 'patient', etc.
+          'email': email,
+          'displayName': name,
+          'name': name, // Also save as 'name' for compatibility with appointment queries
+          'role': role,
           'createdAt': FieldValue.serverTimestamp(),
           'isActive': true,
-        });
+        };
+        
+        // Add doctor-specific fields if registering as doctor
+        if (role == 'doctor') {
+          userData.addAll({
+            'specialty': 'General', // Default specialty
+            'availability': 'Available',
+            'fee': 500.0, // Default consultation fee
+            'rating': 4.0,
+            'experience': '1+ years',
+            'isVerified': false, // Admin needs to verify
+          });
+        }
+        
+        await FirebaseFirestore.instance.collection('users').doc(cred.user!.uid).set(userData);
+        debugPrint('Firestore document created with role: $role');
 
         // Update display name in Auth
-        await cred.user!.updateDisplayName(_nameController.text.trim());
+        await cred.user!.updateDisplayName(name);
+        debugPrint('Display name updated');
       }
 
+      debugPrint('=== REGISTRATION SUCCESS ===');
+      
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registration successful! Please log in.')),
         );
       }
-    } catch (e) {
+    } on FirebaseException catch (e) {
+      debugPrint('=== FIREBASE ERROR ===');
+      debugPrint('Code: ${e.code}');
+      debugPrint('Message: ${e.message}');
+      setState(() {
+        _error = _getFirebaseAuthErrorMessage(e.code);
+      });
+    } catch (e, stackTrace) {
+      debugPrint('=== REGISTRATION ERROR ===');
+      debugPrint('Error: $e');
+      debugPrint('Stack: $stackTrace');
       setState(() {
         _error = e.toString();
       });
@@ -107,7 +172,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         ),
         child: Center(
           child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.8, end: 1.0),
+            tween: Tween(begin: 0.8, end: 1),
             duration: const Duration(milliseconds: 700),
             curve: Curves.elasticOut,
             builder: (context, scale, child) =>
@@ -116,7 +181,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               label: 'Registration Form',
               child: GlassmorphicCard(
                 child: Padding(
-                  padding: const EdgeInsets.all(28.0),
+                  padding: const EdgeInsets.all(28),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -158,7 +223,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   padding: const EdgeInsets.only(bottom: 12),
                                   child: GestureDetector(
                                     onTap: () {
-                                      showDialog(
+                                      showDialog<void>(
                                         context: context,
                                         builder: (context) => AlertDialog(
                                           shape: RoundedRectangleBorder(
@@ -251,3 +316,4 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 }
+

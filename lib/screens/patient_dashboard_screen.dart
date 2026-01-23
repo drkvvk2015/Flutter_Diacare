@@ -1,15 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'patient_profile_screen.dart';
-import '../services/pedometer_service.dart';
 import '../services/health_service.dart';
-import 'quick_book_appointment_screen.dart';
+import '../services/pedometer_service.dart';
 import '../utils/logger.dart';
 import '../widgets/glassmorphic_card.dart';
+import 'patient_profile_screen.dart';
+import 'quick_book_appointment_screen.dart';
 
 class PatientDashboardScreen extends StatefulWidget {
   const PatientDashboardScreen({super.key});
@@ -58,7 +58,7 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
           .collection('users')
           .doc(userId)
           .get();
-      Map<String, dynamic> data = doc.data() ?? {};
+      final Map<String, dynamic> data = doc.data() ?? {};
       data.putIfAbsent('name', () => '');
       data.putIfAbsent('uhid', () => '');
       data.putIfAbsent('photoUrl', () => '');
@@ -73,17 +73,17 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
   void _openProfile(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      Navigator.of(context).push(MaterialPageRoute(
+      Navigator.of(context).push(MaterialPageRoute<void>(
         builder: (_) => PatientProfileScreen(userId: user.uid),
-      ));
+      ),);
     }
   }
 
   void _openDeviceManagement(BuildContext context) =>
       Navigator.of(context).pushNamed('/deviceManagement');
   void _openQuickBookAppointment(BuildContext context) =>
-      Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => const QuickBookAppointmentScreen()));
+      Navigator.of(context).push(MaterialPageRoute<void>(
+          builder: (_) => const QuickBookAppointmentScreen(),),);
   void _openDiagnostics(BuildContext context) =>
       Navigator.of(context).pushNamed('/diagnostics');
 
@@ -105,7 +105,7 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                 colors: [
                   Theme.of(context).colorScheme.primary,
                   Theme.of(context).colorScheme.secondary,
-                  Theme.of(context).colorScheme.primary
+                  Theme.of(context).colorScheme.primary,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -147,14 +147,14 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                       fontWeight: FontWeight.bold,
                       fontSize: 24,
                       color: Colors.white,
-                      letterSpacing: 1.0,
+                      letterSpacing: 1,
                     ),
                   ),
                   centerTitle: false,
                   actions: [
                     if (user != null)
                       Padding(
-                        padding: const EdgeInsets.only(right: 16.0),
+                        padding: const EdgeInsets.only(right: 16),
                         child: GlassmorphicCard(
                           borderRadius: 30,
                           padding: const EdgeInsets.all(4),
@@ -170,7 +170,7 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                   ],
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.all(20),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       Text(
@@ -198,10 +198,10 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
                               return const Padding(
-                                padding: EdgeInsets.all(20.0),
+                                padding: EdgeInsets.all(20),
                                 child: Center(
                                     child: CircularProgressIndicator(
-                                        color: Colors.cyan)),
+                                        color: Colors.cyan,),),
                               );
                             }
                             if (!snapshot.hasData) {
@@ -225,7 +225,7 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                                                               as String)
                                                           .isNotEmpty
                                                   ? NetworkImage(
-                                                      profile['photoUrl'])
+                                                      profile['photoUrl'] as String,)
                                                   : null,
                                           child: (profile['photoUrl'] == null ||
                                                   (profile['photoUrl']
@@ -242,7 +242,7 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              profile['name'] ?? 'User',
+                                              profile['name'] as String? ?? 'User',
                                               style: GoogleFonts.outfit(
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,
@@ -253,7 +253,7 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                                               Text('${profile['uhid']}',
                                                   style: TextStyle(
                                                       color: cyan,
-                                                      fontSize: 12)),
+                                                      fontSize: 12,),),
                                           ],
                                         ),
                                       ),
@@ -267,18 +267,18 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                                       _buildQuickInfo(
                                           Icons.bloodtype,
                                           'Type',
-                                          profile['bloodGroup'] ?? '--',
-                                          Colors.redAccent),
+                                          profile['bloodGroup'] as String? ?? '--',
+                                          Colors.redAccent,),
                                       _buildQuickInfo(
                                           Icons.calendar_today,
                                           'Age',
                                           profile['age']?.toString() ?? '--',
-                                          Colors.orangeAccent),
+                                          Colors.orangeAccent,),
                                       _buildQuickInfo(
                                           Icons.height,
                                           'Height',
                                           profile['height']?.toString() ?? '--',
-                                          Colors.greenAccent),
+                                          Colors.greenAccent,),
                                     ],
                                   ),
                                 ],
@@ -309,14 +309,14 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                                 'Steps',
                                 '${_healthService.steps}',
                                 'steps',
-                                Colors.orangeAccent),
+                                Colors.orangeAccent,),
                             const Divider(color: Colors.white12),
                             _buildVitalRow(
                                 Icons.local_fire_department,
                                 'Calories',
                                 _healthService.calories.toStringAsFixed(0),
                                 'kcal',
-                                Colors.redAccent),
+                                Colors.redAccent,),
                             const Divider(color: Colors.white12),
                             _buildVitalRow(
                                 Icons.favorite,
@@ -324,7 +324,7 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                                 _healthService.heartRate?.toStringAsFixed(0) ??
                                     '--',
                                 'bpm',
-                                Colors.pinkAccent),
+                                Colors.pinkAccent,),
                           ],
                         ),
                       ),
@@ -344,7 +344,7 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                 ),
                 SliverPadding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                      const EdgeInsets.symmetric(horizontal: 20),
                   sliver: SliverGrid(
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
@@ -359,25 +359,25 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                           'Schedule visit',
                           Icons.calendar_month_rounded,
                           const Color(0xFF64FFDA),
-                          () => _openQuickBookAppointment(context)),
+                          () => _openQuickBookAppointment(context),),
                       _buildActionCard(
                           'Diagnostics',
                           'Lab results',
                           Icons.analytics_rounded,
                           const Color(0xFF18FFFF),
-                          () => _openDiagnostics(context)),
+                          () => _openDiagnostics(context),),
                       _buildActionCard(
                           'Devices',
                           'Manage IoT',
                           Icons.watch_rounded,
                           const Color(0xFFFF80AB),
-                          () => _openDeviceManagement(context)),
+                          () => _openDeviceManagement(context),),
                       _buildActionCard(
                           'Chat AI',
                           'Get advice',
                           Icons.chat_bubble_rounded,
                           const Color(0xFFB388FF),
-                          () => Navigator.pushNamed(context, '/chat')),
+                          () => Navigator.pushNamed(context, '/chat'),),
                     ]),
                   ),
                 ),
@@ -402,54 +402,54 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
   }
 
   Widget _buildQuickInfo(
-      IconData icon, String label, String value, Color color) {
+      IconData icon, String label, String value, Color color,) {
     return Column(
       children: [
         Icon(icon, color: color, size: 20),
         const SizedBox(height: 4),
         Text(value,
             style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold)),
+                color: Colors.white, fontWeight: FontWeight.bold,),),
         Text(label,
             style:
-                TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 10)),
+                TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 10),),
       ],
     );
   }
 
   Widget _buildVitalRow(
-      IconData icon, String label, String value, String unit, Color color) {
+      IconData icon, String label, String value, String unit, Color color,) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(8),),
             child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
               child: Text(label,
-                  style: const TextStyle(color: Colors.white70, fontSize: 16))),
+                  style: const TextStyle(color: Colors.white70, fontSize: 16),),),
           Text(value,
               style: GoogleFonts.outfit(
                   color: Colors.white,
                   fontSize: 20,
-                  fontWeight: FontWeight.bold)),
+                  fontWeight: FontWeight.bold,),),
           const SizedBox(width: 4),
           Text(unit,
               style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
+                  color: Colors.white.withValues(alpha: 0.5), fontSize: 12,),),
         ],
       ),
     );
   }
 
   Widget _buildActionCard(String title, String subtitle, IconData icon,
-      Color accent, VoidCallback onTap) {
+      Color accent, VoidCallback onTap,) {
     return GestureDetector(
       onTap: onTap,
       child: GlassmorphicCard(
@@ -461,7 +461,7 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.2), shape: BoxShape.circle),
+                  color: accent.withValues(alpha: 0.2), shape: BoxShape.circle,),
               child: Icon(icon, color: accent, size: 24),
             ),
             const Spacer(),
@@ -469,13 +469,14 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
                 style: GoogleFonts.outfit(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16)),
+                    fontSize: 16,),),
             Text(subtitle,
                 style: GoogleFonts.outfit(
-                    color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
+                    color: Colors.white.withValues(alpha: 0.6), fontSize: 12,),),
           ],
         ),
       ),
     );
   }
 }
+

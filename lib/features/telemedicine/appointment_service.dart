@@ -1,9 +1,11 @@
 import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'appointment_model.dart';
 import 'package:hive/hive.dart';
+
 import '../../models/appointment_hive.dart';
 import '../../utils/logger.dart';
+import 'appointment_model.dart';
 
 class AppointmentService {
   final _appointments = FirebaseFirestore.instance.collection('appointments');
@@ -33,7 +35,7 @@ class AppointmentService {
               .get();
         }
         final appts = snapshot.docs
-            .map((doc) => Appointment.fromFirestore(doc))
+            .map(Appointment.fromFirestore)
             .toList();
 
         logInfo('Found ${appts.length} appointments');
@@ -47,23 +49,27 @@ class AppointmentService {
 
         // Cache in Hive
         try {
-          final box = Hive.box<AppointmentHive>('appointments');
-          await box.clear();
-          for (final a in appts) {
-            box.put(
-              a.id,
-              AppointmentHive(
-                id: a.id,
-                patientId: a.patientId,
-                doctorId: a.doctorId,
-                time: a.time,
-                status: a.status,
-                notes: a.notes,
-                fee: a.fee,
-              ),
-            );
+          if (Hive.isBoxOpen('appointments')) {
+            final box = Hive.box<AppointmentHive>('appointments');
+            await box.clear();
+            for (final a in appts) {
+              box.put(
+                a.id,
+                AppointmentHive(
+                  id: a.id,
+                  patientId: a.patientId,
+                  doctorId: a.doctorId,
+                  time: a.time,
+                  status: a.status,
+                  notes: a.notes,
+                  fee: a.fee,
+                ),
+              );
+            }
+            logInfo('Cached ${appts.length} appointments in Hive');
+          } else {
+            logWarn('Hive appointments box not open, skipping cache');
           }
-          logInfo('Cached ${appts.length} appointments in Hive');
         } catch (hiveError) {
           logWarn('Failed to cache in Hive: $hiveError');
           // Continue even if caching fails
@@ -78,24 +84,29 @@ class AppointmentService {
           logWarn('All attempts failed, falling back to Hive cache');
           // All attempts failed, try Hive
           try {
-            final box = Hive.box<AppointmentHive>('appointments');
-            final List<Appointment> cachedAppts = box.values
-                .map(
-                  (h) => Appointment(
-                    id: h.id,
-                    patientId: h.patientId,
-                    doctorId: h.doctorId,
-                    time: h.time,
-                    status: h.status,
-                    notes: h.notes,
-                    fee: h.fee,
-                  ),
-                )
-                .toList();
-            logInfo(
-              'Retrieved ${cachedAppts.length} appointments from Hive cache',
-            );
-            return cachedAppts;
+            if (Hive.isBoxOpen('appointments')) {
+              final box = Hive.box<AppointmentHive>('appointments');
+              final List<Appointment> cachedAppts = box.values
+                  .map(
+                    (h) => Appointment(
+                      id: h.id,
+                      patientId: h.patientId,
+                      doctorId: h.doctorId,
+                      time: h.time,
+                      status: h.status,
+                      notes: h.notes,
+                      fee: h.fee,
+                    ),
+                  )
+                  .toList();
+              logInfo(
+                'Retrieved ${cachedAppts.length} appointments from Hive cache',
+              );
+              return cachedAppts;
+            } else {
+              logWarn('Hive appointments box not open, cannot use cache');
+              rethrow;
+            }
           } catch (hiveError) {
             logError('Hive cache retrieval failed', hiveError);
             rethrow; // Rethrow the original Firestore error
@@ -103,7 +114,7 @@ class AppointmentService {
         }
 
         // Wait before retry
-        await Future.delayed(Duration(seconds: 1 * attempts));
+        await Future<void>.delayed(Duration(seconds: 1 * attempts));
       }
     }
 
@@ -135,20 +146,22 @@ class AppointmentService {
 
         // Also add to Hive cache
         try {
-          final box = Hive.box<AppointmentHive>('appointments');
-          box.put(
-            appointmentId,
-            AppointmentHive(
-              id: appointmentId,
-              patientId: appt.patientId,
-              doctorId: appt.doctorId,
-              time: appt.time,
-              status: appt.status,
-              notes: appt.notes,
-              fee: appt.fee,
-            ),
-          );
-          logInfo('Appointment cached in Hive');
+          if (Hive.isBoxOpen('appointments')) {
+            final box = Hive.box<AppointmentHive>('appointments');
+            box.put(
+              appointmentId,
+              AppointmentHive(
+                id: appointmentId,
+                patientId: appt.patientId,
+                doctorId: appt.doctorId,
+                time: appt.time,
+                status: appt.status,
+                notes: appt.notes,
+                fee: appt.fee,
+              ),
+            );
+            logInfo('Appointment cached in Hive');
+          }
         } catch (hiveError) {
           logWarn('Failed to cache in Hive: $hiveError');
           // Continue even if caching fails
@@ -167,7 +180,7 @@ class AppointmentService {
         }
 
         // Wait before retry
-        await Future.delayed(Duration(seconds: 1 * attempts));
+        await Future<void>.delayed(Duration(seconds: 1 * attempts));
       }
     }
 
@@ -225,7 +238,7 @@ class AppointmentService {
 
     // Try to load cached doctors first
     try {
-      final prefs = await Hive.openBox('app_settings');
+      final prefs = await Hive.openBox<dynamic>('app_settings');
       final cachedDoctors = prefs.get('cached_doctors');
       if (cachedDoctors != null && cachedDoctors is List) {
         logInfo('Using cached doctors list (${cachedDoctors.length} doctors)');
@@ -259,7 +272,7 @@ class AppointmentService {
           final data = doc.data();
           final doctor = {
             'id': doc.id,
-            'name': data['name'] ?? 'Unknown Doctor',
+            'name': data['name'] ?? data['displayName'] ?? 'Unknown Doctor',
             'specialty': data['specialty'] ?? 'General',
             'availability': data['availability'] ?? 'Available',
             'fee': data['fee'] ?? 500.0, // Default fee if not specified
@@ -272,7 +285,7 @@ class AppointmentService {
           return doctor;
         }).toList(); // Cache the doctors list
         try {
-          final prefs = await Hive.openBox('app_settings');
+          final prefs = await Hive.openBox<dynamic>('app_settings');
           await prefs.put('cached_doctors', doctors);
           await prefs.put(
             'doctors_last_updated',
@@ -291,7 +304,7 @@ class AppointmentService {
           logError('All attempts to fetch doctors failed', e);
           // Try to load any previously cached doctors as fallback
           try {
-            final prefs = await Hive.openBox('app_settings');
+            final prefs = await Hive.openBox<dynamic>('app_settings');
             final cachedDoctors = prefs.get('cached_doctors');
             if (cachedDoctors != null && cachedDoctors is List) {
               logInfo('Using cached doctors as fallback after failed attempts');
@@ -314,7 +327,7 @@ class AppointmentService {
         }
 
         // Wait before retry with exponential backoff
-        await Future.delayed(Duration(seconds: 2 * attempts));
+        await Future<void>.delayed(Duration(seconds: 2 * attempts));
       }
     }
 
@@ -322,3 +335,5 @@ class AppointmentService {
     return [];
   }
 }
+
+

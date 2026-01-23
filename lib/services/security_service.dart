@@ -1,18 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
-import 'package:local_auth/local_auth.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
+
 import 'package:crypto/crypto.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:local_auth/local_auth.dart';
 
 /// Comprehensive security service for Flutter Diacare app
 /// Handles biometric authentication, secure storage, data encryption, and security auditing
 class SecurityService {
-  static final SecurityService _instance = SecurityService._internal();
   factory SecurityService() => _instance;
   SecurityService._internal();
+  static final SecurityService _instance = SecurityService._internal();
 
   // Services
   late final LocalAuthentication _localAuth;
@@ -47,17 +48,8 @@ class SecurityService {
     try {
       _localAuth = LocalAuthentication();
 
-      // Configure secure storage with encryption
-      const secureStorageOptions = AndroidOptions(
-        encryptedSharedPreferences: true,
-        keyCipherAlgorithm:
-            KeyCipherAlgorithm.RSA_ECB_OAEPwithSHA_256andMGF1Padding,
-        storageCipherAlgorithm: StorageCipherAlgorithm.AES_GCM_NoPadding,
-      );
-
-      _secureStorage = const FlutterSecureStorage(
-        aOptions: secureStorageOptions,
-      );
+      // Configure secure storage
+      _secureStorage = const FlutterSecureStorage();
 
       // Initialize encryption
       await _initializeEncryption();
@@ -172,10 +164,6 @@ class SecurityService {
     try {
       final authenticated = await _localAuth.authenticate(
         localizedReason: 'Please authenticate to access secure data',
-        options: const AuthenticationOptions(
-          biometricOnly: false,
-          stickyAuth: true,
-        ),
       );
 
       if (authenticated) {
@@ -532,23 +520,19 @@ class SecurityService {
 
 /// Biometric support information
 class BiometricSupport {
-  final bool isAvailable;
-  final bool isDeviceSupported;
-  final List<BiometricType> availableBiometrics;
 
   BiometricSupport(
     this.isAvailable,
     this.isDeviceSupported,
     this.availableBiometrics,
   );
+  final bool isAvailable;
+  final bool isDeviceSupported;
+  final List<BiometricType> availableBiometrics;
 }
 
 /// Authentication result
 class AuthenticationResult {
-  final bool success;
-  final String? error;
-  final Duration? lockoutRemaining;
-  final AuthenticationStatus status;
 
   AuthenticationResult._(
     this.success,
@@ -576,6 +560,10 @@ class AuthenticationResult {
     null,
     AuthenticationStatus.notInitialized,
   );
+  final bool success;
+  final String? error;
+  final Duration? lockoutRemaining;
+  final AuthenticationStatus status;
 }
 
 /// Authentication status enum
@@ -583,6 +571,17 @@ enum AuthenticationStatus { success, failed, error, lockedOut, notInitialized }
 
 /// Security status information
 class SecurityStatus {
+
+  SecurityStatus({
+    required this.isInitialized,
+    required this.biometricEnabled,
+    required this.encryptionEnabled,
+    required this.isLockedOut,
+    required this.failedAttempts,
+    required this.maxAttempts,
+    required this.securityEventsCount, this.lockoutUntil,
+    this.lastAuthTime,
+  });
   final bool isInitialized;
   final bool biometricEnabled;
   final bool encryptionEnabled;
@@ -592,27 +591,15 @@ class SecurityStatus {
   final DateTime? lockoutUntil;
   final DateTime? lastAuthTime;
   final int securityEventsCount;
-
-  SecurityStatus({
-    required this.isInitialized,
-    required this.biometricEnabled,
-    required this.encryptionEnabled,
-    required this.isLockedOut,
-    required this.failedAttempts,
-    required this.maxAttempts,
-    this.lockoutUntil,
-    this.lastAuthTime,
-    required this.securityEventsCount,
-  });
 }
 
 /// Security event for audit trail
 class SecurityEvent {
+
+  SecurityEvent({required this.eventType, required this.timestamp, this.data});
   final String eventType;
   final DateTime timestamp;
   final Map<String, dynamic>? data;
-
-  SecurityEvent({required this.eventType, required this.timestamp, this.data});
 
   Map<String, dynamic> toJson() => {
     'event_type': eventType,
@@ -623,13 +610,6 @@ class SecurityEvent {
 
 /// Security audit report
 class SecurityAuditReport {
-  final int totalEvents;
-  final List<SecurityEvent> recentEvents;
-  final int authSuccessCount;
-  final int authFailureCount;
-  final int dataAccessCount;
-  final List<SecurityEvent> securityViolations;
-  final DateTime lastAuditTime;
 
   SecurityAuditReport({
     required this.totalEvents,
@@ -640,12 +620,19 @@ class SecurityAuditReport {
     required this.securityViolations,
     required this.lastAuditTime,
   });
+  final int totalEvents;
+  final List<SecurityEvent> recentEvents;
+  final int authSuccessCount;
+  final int authFailureCount;
+  final int dataAccessCount;
+  final List<SecurityEvent> securityViolations;
+  final DateTime lastAuditTime;
 }
 
 /// Security exception
 class SecurityException implements Exception {
-  final String message;
   SecurityException(this.message);
+  final String message;
 
   @override
   String toString() => 'SecurityException: $message';

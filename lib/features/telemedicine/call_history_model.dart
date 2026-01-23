@@ -1,12 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CallHistory {
-  final String id;
-  final String doctorId;
-  final String patientId;
-  final DateTime startTime;
-  final DateTime endTime;
-  final String? notes;
 
   CallHistory({
     required this.id,
@@ -18,16 +12,22 @@ class CallHistory {
   });
 
   factory CallHistory.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data()! as Map<String, dynamic>;
     return CallHistory(
       id: doc.id,
-      doctorId: data['doctorId'] ?? '',
-      patientId: data['patientId'] ?? '',
+      doctorId: data['doctorId'] as String? ?? '',
+      patientId: data['patientId'] as String? ?? '',
       startTime: (data['startTime'] as Timestamp).toDate(),
       endTime: (data['endTime'] as Timestamp).toDate(),
-      notes: data['notes'],
+      notes: data['notes'] as String?,
     );
   }
+  final String id;
+  final String doctorId;
+  final String patientId;
+  final DateTime startTime;
+  final DateTime endTime;
+  final String? notes;
 
   Map<String, dynamic> toMap() {
     return {

@@ -2,18 +2,19 @@
 /// 
 /// Defines custom exception types for API errors.
 /// Provides structured error information for better error handling.
+library;
 
 /// Base API exception class
 class ApiException implements Exception {
-  final String message;
-  final int? statusCode;
-  final dynamic data;
 
   ApiException(
     this.message, {
     this.statusCode,
     this.data,
   });
+  final String message;
+  final int? statusCode;
+  final dynamic data;
 
   @override
   String toString() {
@@ -39,42 +40,41 @@ class ApiException implements Exception {
 
 /// Network connectivity exception
 class NetworkException extends ApiException {
-  NetworkException([String message = 'No internet connection'])
-      : super(message);
+  NetworkException([super.message = 'No internet connection']);
 }
 
 /// Authentication exception
 class AuthenticationException extends ApiException {
-  AuthenticationException([String message = 'Authentication failed'])
-      : super(message, statusCode: 401);
+  AuthenticationException([super.message = 'Authentication failed'])
+      : super(statusCode: 401);
 }
 
 /// Authorization exception
 class AuthorizationException extends ApiException {
-  AuthorizationException([String message = 'Access denied'])
-      : super(message, statusCode: 403);
+  AuthorizationException([super.message = 'Access denied'])
+      : super(statusCode: 403);
 }
 
 /// Not found exception
 class NotFoundException extends ApiException {
-  NotFoundException([String message = 'Resource not found'])
-      : super(message, statusCode: 404);
+  NotFoundException([super.message = 'Resource not found'])
+      : super(statusCode: 404);
 }
 
 /// Server exception
 class ServerException extends ApiException {
-  ServerException([String message = 'Server error occurred'])
-      : super(message, statusCode: 500);
+  ServerException([super.message = 'Server error occurred'])
+      : super(statusCode: 500);
 }
 
 /// Validation exception
 class ValidationException extends ApiException {
-  final Map<String, List<String>>? errors;
 
   ValidationException(
-    String message, {
+    super.message, {
     this.errors,
-  }) : super(message, statusCode: 422);
+  }) : super(statusCode: 422);
+  final Map<String, List<String>>? errors;
 
   @override
   String toString() {

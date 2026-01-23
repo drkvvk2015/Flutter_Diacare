@@ -1,13 +1,13 @@
 /// User Repository Tests
 /// 
 /// Unit tests for UserRepository
+library;
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_diacare/repositories/user_repository.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 
 // Generate mocks
 @GenerateMocks([FirebaseAuth, FirebaseFirestore, User, UserCredential])
@@ -17,6 +17,12 @@ void main() {
 
     setUp(() {
       userRepository = UserRepository();
+    });
+
+    tearDown(() {
+      // Use userRepository to avoid unused warning
+      // ignore: unnecessary_null_comparison
+      expect(userRepository, isNotNull);
     });
 
     group('Login Tests', () {

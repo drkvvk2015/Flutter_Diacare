@@ -1,15 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+import '../widgets/dashboard_card.dart';
+import '../widgets/glassmorphic_card.dart';
 import 'prescription_screen.dart';
 import 'records_screen.dart';
-import '../widgets/glassmorphic_card.dart';
-import '../widgets/dashboard_card.dart';
 
 /// Debug widget to print a message when built
 class DebugPrintWidget extends StatelessWidget {
-  final String message;
   const DebugPrintWidget(this.message, {super.key});
+  final String message;
   @override
   Widget build(BuildContext context) {
     // ignore: avoid_print
@@ -83,8 +84,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
                 padding: EdgeInsets.all(padding),
                 children: [
                   // Stat cards
-                  isWide
-                      ? Row(
+                  if (isWide) Row(
                           children: [
                             Expanded(
                               child: Semantics(
@@ -122,8 +122,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
                               ),
                             ),
                           ],
-                        )
-                      : Column(
+                        ) else Column(
                           children: [
                             Semantics(
                               label: 'Pending Orders: 8',
@@ -156,18 +155,17 @@ class PharmacyDashboardScreen extends StatelessWidget {
                         ),
                   const DebugPrintWidget('Built stat cards'),
                   SizedBox(height: cardSpacing),
-                  isWide
-                      ? Row(
+                  if (isWide) Row(
                           children: [
                             Expanded(
                               child: Semantics(
-                                label: 'Revenue Today: \$850',
+                                label: r'Revenue Today: $850',
                                 child: GlassmorphicCard(
                                   key: const Key('pharmacy_revenue_today_card'),
                                   borderRadius: 20,
                                   child: _buildStatCard(
                                     'Revenue Today',
-                                    '\$850',
+                                    r'$850',
                                     Icons.attach_money,
                                     Colors.blue,
                                   ),
@@ -193,17 +191,16 @@ class PharmacyDashboardScreen extends StatelessWidget {
                               ),
                             ),
                           ],
-                        )
-                      : Column(
+                        ) else Column(
                           children: [
                             Semantics(
-                              label: 'Revenue Today: \$850',
+                              label: r'Revenue Today: $850',
                               child: GlassmorphicCard(
                                 key: const Key('pharmacy_revenue_today_card'),
                                 borderRadius: 20,
                                 child: _buildStatCard(
                                   'Revenue Today',
-                                  '\$850',
+                                  r'$850',
                                   Icons.attach_money,
                                   Colors.blue,
                                 ),
@@ -245,7 +242,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
                           subtitle: 'View and process prescription orders.',
                           onTap: () => Navigator.push(
                             context,
-                            MaterialPageRoute(
+                            MaterialPageRoute<void>(
                               builder: (_) => const PrescriptionScreen(),
                             ),
                           ),
@@ -316,7 +313,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
                           subtitle: 'Access prescription records.',
                           onTap: () => Navigator.push(
                             context,
-                            MaterialPageRoute(
+                            MaterialPageRoute<void>(
                               builder: (_) => const RecordsScreen(),
                             ),
                           ),
@@ -346,7 +343,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
 
   void _showHelpFeedbackDialog(BuildContext context) {
     final TextEditingController feedbackController = TextEditingController();
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Help & Feedback'),
@@ -396,7 +393,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Icon(icon, color: color, size: 32),
@@ -422,7 +419,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
   }
 
   void _showInventoryManagement(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Inventory Management'),
@@ -474,7 +471,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
     final priceController = TextEditingController();
     final stockController = TextEditingController();
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Add New Medicine'),
@@ -525,7 +522,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
   }
 
   void _showMedicinesList(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('All Medicines'),
@@ -542,9 +539,9 @@ class PharmacyDashboardScreen extends StatelessWidget {
               }
               return ListView(
                 children: snapshot.data!.docs.map((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
+                  final data = doc.data()! as Map<String, dynamic>;
                   return ListTile(
-                    title: Text(data['name'] ?? 'Unknown'),
+                    title: Text(data['name'] as String? ?? data['displayName'] as String? ?? 'Unknown'),
                     subtitle: Text(
                       'Price: \$${data['price']} - Stock: ${data['stock']}',
                     ),
@@ -571,7 +568,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
   }
 
   void _showLowStockAlert(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Low Stock Alert'),
@@ -615,7 +612,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
   }
 
   void _showOrderManagement(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Order Management'),
@@ -653,7 +650,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
   }
 
   void _showDeliveryManagement(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delivery Management'),
@@ -691,7 +688,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
   }
 
   void _showCustomerManagement(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Customer Management'),
@@ -729,7 +726,7 @@ class PharmacyDashboardScreen extends StatelessWidget {
   }
 
   void _showSalesReports(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sales Reports'),
@@ -741,17 +738,17 @@ class PharmacyDashboardScreen extends StatelessWidget {
               ListTile(
                 leading: Icon(Icons.today, color: Colors.green),
                 title: Text('Today\'s Sales'),
-                subtitle: Text('\$850 - 23 orders'),
+                subtitle: Text(r'$850 - 23 orders'),
               ),
               ListTile(
                 leading: Icon(Icons.view_week, color: Colors.blue),
                 title: Text('This Week\'s Sales'),
-                subtitle: Text('\$4,250 - 125 orders'),
+                subtitle: Text(r'$4,250 - 125 orders'),
               ),
               ListTile(
                 leading: Icon(Icons.calendar_month, color: Colors.purple),
                 title: Text('This Month\'s Sales'),
-                subtitle: Text('\$18,500 - 450 orders'),
+                subtitle: Text(r'$18,500 - 450 orders'),
               ),
             ],
           ),
@@ -766,3 +763,5 @@ class PharmacyDashboardScreen extends StatelessWidget {
     );
   }
 }
+
+

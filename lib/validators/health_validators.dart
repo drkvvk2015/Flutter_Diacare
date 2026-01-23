@@ -2,6 +2,7 @@
 /// 
 /// Specialized validators for health-related measurements.
 /// Ensures medical data falls within acceptable ranges.
+library;
 
 import '../constants/app_constants.dart';
 

@@ -1,16 +1,17 @@
-import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_selector/file_selector.dart' as selector;
-import 'dart:io' show Platform;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+
+import '../models/chat_hive.dart';
+import '../utils/logger.dart';
 // Removed unnecessary dart:ui import (all symbols via material.dart)
 
 import '../widgets/glassmorphic_card.dart';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:hive/hive.dart';
-import '../models/chat_hive.dart';
-import '../utils/logger.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -36,8 +37,8 @@ class _ChatScreenState extends State<ChatScreen> {
     isGeneral = args?['general'] == true;
     final user = FirebaseAuth.instance.currentUser;
     if (args?['patient'] != null) {
-      patientId = args?['patient'].id;
-      doctorId = args?['doctorId'] ?? user?.uid;
+      patientId = args?['patient'].id as String?;
+      doctorId = args?['doctorId'] as String? ?? user?.uid;
       chatDocId = 'chat_${doctorId}_$patientId';
     } else {
       doctorId = user?.uid;
@@ -58,7 +59,7 @@ class _ChatScreenState extends State<ChatScreen> {
         setState(() {
           messages.clear();
           messages.addAll(
-            List<Map<String, String>>.from(doc.data()!['messages']),
+            List<Map<String, String>>.from(doc.data()!['messages'] as List? ?? []),
           );
         });
         // Cache in Hive
@@ -67,7 +68,7 @@ class _ChatScreenState extends State<ChatScreen> {
           chatDocId,
           ChatHive(
             id: chatDocId!,
-            messages: List<Map<String, String>>.from(doc.data()!['messages']),
+            messages: List<Map<String, String>>.from(doc.data()!['messages'] as List? ?? []),
           ),
         );
         return;
@@ -132,7 +133,7 @@ class _ChatScreenState extends State<ChatScreen> {
     } else {
       if (!mounted) return;
       setState(() => showError = true);
-      Future.delayed(const Duration(seconds: 2), () {
+      Future<void>.delayed(const Duration(seconds: 2), () {
         if (mounted) setState(() => showError = false);
       });
     }
@@ -207,7 +208,7 @@ class _ChatScreenState extends State<ChatScreen> {
         actions: [
           // Replaced deprecated Radio widgets with SegmentedButton
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: SegmentedButton<bool>(
               segments: const [
                 ButtonSegment<bool>(
@@ -341,7 +342,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8),
                 child: GlassmorphicCard(
                   borderRadius: 32,
                   child: Row(
@@ -377,7 +378,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               key: ValueKey(messageController.text.isNotEmpty),
                             ),
                           ),
-                          onPressed: () => sendMessage(),
+                          onPressed: sendMessage,
                           tooltip: 'Send',
                         ),
                       ),
@@ -392,3 +393,4 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
+

@@ -13,9 +13,9 @@ import 'mock_auth_service.dart';
 /// - Secure credential handling
 /// - Performance monitoring
 class AuthBridgeService {
-  static final AuthBridgeService _instance = AuthBridgeService._internal();
   factory AuthBridgeService() => _instance;
   AuthBridgeService._internal();
+  static final AuthBridgeService _instance = AuthBridgeService._internal();
 
   final MockAuthService _mockAuth = MockAuthService();
   Timer? _sessionTimer;
@@ -96,7 +96,7 @@ class AuthBridgeService {
 
         return AuthResult.success({
           'email': email,
-          'userType': _mockAuth.currentUserType!,
+          'userType': _mockAuth.currentUserType,
           'sessionId': _generateSessionId(),
           'expiresAt': DateTime.now().add(_sessionDuration).toIso8601String(),
         });
@@ -250,9 +250,6 @@ class AuthBridgeService {
 
 /// Authentication result wrapper
 class AuthResult {
-  final bool isSuccess;
-  final String? error;
-  final Map<String, dynamic>? data;
 
   AuthResult._(this.isSuccess, this.error, this.data);
 
@@ -260,12 +257,13 @@ class AuthResult {
       AuthResult._(true, null, data);
 
   factory AuthResult.failure(String error) => AuthResult._(false, error, null);
+  final bool isSuccess;
+  final String? error;
+  final Map<String, dynamic>? data;
 }
 
 /// Credential validation result
 class CredentialValidationResult {
-  final bool isValid;
-  final String? error;
 
   CredentialValidationResult._(this.isValid, this.error);
 
@@ -274,12 +272,12 @@ class CredentialValidationResult {
 
   factory CredentialValidationResult.invalid(String error) =>
       CredentialValidationResult._(false, error);
+  final bool isValid;
+  final String? error;
 }
 
 /// Authentication events
 class AuthEvent {
-  final String type;
-  final Map<String, dynamic> data;
 
   AuthEvent._(this.type, this.data);
 
@@ -291,4 +289,6 @@ class AuthEvent {
 
   factory AuthEvent.signOut(String reason) =>
       AuthEvent._('sign_out', {'reason': reason});
+  final String type;
+  final Map<String, dynamic> data;
 }

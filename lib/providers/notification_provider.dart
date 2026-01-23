@@ -9,6 +9,7 @@
 /// - Type-based filtering (appointments, health, system)
 /// - In-app notification display
 /// - Batch operations (mark all read, clear all)
+library;
 import 'package:flutter/material.dart';
 
 /// Notification state management provider
@@ -122,7 +123,6 @@ class NotificationProvider extends ChangeNotifier {
       message: message,
       type: type,
       timestamp: DateTime.now(),
-      isRead: false,
       onTap: onTap,
     );
 
@@ -130,7 +130,7 @@ class NotificationProvider extends ChangeNotifier {
 
     // Auto-remove after duration for temporary notifications
     if (type == NotificationType.info || type == NotificationType.success) {
-      Future.delayed(duration, () {
+      Future<void>.delayed(duration, () {
         removeNotification(notification.id);
       });
     }
@@ -170,7 +170,6 @@ class NotificationProvider extends ChangeNotifier {
     showInAppNotification(
       title: title ?? 'Info',
       message: message,
-      type: NotificationType.info,
     );
   }
 
@@ -188,7 +187,6 @@ class NotificationProvider extends ChangeNotifier {
       type: NotificationType.appointment,
       timestamp: DateTime.now(),
       appointmentTime: appointmentTime,
-      isRead: false,
       isPersistent: true,
       onTap: onTap,
     );
@@ -210,7 +208,6 @@ class NotificationProvider extends ChangeNotifier {
       type: NotificationType.health,
       timestamp: DateTime.now(),
       healthSeverity: severity,
-      isRead: false,
       isPersistent: severity == HealthAlertSeverity.high,
       onTap: onTap,
     );
@@ -258,16 +255,6 @@ class NotificationProvider extends ChangeNotifier {
 
 /// App notification model
 class AppNotification {
-  final String id;
-  final String title;
-  final String message;
-  final NotificationType type;
-  final DateTime timestamp;
-  final bool isRead;
-  final bool isPersistent;
-  final DateTime? appointmentTime;
-  final HealthAlertSeverity? healthSeverity;
-  final VoidCallback? onTap;
 
   const AppNotification({
     required this.id,
@@ -281,6 +268,16 @@ class AppNotification {
     this.healthSeverity,
     this.onTap,
   });
+  final String id;
+  final String title;
+  final String message;
+  final NotificationType type;
+  final DateTime timestamp;
+  final bool isRead;
+  final bool isPersistent;
+  final DateTime? appointmentTime;
+  final HealthAlertSeverity? healthSeverity;
+  final VoidCallback? onTap;
 
   AppNotification copyWith({
     String? id,
@@ -457,3 +454,4 @@ enum NotificationFilter {
     }
   }
 }
+

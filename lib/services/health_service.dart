@@ -1,5 +1,6 @@
-import 'package:health/health.dart';
 import 'package:flutter/foundation.dart';
+import 'package:health/health.dart';
+
 import '../utils/logger.dart';
 
 /// Modern enhanced HealthService with analytics and robust error handling
@@ -11,8 +12,8 @@ class HealthService with ChangeNotifier {
 
   // Health data with null safety and proper typing
   int _steps = 0;
-  double _calories = 0.0;
-  double _distance = 0.0;
+  double _calories = 0;
+  double _distance = 0;
   double? _heartRate;
   double? _spo2;
   double? _temperature;
@@ -108,7 +109,7 @@ class HealthService with ChangeNotifier {
       notifyListeners();
       return authorized;
     } catch (e, stack) {
-      _lastError = 'Authorization failed: ${e.toString()}';
+      _lastError = 'Authorization failed: $e';
       logError('Health authorization error', e, stack);
       notifyListeners();
       return false;
@@ -150,7 +151,7 @@ class HealthService with ChangeNotifier {
       logInfo('Successfully fetched ${data.length} health data points');
       return true;
     } catch (e, stack) {
-      _lastError = 'Failed to fetch health data: ${e.toString()}';
+      _lastError = 'Failed to fetch health data: $e';
       logError('Health data fetch error', e, stack);
       return false;
     } finally {
@@ -182,7 +183,7 @@ class HealthService with ChangeNotifier {
       logInfo('Successfully fetched ${data.length} weekly health data points');
       return true;
     } catch (e, stack) {
-      _lastError = 'Failed to fetch weekly data: ${e.toString()}';
+      _lastError = 'Failed to fetch weekly data: $e';
       logError('Weekly health data fetch error', e, stack);
       return false;
     }
@@ -425,10 +426,10 @@ class HealthService with ChangeNotifier {
     try {
       return data
           .where((d) => d.type == type)
-          .fold(0.0, (sum, d) => sum + (d.value as num).toDouble());
+          .fold(0, (sum, d) => sum + (d.value as num).toDouble());
     } catch (e) {
       logError('Error summing double data for type $type', e);
-      return 0.0;
+      return 0;
     }
   }
 

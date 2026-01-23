@@ -7,6 +7,7 @@
 /// - Direct login for doctors
 /// - Doctor-specific UI theme (Indigo color scheme)
 /// - Optimized workflow for medical professionals
+library;
 import 'package:flutter/material.dart';
 import 'package:flutter_diacare/features/auth/login_screen.dart';
 

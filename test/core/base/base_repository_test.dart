@@ -1,10 +1,10 @@
 /// Base Repository Tests
 /// 
 /// Tests for the BaseRepository class.
+library;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_diacare/core/base/base_repository.dart';
-import 'package:flutter_diacare/constants/error_messages.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // Test repository implementation
 class TestRepository extends BaseRepository {
@@ -84,7 +84,7 @@ void main() {
 
     test('Result.failure should create failure result', () {
       final exception = Exception('error');
-      final result = Result.failure('Error message', exception);
+      final result = Result<String>.failure('Error message', exception);
       expect(result.isSuccess, false);
       expect(result.isFailure, true);
       expect(result.error, 'Error message');

@@ -2,6 +2,7 @@
 /// 
 /// Centralized, standardized error messages for consistent user communication.
 /// Provides context-aware error messages with proper categorization.
+library;
 
 /// Standard error messages for the application
 class ErrorMessages {

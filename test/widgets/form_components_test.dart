@@ -1,10 +1,12 @@
 /// Form Components Widget Tests
 /// 
 /// Tests for reusable form components.
+library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_diacare/widgets/form_components.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 import '../helpers/test_helpers.dart';
 
 void main() {

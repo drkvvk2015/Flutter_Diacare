@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ExerciseVideoLibraryScreen extends StatelessWidget {
+
+  ExerciseVideoLibraryScreen({super.key});
   final List<Map<String, String>> videos = [
     {
       'title': 'Beginner Cardio Routine',
@@ -19,8 +21,6 @@ class ExerciseVideoLibraryScreen extends StatelessWidget {
       'thumbnail': 'https://img.youtube.com/vi/JJAHGpe0AVU/0.jpg',
     },
   ];
-
-  ExerciseVideoLibraryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

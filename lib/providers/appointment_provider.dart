@@ -9,8 +9,9 @@
 /// - Date-based filtering
 /// - Real-time appointment updates
 /// - Role-based appointment queries
-import 'package:flutter/foundation.dart';
+library;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 /// Comprehensive appointment state management provider
 /// 
@@ -200,7 +201,7 @@ class AppointmentProvider extends ChangeNotifier {
       if (prescriptions != null) updateData['prescriptions'] = prescriptions;
       if (additionalData != null) {
         for (final entry in additionalData.entries) {
-          updateData[entry.key] = entry.value;
+          updateData[entry.key] = entry.value as Object;
         }
       }
 
@@ -300,7 +301,7 @@ class AppointmentProvider extends ChangeNotifier {
 
   /// Calculate appointment completion rate
   double _calculateCompletionRate() {
-    if (_appointments.isEmpty) return 0.0;
+    if (_appointments.isEmpty) return 0;
 
     final completed = _appointments
         .where((apt) => apt.status == AppointmentStatus.completed)
@@ -356,18 +357,6 @@ class AppointmentProvider extends ChangeNotifier {
 
 /// Appointment model
 class AppointmentModel {
-  final String id;
-  final String patientId;
-  final String doctorId;
-  final String patientName;
-  final String doctorName;
-  final DateTime dateTime;
-  final Duration duration;
-  final AppointmentType type;
-  final AppointmentStatus status;
-  final String? notes;
-  final String? cancellationReason;
-  final Map<String, dynamic>? metadata;
 
   const AppointmentModel({
     required this.id,
@@ -385,16 +374,16 @@ class AppointmentModel {
   });
 
   factory AppointmentModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data()! as Map<String, dynamic>;
 
     return AppointmentModel(
       id: doc.id,
-      patientId: data['patientId'] ?? '',
-      doctorId: data['doctorId'] ?? '',
-      patientName: data['patientName'] ?? '',
-      doctorName: data['doctorName'] ?? '',
+      patientId: data['patientId'] as String? ?? '',
+      doctorId: data['doctorId'] as String? ?? '',
+      patientName: data['patientName'] as String? ?? '',
+      doctorName: data['doctorName'] as String? ?? '',
       dateTime: (data['dateTime'] as Timestamp).toDate(),
-      duration: Duration(minutes: data['duration'] ?? 30),
+      duration: Duration(minutes: data['duration'] as int? ?? 30),
       type: AppointmentType.values.firstWhere(
         (e) => e.name == data['type'],
         orElse: () => AppointmentType.consultation,
@@ -403,11 +392,23 @@ class AppointmentModel {
         (e) => e.name == data['status'],
         orElse: () => AppointmentStatus.scheduled,
       ),
-      notes: data['notes'],
-      cancellationReason: data['cancellationReason'],
-      metadata: data['metadata'],
+      notes: data['notes'] as String?,
+      cancellationReason: data['cancellationReason'] as String?,
+      metadata: data['metadata'] as Map<String, dynamic>?,
     );
   }
+  final String id;
+  final String patientId;
+  final String doctorId;
+  final String patientName;
+  final String doctorName;
+  final DateTime dateTime;
+  final Duration duration;
+  final AppointmentType type;
+  final AppointmentStatus status;
+  final String? notes;
+  final String? cancellationReason;
+  final Map<String, dynamic>? metadata;
 
   Map<String, dynamic> toMap() {
     return {

@@ -14,11 +14,11 @@ class SMBGService {
     return snapshot.docs.map((doc) {
       final data = doc.data();
       return SMBGReading(
-        fasting: (data['fasting'] ?? 0).toDouble(),
-        preLunch: (data['preLunch'] ?? 0).toDouble(),
-        preDinner: (data['preDinner'] ?? 0).toDouble(),
-        postMeal: (data['postMeal'] ?? 0).toDouble(),
-        date: DateTime.parse(data['date'] ?? DateTime.now().toIso8601String()),
+        fasting: ((data['fasting'] as num?) ?? 0).toDouble(),
+        preLunch: ((data['preLunch'] as num?) ?? 0).toDouble(),
+        preDinner: ((data['preDinner'] as num?) ?? 0).toDouble(),
+        postMeal: ((data['postMeal'] as num?) ?? 0).toDouble(),
+        date: DateTime.parse(data['date'] as String? ?? DateTime.now().toIso8601String()),
       );
     }).toList();
   }

@@ -2,11 +2,12 @@
 /// 
 /// Displays application errors and diagnostics for debugging.
 /// Available in debug mode only.
+library;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
 import '../constants/ui_constants.dart';
-import '../utils/logger.dart';
 
 /// Error tracking and monitoring screen
 class ErrorTrackingScreen extends StatefulWidget {
@@ -70,7 +71,7 @@ class _ErrorTrackingScreenState extends State<ErrorTrackingScreen> {
 
   Widget _buildFilterChips() {
     return Container(
-      padding: EdgeInsets.all(UIConstants.spacingMd),
+      padding: const EdgeInsets.all(UIConstants.spacingMd),
       child: Wrap(
         spacing: UIConstants.spacingSm,
         children: [
@@ -99,7 +100,7 @@ class _ErrorTrackingScreenState extends State<ErrorTrackingScreen> {
     final warningCount = _errors.where((e) => e.severity == 'warning').length;
 
     return Container(
-      padding: EdgeInsets.all(UIConstants.spacingMd),
+      padding: const EdgeInsets.all(UIConstants.spacingMd),
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -116,7 +117,7 @@ class _ErrorTrackingScreenState extends State<ErrorTrackingScreen> {
     return Column(
       children: [
         Icon(icon, color: color, size: UIConstants.iconSizeLg),
-        SizedBox(height: UIConstants.spacingXs),
+        const SizedBox(height: UIConstants.spacingXs),
         Text(
           count.toString(),
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -138,17 +139,17 @@ class _ErrorTrackingScreenState extends State<ErrorTrackingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.check_circle_outline,
               size: UIConstants.iconSize2Xl,
               color: Colors.green,
             ),
-            SizedBox(height: UIConstants.spacingMd),
+            const SizedBox(height: UIConstants.spacingMd),
             Text(
               'No errors found',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            SizedBox(height: UIConstants.spacingSm),
+            const SizedBox(height: UIConstants.spacingSm),
             Text(
               'The application is running smoothly',
               style: Theme.of(context).textTheme.bodyMedium,
@@ -159,7 +160,7 @@ class _ErrorTrackingScreenState extends State<ErrorTrackingScreen> {
     }
 
     return ListView.builder(
-      padding: EdgeInsets.all(UIConstants.spacingMd),
+      padding: const EdgeInsets.all(UIConstants.spacingMd),
       itemCount: _filteredErrors.length,
       itemBuilder: (context, index) {
         final error = _filteredErrors[index];
@@ -172,10 +173,10 @@ class _ErrorTrackingScreenState extends State<ErrorTrackingScreen> {
     final color = error.severity == 'error' ? Colors.red : Colors.orange;
 
     return Card(
-      margin: EdgeInsets.only(bottom: UIConstants.spacingMd),
+      margin: const EdgeInsets.only(bottom: UIConstants.spacingMd),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.2),
+          backgroundColor: color.withValues(alpha: 0.2),
           child: Icon(
             error.severity == 'error' ? Icons.error : Icons.warning,
             color: color,
@@ -190,10 +191,10 @@ class _ErrorTrackingScreenState extends State<ErrorTrackingScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: UIConstants.spacingXs),
+            const SizedBox(height: UIConstants.spacingXs),
             Text(error.timestamp.toString()),
             if (error.stackTrace != null) ...[
-              SizedBox(height: UIConstants.spacingXs),
+              const SizedBox(height: UIConstants.spacingXs),
               Text(
                 'Has stack trace',
                 style: TextStyle(
@@ -214,7 +215,7 @@ class _ErrorTrackingScreenState extends State<ErrorTrackingScreen> {
   }
 
   void _showErrorDetails(ErrorLog error) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(error.severity.toUpperCase()),
@@ -223,35 +224,35 @@ class _ErrorTrackingScreenState extends State<ErrorTrackingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 'Message:',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: UIConstants.spacingXs),
+              const SizedBox(height: UIConstants.spacingXs),
               Text(error.message),
-              SizedBox(height: UIConstants.spacingMd),
-              Text(
+              const SizedBox(height: UIConstants.spacingMd),
+              const Text(
                 'Time:',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: UIConstants.spacingXs),
+              const SizedBox(height: UIConstants.spacingXs),
               Text(error.timestamp.toString()),
               if (error.stackTrace != null) ...[
-                SizedBox(height: UIConstants.spacingMd),
-                Text(
+                const SizedBox(height: UIConstants.spacingMd),
+                const Text(
                   'Stack Trace:',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: UIConstants.spacingXs),
+                const SizedBox(height: UIConstants.spacingXs),
                 Container(
-                  padding: EdgeInsets.all(UIConstants.spacingSm),
+                  padding: const EdgeInsets.all(UIConstants.spacingSm),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(UIConstants.radiusSm),
                   ),
                   child: Text(
                     error.stackTrace!,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'monospace',
                       fontSize: UIConstants.fontSizeXs,
                     ),
@@ -279,7 +280,7 @@ class _ErrorTrackingScreenState extends State<ErrorTrackingScreen> {
   }
 
   void _clearErrors() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear All Errors'),
@@ -307,10 +308,6 @@ class _ErrorTrackingScreenState extends State<ErrorTrackingScreen> {
 
 /// Error log model
 class ErrorLog {
-  final String message;
-  final String severity;
-  final DateTime timestamp;
-  final String? stackTrace;
 
   ErrorLog({
     required this.message,
@@ -318,12 +315,16 @@ class ErrorLog {
     required this.timestamp,
     this.stackTrace,
   });
+  final String message;
+  final String severity;
+  final DateTime timestamp;
+  final String? stackTrace;
 }
 
 /// Error logger singleton
 class ErrorLogger {
-  static final ErrorLogger instance = ErrorLogger._();
   ErrorLogger._();
+  static final ErrorLogger instance = ErrorLogger._();
 
   final List<ErrorLog> _errors = [];
 
@@ -376,3 +377,5 @@ class ErrorLogger {
     _errors.clear();
   }
 }
+
+

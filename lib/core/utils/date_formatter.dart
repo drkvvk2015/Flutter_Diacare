@@ -1,6 +1,7 @@
 /// Date Formatter
 /// 
 /// Utility functions for date formatting.
+library;
 
 import 'package:intl/intl.dart';
 

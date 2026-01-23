@@ -2,6 +2,7 @@
 /// 
 /// Initial loading screen that checks onboarding status
 /// and navigates to the appropriate screen.
+library;
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,17 +37,17 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 1500),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+        curve: const Interval(0, 0.5, curve: Curves.easeIn),
       ),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0.5, end: 1).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: const Interval(0.0, 0.5, curve: Curves.elasticOut),
+        curve: const Interval(0, 0.5, curve: Curves.elasticOut),
       ),
     );
 
@@ -55,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _initialize() async {
     // Simulate loading time
-    await Future.delayed(const Duration(seconds: 2));
+    await Future<void>.delayed(const Duration(seconds: 2));
 
     // Check if onboarding is completed
     final prefs = await SharedPreferences.getInstance();
@@ -81,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -110,7 +111,7 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Container(
                   width: 120,
                   height: 120,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
                     boxShadow: UIConstants.shadowLg,
@@ -122,10 +123,10 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
               ),
-              SizedBox(height: UIConstants.spacingXl),
+              const SizedBox(height: UIConstants.spacingXl),
               FadeTransition(
                 opacity: _fadeAnimation,
-                child: Text(
+                child: const Text(
                   'DiaCare',
                   style: TextStyle(
                     fontSize: UIConstants.fontSize5Xl,
@@ -135,10 +136,10 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
               ),
-              SizedBox(height: UIConstants.spacingSm),
+              const SizedBox(height: UIConstants.spacingSm),
               FadeTransition(
                 opacity: _fadeAnimation,
-                child: Text(
+                child: const Text(
                   'Your Health Companion',
                   style: TextStyle(
                     fontSize: UIConstants.fontSizeLg,
@@ -146,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
               ),
-              SizedBox(height: UIConstants.spacing2Xl),
+              const SizedBox(height: UIConstants.spacing2Xl),
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: const CircularProgressIndicator(
@@ -160,3 +161,4 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 }
+

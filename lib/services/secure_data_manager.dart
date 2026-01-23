@@ -5,9 +5,9 @@ import 'security_service.dart';
 /// Secure data manager for handling encrypted application data
 /// Provides high-level interface for secure storage operations
 class SecureDataManager {
-  static final SecureDataManager _instance = SecureDataManager._internal();
   factory SecureDataManager() => _instance;
   SecureDataManager._internal();
+  static final SecureDataManager _instance = SecureDataManager._internal();
 
   final SecurityService _securityService = SecurityService();
 
@@ -49,7 +49,7 @@ class SecureDataManager {
       );
       if (jsonData == null) return null;
 
-      final data = jsonDecode(jsonData);
+      final data = jsonDecode(jsonData) as Map<String, dynamic>;
       return UserCredentials.fromJson(data);
     } catch (e) {
       _log('Error retrieving user credentials: $e');
@@ -80,7 +80,7 @@ class SecureDataManager {
       final jsonData = await _securityService.retrieveSecureData(key);
       if (jsonData == null) return null;
 
-      final data = jsonDecode(jsonData);
+      final data = jsonDecode(jsonData) as Map<String, dynamic>;
       return MedicalData.fromJson(data);
     } catch (e) {
       _log('Error retrieving medical data: $e');
@@ -110,8 +110,8 @@ class SecureDataManager {
       );
       if (jsonData == null) return [];
 
-      final List<dynamic> data = jsonDecode(jsonData);
-      return data.map((item) => AppointmentData.fromJson(item)).toList();
+      final List<dynamic> data = jsonDecode(jsonData) as List<dynamic>;
+      return data.map((item) => AppointmentData.fromJson(item as Map<String, dynamic>)).toList();
     } catch (e) {
       _log('Error retrieving appointment data: $e');
       return [];
@@ -141,7 +141,7 @@ class SecureDataManager {
       final jsonData = await _securityService.retrieveSecureData(key);
       if (jsonData == null) return null;
 
-      final data = jsonDecode(jsonData);
+      final data = jsonDecode(jsonData) as Map<String, dynamic>;
       return PatientData.fromJson(data);
     } catch (e) {
       _log('Error retrieving patient data: $e');
@@ -172,7 +172,7 @@ class SecureDataManager {
       final jsonData = await _securityService.retrieveSecureData(key);
       if (jsonData == null) return null;
 
-      final data = jsonDecode(jsonData);
+      final data = jsonDecode(jsonData) as Map<String, dynamic>;
       return PrescriptionData.fromJson(data);
     } catch (e) {
       _log('Error retrieving prescription data: $e');
@@ -198,7 +198,7 @@ class SecureDataManager {
       final jsonData = await _securityService.retrieveSecureData(_apiKeysKey);
       if (jsonData == null) return {};
 
-      final Map<String, dynamic> data = jsonDecode(jsonData);
+      final Map<String, dynamic> data = jsonDecode(jsonData) as Map<String, dynamic>;
       return data.map((key, value) => MapEntry(key, value.toString()));
     } catch (e) {
       _log('Error retrieving API keys: $e');
@@ -224,7 +224,7 @@ class SecureDataManager {
       final jsonData = await _securityService.retrieveSecureData(_tokenDataKey);
       if (jsonData == null) return null;
 
-      final data = jsonDecode(jsonData);
+      final data = jsonDecode(jsonData) as Map<String, dynamic>;
       return TokenData.fromJson(data);
     } catch (e) {
       _log('Error retrieving token data: $e');
@@ -252,7 +252,7 @@ class SecureDataManager {
       final jsonData = await _securityService.retrieveSecureData(key);
       if (jsonData == null) return null;
 
-      final data = jsonDecode(jsonData);
+      final data = jsonDecode(jsonData) as Map<String, dynamic>;
       return HealthData.fromJson(data);
     } catch (e) {
       _log('Error retrieving health data: $e');
@@ -280,7 +280,7 @@ class SecureDataManager {
       );
       if (jsonData == null) return null;
 
-      final data = jsonDecode(jsonData);
+      final data = jsonDecode(jsonData) as Map<String, dynamic>;
       return BiometricSettings.fromJson(data);
     } catch (e) {
       _log('Error retrieving biometric settings: $e');
@@ -308,7 +308,7 @@ class SecureDataManager {
       );
       if (jsonData == null) return null;
 
-      final data = jsonDecode(jsonData);
+      final data = jsonDecode(jsonData) as Map<String, dynamic>;
       return SecuritySettings.fromJson(data);
     } catch (e) {
       _log('Error retrieving security settings: $e');
@@ -484,19 +484,27 @@ enum SecureDataType {
 
 /// Data classes for secure storage
 class UserCredentials {
+
+  UserCredentials({
+    required this.userId,
+    required this.email,
+    required this.lastLogin, this.hashedPassword,
+    this.metadata = const {},
+  });
+
+  factory UserCredentials.fromJson(Map<String, dynamic> json) =>
+      UserCredentials(
+        userId: json['user_id'] as String,
+        email: json['email'] as String,
+        hashedPassword: json['hashed_password'] as String?,
+        lastLogin: DateTime.parse(json['last_login'] as String),
+        metadata: Map<String, String>.from(json['metadata'] as Map? ?? {}),
+      );
   final String userId;
   final String email;
   final String? hashedPassword;
   final DateTime lastLogin;
   final Map<String, String> metadata;
-
-  UserCredentials({
-    required this.userId,
-    required this.email,
-    this.hashedPassword,
-    required this.lastLogin,
-    this.metadata = const {},
-  });
 
   Map<String, dynamic> toJson() => {
     'user_id': userId,
@@ -505,33 +513,32 @@ class UserCredentials {
     'last_login': lastLogin.toIso8601String(),
     'metadata': metadata,
   };
-
-  factory UserCredentials.fromJson(Map<String, dynamic> json) =>
-      UserCredentials(
-        userId: json['user_id'],
-        email: json['email'],
-        hashedPassword: json['hashed_password'],
-        lastLogin: DateTime.parse(json['last_login']),
-        metadata: Map<String, String>.from(json['metadata'] ?? {}),
-      );
 }
 
 class MedicalData {
+
+  MedicalData({
+    required this.patientId,
+    required this.lastUpdated, this.allergies = const [],
+    this.medications = const [],
+    this.medicalHistory = const [],
+    this.vitalSigns = const {},
+  });
+
+  factory MedicalData.fromJson(Map<String, dynamic> json) => MedicalData(
+    patientId: json['patient_id'] as String,
+    allergies: List<String>.from(json['allergies'] as List? ?? []),
+    medications: List<String>.from(json['medications'] as List? ?? []),
+    medicalHistory: List<String>.from(json['medical_history'] as List? ?? []),
+    vitalSigns: Map<String, dynamic>.from(json['vital_signs'] as Map? ?? {}),
+    lastUpdated: DateTime.parse(json['last_updated'] as String),
+  );
   final String patientId;
   final List<String> allergies;
   final List<String> medications;
   final List<String> medicalHistory;
   final Map<String, dynamic> vitalSigns;
   final DateTime lastUpdated;
-
-  MedicalData({
-    required this.patientId,
-    this.allergies = const [],
-    this.medications = const [],
-    this.medicalHistory = const [],
-    this.vitalSigns = const {},
-    required this.lastUpdated,
-  });
 
   Map<String, dynamic> toJson() => {
     'patient_id': patientId,
@@ -541,25 +548,9 @@ class MedicalData {
     'vital_signs': vitalSigns,
     'last_updated': lastUpdated.toIso8601String(),
   };
-
-  factory MedicalData.fromJson(Map<String, dynamic> json) => MedicalData(
-    patientId: json['patient_id'],
-    allergies: List<String>.from(json['allergies'] ?? []),
-    medications: List<String>.from(json['medications'] ?? []),
-    medicalHistory: List<String>.from(json['medical_history'] ?? []),
-    vitalSigns: Map<String, dynamic>.from(json['vital_signs'] ?? {}),
-    lastUpdated: DateTime.parse(json['last_updated']),
-  );
 }
 
 class AppointmentData {
-  final String appointmentId;
-  final String patientId;
-  final String doctorId;
-  final DateTime scheduledTime;
-  final String status;
-  final String? notes;
-  final Map<String, dynamic> metadata;
 
   AppointmentData({
     required this.appointmentId,
@@ -571,6 +562,24 @@ class AppointmentData {
     this.metadata = const {},
   });
 
+  factory AppointmentData.fromJson(Map<String, dynamic> json) =>
+      AppointmentData(
+        appointmentId: json['appointment_id'] as String,
+        patientId: json['patient_id'] as String,
+        doctorId: json['doctor_id'] as String,
+        scheduledTime: DateTime.parse(json['scheduled_time'] as String),
+        status: json['status'] as String,
+        notes: json['notes'] as String?,
+        metadata: Map<String, dynamic>.from(json['metadata'] as Map? ?? {}),
+      );
+  final String appointmentId;
+  final String patientId;
+  final String doctorId;
+  final DateTime scheduledTime;
+  final String status;
+  final String? notes;
+  final Map<String, dynamic> metadata;
+
   Map<String, dynamic> toJson() => {
     'appointment_id': appointmentId,
     'patient_id': patientId,
@@ -580,28 +589,9 @@ class AppointmentData {
     'notes': notes,
     'metadata': metadata,
   };
-
-  factory AppointmentData.fromJson(Map<String, dynamic> json) =>
-      AppointmentData(
-        appointmentId: json['appointment_id'],
-        patientId: json['patient_id'],
-        doctorId: json['doctor_id'],
-        scheduledTime: DateTime.parse(json['scheduled_time']),
-        status: json['status'],
-        notes: json['notes'],
-        metadata: Map<String, dynamic>.from(json['metadata'] ?? {}),
-      );
 }
 
 class PatientData {
-  final String patientId;
-  final String name;
-  final DateTime dateOfBirth;
-  final String gender;
-  final String? phoneNumber;
-  final String? address;
-  final String? emergencyContact;
-  final Map<String, dynamic> personalInfo;
 
   PatientData({
     required this.patientId,
@@ -614,6 +604,25 @@ class PatientData {
     this.personalInfo = const {},
   });
 
+  factory PatientData.fromJson(Map<String, dynamic> json) => PatientData(
+    patientId: json['patient_id'] as String,
+    name: json['name'] as String,
+    dateOfBirth: DateTime.parse(json['date_of_birth'] as String),
+    gender: json['gender'] as String,
+    phoneNumber: json['phone_number'] as String?,
+    address: json['address'] as String?,
+    emergencyContact: json['emergency_contact'] as String?,
+    personalInfo: Map<String, dynamic>.from(json['personal_info'] as Map? ?? {}),
+  );
+  final String patientId;
+  final String name;
+  final DateTime dateOfBirth;
+  final String gender;
+  final String? phoneNumber;
+  final String? address;
+  final String? emergencyContact;
+  final Map<String, dynamic> personalInfo;
+
   Map<String, dynamic> toJson() => {
     'patient_id': patientId,
     'name': name,
@@ -624,28 +633,9 @@ class PatientData {
     'emergency_contact': emergencyContact,
     'personal_info': personalInfo,
   };
-
-  factory PatientData.fromJson(Map<String, dynamic> json) => PatientData(
-    patientId: json['patient_id'],
-    name: json['name'],
-    dateOfBirth: DateTime.parse(json['date_of_birth']),
-    gender: json['gender'],
-    phoneNumber: json['phone_number'],
-    address: json['address'],
-    emergencyContact: json['emergency_contact'],
-    personalInfo: Map<String, dynamic>.from(json['personal_info'] ?? {}),
-  );
 }
 
 class PrescriptionData {
-  final String prescriptionId;
-  final String patientId;
-  final String doctorId;
-  final List<String> medications;
-  final String dosage;
-  final String instructions;
-  final DateTime prescribedDate;
-  final DateTime? expiryDate;
 
   PrescriptionData({
     required this.prescriptionId,
@@ -658,6 +648,28 @@ class PrescriptionData {
     this.expiryDate,
   });
 
+  factory PrescriptionData.fromJson(Map<String, dynamic> json) =>
+      PrescriptionData(
+        prescriptionId: json['prescription_id'] as String,
+        patientId: json['patient_id'] as String,
+        doctorId: json['doctor_id'] as String,
+        medications: List<String>.from(json['medications'] as List? ?? []),
+        dosage: json['dosage'] as String,
+        instructions: json['instructions'] as String,
+        prescribedDate: DateTime.parse(json['prescribed_date'] as String),
+        expiryDate: json['expiry_date'] != null
+            ? DateTime.parse(json['expiry_date'] as String)
+            : null,
+      );
+  final String prescriptionId;
+  final String patientId;
+  final String doctorId;
+  final List<String> medications;
+  final String dosage;
+  final String instructions;
+  final DateTime prescribedDate;
+  final DateTime? expiryDate;
+
   Map<String, dynamic> toJson() => {
     'prescription_id': prescriptionId,
     'patient_id': patientId,
@@ -668,36 +680,29 @@ class PrescriptionData {
     'prescribed_date': prescribedDate.toIso8601String(),
     'expiry_date': expiryDate?.toIso8601String(),
   };
-
-  factory PrescriptionData.fromJson(Map<String, dynamic> json) =>
-      PrescriptionData(
-        prescriptionId: json['prescription_id'],
-        patientId: json['patient_id'],
-        doctorId: json['doctor_id'],
-        medications: List<String>.from(json['medications']),
-        dosage: json['dosage'],
-        instructions: json['instructions'],
-        prescribedDate: DateTime.parse(json['prescribed_date']),
-        expiryDate: json['expiry_date'] != null
-            ? DateTime.parse(json['expiry_date'])
-            : null,
-      );
 }
 
 class TokenData {
+
+  TokenData({
+    required this.accessToken,
+    required this.expiresAt, this.refreshToken,
+    this.tokenType = 'Bearer',
+    this.scopes = const [],
+  });
+
+  factory TokenData.fromJson(Map<String, dynamic> json) => TokenData(
+    accessToken: json['access_token'] as String,
+    refreshToken: json['refresh_token'] as String?,
+    expiresAt: DateTime.parse(json['expires_at'] as String),
+    tokenType: json['token_type'] as String? ?? 'Bearer',
+    scopes: List<String>.from(json['scopes'] as List? ?? []),
+  );
   final String accessToken;
   final String? refreshToken;
   final DateTime expiresAt;
   final String tokenType;
   final List<String> scopes;
-
-  TokenData({
-    required this.accessToken,
-    this.refreshToken,
-    required this.expiresAt,
-    this.tokenType = 'Bearer',
-    this.scopes = const [],
-  });
 
   Map<String, dynamic> toJson() => {
     'access_token': accessToken,
@@ -706,30 +711,29 @@ class TokenData {
     'token_type': tokenType,
     'scopes': scopes,
   };
-
-  factory TokenData.fromJson(Map<String, dynamic> json) => TokenData(
-    accessToken: json['access_token'],
-    refreshToken: json['refresh_token'],
-    expiresAt: DateTime.parse(json['expires_at']),
-    tokenType: json['token_type'] ?? 'Bearer',
-    scopes: List<String>.from(json['scopes'] ?? []),
-  );
 }
 
 class HealthData {
+
+  HealthData({
+    required this.userId,
+    required this.lastUpdated, this.vitalSigns = const {},
+    this.healthMetrics = const [],
+    this.healthScore = const {},
+  });
+
+  factory HealthData.fromJson(Map<String, dynamic> json) => HealthData(
+    userId: json['user_id'] as String,
+    vitalSigns: Map<String, dynamic>.from(json['vital_signs'] as Map? ?? {}),
+    healthMetrics: List<String>.from(json['health_metrics'] as List? ?? []),
+    healthScore: Map<String, dynamic>.from(json['health_score'] as Map? ?? {}),
+    lastUpdated: DateTime.parse(json['last_updated'] as String),
+  );
   final String userId;
   final Map<String, dynamic> vitalSigns;
   final List<String> healthMetrics;
   final Map<String, dynamic> healthScore;
   final DateTime lastUpdated;
-
-  HealthData({
-    required this.userId,
-    this.vitalSigns = const {},
-    this.healthMetrics = const [],
-    this.healthScore = const {},
-    required this.lastUpdated,
-  });
 
   Map<String, dynamic> toJson() => {
     'user_id': userId,
@@ -738,30 +742,30 @@ class HealthData {
     'health_score': healthScore,
     'last_updated': lastUpdated.toIso8601String(),
   };
-
-  factory HealthData.fromJson(Map<String, dynamic> json) => HealthData(
-    userId: json['user_id'],
-    vitalSigns: Map<String, dynamic>.from(json['vital_signs'] ?? {}),
-    healthMetrics: List<String>.from(json['health_metrics'] ?? []),
-    healthScore: Map<String, dynamic>.from(json['health_score'] ?? {}),
-    lastUpdated: DateTime.parse(json['last_updated']),
-  );
 }
 
 class BiometricSettings {
+
+  BiometricSettings({
+    required this.enabled,
+    required this.lastUpdated, this.enabledBiometrics = const [],
+    this.requireForLogin = true,
+    this.requireForSensitiveData = true,
+  });
+
+  factory BiometricSettings.fromJson(Map<String, dynamic> json) =>
+      BiometricSettings(
+        enabled: json['enabled'] as bool,
+        enabledBiometrics: List<String>.from(json['enabled_biometrics'] as List? ?? []),
+        requireForLogin: json['require_for_login'] as bool? ?? true,
+        requireForSensitiveData: json['require_for_sensitive_data'] as bool? ?? true,
+        lastUpdated: DateTime.parse(json['last_updated'] as String),
+      );
   final bool enabled;
   final List<String> enabledBiometrics;
   final bool requireForLogin;
   final bool requireForSensitiveData;
   final DateTime lastUpdated;
-
-  BiometricSettings({
-    required this.enabled,
-    this.enabledBiometrics = const [],
-    this.requireForLogin = true,
-    this.requireForSensitiveData = true,
-    required this.lastUpdated,
-  });
 
   Map<String, dynamic> toJson() => {
     'enabled': enabled,
@@ -770,33 +774,33 @@ class BiometricSettings {
     'require_for_sensitive_data': requireForSensitiveData,
     'last_updated': lastUpdated.toIso8601String(),
   };
-
-  factory BiometricSettings.fromJson(Map<String, dynamic> json) =>
-      BiometricSettings(
-        enabled: json['enabled'],
-        enabledBiometrics: List<String>.from(json['enabled_biometrics'] ?? []),
-        requireForLogin: json['require_for_login'] ?? true,
-        requireForSensitiveData: json['require_for_sensitive_data'] ?? true,
-        lastUpdated: DateTime.parse(json['last_updated']),
-      );
 }
 
 class SecuritySettings {
+
+  SecuritySettings({
+    required this.lastUpdated, this.autoLockEnabled = true,
+    this.autoLockTimeout = 300, // 5 minutes
+    this.dataEncryptionEnabled = true,
+    this.secureBackupEnabled = false,
+    this.auditLoggingEnabled = true,
+  });
+
+  factory SecuritySettings.fromJson(Map<String, dynamic> json) =>
+      SecuritySettings(
+        autoLockEnabled: json['auto_lock_enabled'] as bool? ?? true,
+        autoLockTimeout: json['auto_lock_timeout'] as int? ?? 300,
+        dataEncryptionEnabled: json['data_encryption_enabled'] as bool? ?? true,
+        secureBackupEnabled: json['secure_backup_enabled'] as bool? ?? false,
+        auditLoggingEnabled: json['audit_logging_enabled'] as bool? ?? true,
+        lastUpdated: DateTime.parse(json['last_updated'] as String),
+      );
   final bool autoLockEnabled;
   final int autoLockTimeout;
   final bool dataEncryptionEnabled;
   final bool secureBackupEnabled;
   final bool auditLoggingEnabled;
   final DateTime lastUpdated;
-
-  SecuritySettings({
-    this.autoLockEnabled = true,
-    this.autoLockTimeout = 300, // 5 minutes
-    this.dataEncryptionEnabled = true,
-    this.secureBackupEnabled = false,
-    this.auditLoggingEnabled = true,
-    required this.lastUpdated,
-  });
 
   Map<String, dynamic> toJson() => {
     'auto_lock_enabled': autoLockEnabled,
@@ -806,14 +810,4 @@ class SecuritySettings {
     'audit_logging_enabled': auditLoggingEnabled,
     'last_updated': lastUpdated.toIso8601String(),
   };
-
-  factory SecuritySettings.fromJson(Map<String, dynamic> json) =>
-      SecuritySettings(
-        autoLockEnabled: json['auto_lock_enabled'] ?? true,
-        autoLockTimeout: json['auto_lock_timeout'] ?? 300,
-        dataEncryptionEnabled: json['data_encryption_enabled'] ?? true,
-        secureBackupEnabled: json['secure_backup_enabled'] ?? false,
-        auditLoggingEnabled: json['audit_logging_enabled'] ?? true,
-        lastUpdated: DateTime.parse(json['last_updated']),
-      );
 }

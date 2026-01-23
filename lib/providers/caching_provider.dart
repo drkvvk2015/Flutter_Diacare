@@ -9,9 +9,11 @@
 /// - Critical data preloading
 /// - Cache statistics and metrics
 /// - Performance monitoring
+library;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../services/performance_service.dart';
 
 /// Provider for managing cached data and performance optimization
@@ -149,8 +151,8 @@ class CachingProvider extends ChangeNotifier {
   String get cacheUsageText {
     if (!_isInitialized) return 'Cache not initialized';
 
-    final memoryEntries = _cacheStats['memoryCache']?['entries'] ?? 0;
-    final maxSize = _cacheStats['memoryCache']?['maxSize'] ?? 0;
+    final memoryEntries = _cacheStats['memoryCache']?['entries'] as int? ?? 0;
+    final maxSize = _cacheStats['memoryCache']?['maxSize'] as int? ?? 0;
     final usagePercent = maxSize > 0
         ? (memoryEntries / maxSize * 100).round()
         : 0;
@@ -235,7 +237,7 @@ mixin CachingMixin<T extends StatefulWidget> on State<T> {
     _initializeCaching();
   }
 
-  void _initializeCaching() async {
+  Future<void> _initializeCaching() async {
     if (!cachingProvider.isInitialized) {
       await cachingProvider.initialize();
     }
@@ -250,16 +252,14 @@ mixin CachingMixin<T extends StatefulWidget> on State<T> {
 
 /// Performance monitoring widget wrapper
 class PerformanceMonitor extends StatefulWidget {
+
+  const PerformanceMonitor({
+    required this.child, required this.operationName, super.key,
+    this.enableMonitoring = true,
+  });
   final Widget child;
   final String operationName;
   final bool enableMonitoring;
-
-  const PerformanceMonitor({
-    super.key,
-    required this.child,
-    required this.operationName,
-    this.enableMonitoring = true,
-  });
 
   @override
   State<PerformanceMonitor> createState() => _PerformanceMonitorState();

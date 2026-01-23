@@ -17,7 +17,7 @@ class BPService {
         systolic: (data['systolic'] ?? 0) as int,
         diastolic: (data['diastolic'] ?? 0) as int,
         pulse: (data['pulse'] ?? 0) as int,
-        date: DateTime.parse(data['date'] ?? DateTime.now().toIso8601String()),
+        date: DateTime.parse(data['date'] as String? ?? DateTime.now().toIso8601String()),
       );
     }).toList();
   }

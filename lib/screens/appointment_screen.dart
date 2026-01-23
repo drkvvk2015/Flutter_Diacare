@@ -1,21 +1,20 @@
-import '../features/telemedicine/appointment_notifications.dart';
-import 'video_call_screen.dart';
-import '../features/payments/payment_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+import '../features/payments/payment_screen.dart';
 import '../features/telemedicine/appointment_model.dart';
+import '../features/telemedicine/appointment_notifications.dart';
 import '../features/telemedicine/appointment_service.dart';
-import '../widgets/glassmorphic_card.dart';
 import '../utils/logger.dart';
+import '../widgets/glassmorphic_card.dart';
+import 'video_call_screen.dart';
 
 class AppointmentScreen extends StatefulWidget {
+  const AppointmentScreen({
+    required this.userRole, required this.userId, super.key,
+  });
   final String userRole;
   final String userId;
-  const AppointmentScreen({
-    super.key,
-    required this.userRole,
-    required this.userId,
-  });
 
   @override
   State<AppointmentScreen> createState() => _AppointmentScreenState();
@@ -92,7 +91,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
     }
   }
 
-  void _bookDialog() async {
+  Future<void> _bookDialog() async {
     final formKey = GlobalKey<FormState>();
     DateTime? selectedDate;
     TimeOfDay? selectedTime;
@@ -104,7 +103,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
 
     // Show loading dialog while fetching doctors
     if (mounted) {
-      showDialog(
+      showDialog<void>(
         context: context,
         barrierDismissible: false,
         builder: (context) => const AlertDialog(
@@ -133,7 +132,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
         final data = doc.data();
         final doctor = {
           'id': doc.id,
-          'name': data['name'] ?? 'Unknown Doctor',
+          'name': data['name'] ?? data['displayName'] ?? 'Unknown Doctor',
           'specialty': data['specialty'] ?? 'General',
           'availability': data['availability'] ?? 'Available',
           'fee': data['fee'] ?? 500.0, // Default fee if not specified
@@ -178,7 +177,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
 
     if (!mounted) return;
 
-    await showDialog(
+    await showDialog<void>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
@@ -206,8 +205,8 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                           .toList(),
                       onChanged: (v) {
                         setState(() {
-                          doctorId = v?['id'];
-                          doctorName = v?['name'];
+                          doctorId = v?['id'] as String?;
+                          doctorName = v?['name'] as String?;
                           fee = v?['fee'] != null
                               ? (v?['fee'] as num).toDouble()
                               : null;
@@ -348,7 +347,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                 // Show loading indicator
                 final navigator = Navigator.of(context);
                 final messenger = ScaffoldMessenger.of(context);
-                showDialog(
+                showDialog<void>(
                   context: context,
                   barrierDismissible: false,
                   builder: (context) => const AlertDialog(
@@ -366,7 +365,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                 final appt = Appointment(
                   id: '', // Will be set by Firestore
                   patientId: widget.userRole == 'patient' ? widget.userId : '',
-                  doctorId: finalDoctorId,
+                  doctorId: finalDoctorId as String,
                   time: dt,
                   status: 'scheduled',
                   notes: notes,
@@ -480,7 +479,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                       children: [
                         if (_showReminder && _nextAppointment != null)
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(8),
                             child: GlassmorphicCard(
                               color: Colors.yellow[100]?.withValues(alpha: 0.7),
                               borderRadius: 20,
@@ -520,7 +519,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                                             paymentSnap.data()?['status'] !=
                                                 'success') {
                                           final paid = await navigator.push(
-                                            MaterialPageRoute(
+                                            MaterialPageRoute<bool>(
                                               builder: (_) => PaymentScreen(
                                                 appointmentId:
                                                     _nextAppointment!.id,
@@ -537,7 +536,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                                       }
                                       if (!mounted) return;
                                       await navigator.push(
-                                        MaterialPageRoute(
+                                        MaterialPageRoute<void>(
                                           builder: (_) => VideoCallScreen(
                                             userId: widget.userId,
                                             userRole: widget.userRole,
@@ -686,7 +685,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                 paymentDoc != null &&
                 paymentDoc.exists &&
                 paymentDoc.data() != null &&
-                (paymentDoc.data() as Map<String, dynamic>)['status'] ==
+                (paymentDoc.data()! as Map<String, dynamic>)['status'] ==
                     'success';
 
             Color statusColor;
@@ -763,15 +762,15 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                       onPressed: () async {
                         final navigator = Navigator.of(context);
                         final paid = await navigator.push(
-                          MaterialPageRoute(
-                            builder: (_) => PaymentScreen(
+                          MaterialPageRoute<bool>(
+                                              builder: (_) => PaymentScreen(
                               appointmentId: a.id,
                               amount: a.fee!,
                               doctorId: a.doctorId,
                             ),
                           ),
                         );
-                        if (paid == true && mounted) {
+                        if ((paid ?? false) && mounted) {
                           setState(() {});
                         }
                       },
@@ -786,8 +785,8 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                             a.fee != null &&
                             !isPaid) {
                           final paid = await navigator.push(
-                            MaterialPageRoute(
-                              builder: (_) => PaymentScreen(
+                            MaterialPageRoute<bool>(
+                                              builder: (_) => PaymentScreen(
                                 appointmentId: a.id,
                                 amount: a.fee!,
                                 doctorId: a.doctorId,
@@ -800,7 +799,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                         }
                         if (!mounted) return;
                         await navigator.push(
-                          MaterialPageRoute(
+                          MaterialPageRoute<void>(
                             builder: (_) => VideoCallScreen(
                               userId: widget.userId,
                               userRole: widget.userRole,
@@ -834,3 +833,6 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
     );
   }
 }
+
+
+

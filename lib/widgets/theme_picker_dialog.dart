@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
 class ThemePickerDialog extends StatelessWidget {
+  const ThemePickerDialog({
+    required this.currentColor, required this.onColorSelected, super.key,
+  });
   final Color currentColor;
   final ValueChanged<Color> onColorSelected;
-  const ThemePickerDialog({
-    super.key,
-    required this.currentColor,
-    required this.onColorSelected,
-  });
 
   static const List<Color> accentColors = [
     Color(0xFF43CEA2),

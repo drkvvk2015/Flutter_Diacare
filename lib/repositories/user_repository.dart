@@ -8,10 +8,10 @@
 /// - Profile management
 /// - Authentication state
 /// - Data caching
+library;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../api/api_client.dart';
-import '../api/endpoints.dart';
 import '../core/error/api_exception.dart';
 import '../utils/logger.dart';
 
@@ -117,7 +117,7 @@ class UserRepository {
       final doc = await _firestore.collection('users').doc(uid).get();
       
       if (!doc.exists) {
-        print('User profile not found: $uid');
+        logInfo('User profile not found: $uid');
         return null;
       }
 
@@ -145,10 +145,10 @@ class UserRepository {
         final user = _auth.currentUser;
         if (user != null) {
           if (data.containsKey('displayName')) {
-            await user.updateDisplayName(data['displayName']);
+            await user.updateDisplayName(data['displayName'] as String?);
           }
           if (data.containsKey('photoUrl')) {
-            await user.updatePhotoURL(data['photoUrl']);
+            await user.updatePhotoURL(data['photoUrl'] as String?);
           }
         }
       }
@@ -258,7 +258,7 @@ class UserRepository {
         'lastLoginAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Failed to update last login: $e');
+      logInfo('Failed to update last login: $e');
     }
   }
 
@@ -286,3 +286,5 @@ class UserRepository {
     }
   }
 }
+
+

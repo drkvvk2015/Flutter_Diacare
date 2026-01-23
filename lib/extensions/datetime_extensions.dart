@@ -1,6 +1,7 @@
 /// DateTime Extensions
 /// 
 /// Useful extensions for DateTime manipulation and formatting.
+library;
 
 import 'package:intl/intl.dart';
 
@@ -140,7 +141,7 @@ extension DateTimeExtensions on DateTime {
 
   /// Get start of month
   DateTime get startOfMonth {
-    return DateTime(year, month, 1);
+    return DateTime(year, month);
   }
 
   /// Get end of month
@@ -150,7 +151,7 @@ extension DateTimeExtensions on DateTime {
 
   /// Get start of year
   DateTime get startOfYear {
-    return DateTime(year, 1, 1);
+    return DateTime(year);
   }
 
   /// Get end of year

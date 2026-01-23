@@ -6,9 +6,9 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 /// Performance optimization service for Flutter Diacare app
 /// Handles caching, lazy loading, image optimization, and memory management
 class PerformanceService {
-  static final PerformanceService _instance = PerformanceService._internal();
   factory PerformanceService() => _instance;
   PerformanceService._internal();
+  static final PerformanceService _instance = PerformanceService._internal();
 
   // Cache managers for different data types
   late final CacheManager _imageCache;
@@ -236,21 +236,21 @@ class PerformanceService {
   Future<void> _preloadUserData() async {
     // Implementation would fetch and cache user profile data
     // This is a placeholder for the actual implementation
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
   }
 
   /// Preload recent appointments
   Future<void> _preloadRecentAppointments() async {
     // Implementation would fetch and cache recent appointments
     // This is a placeholder for the actual implementation
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
   }
 
   /// Preload notification settings
   Future<void> _preloadNotificationSettings() async {
     // Implementation would fetch and cache notification preferences
     // This is a placeholder for the actual implementation
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
   }
 
   /// Get image cache manager
@@ -343,9 +343,7 @@ extension PerformanceFuture<T> on Future<T> {
   }) async {
     final trace = FirebasePerformance.instance.newTrace(operationName);
     await trace.start();
-    attributes?.forEach((key, value) {
-      trace.putAttribute(key, value);
-    });
+    attributes?.forEach(trace.putAttribute);
 
     try {
       final result = await this;
@@ -357,3 +355,4 @@ extension PerformanceFuture<T> on Future<T> {
     }
   }
 }
+

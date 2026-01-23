@@ -1,20 +1,20 @@
 /// Global Error Handler Widget
 /// 
 /// Wraps the app to catch and handle all errors gracefully.
+library;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 /// Error boundary widget to catch and handle errors
 class ErrorBoundary extends StatefulWidget {
-  final Widget child;
-  final Widget Function(FlutterErrorDetails)? errorWidgetBuilder;
 
   const ErrorBoundary({
-    super.key,
-    required this.child,
+    required this.child, super.key,
     this.errorWidgetBuilder,
   });
+  final Widget child;
+  final Widget Function(FlutterErrorDetails)? errorWidgetBuilder;
 
   @override
   State<ErrorBoundary> createState() => _ErrorBoundaryState();
@@ -59,7 +59,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
       home: Scaffold(
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -127,12 +127,11 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
 
 /// Error report dialog
 class ErrorReportDialog extends StatelessWidget {
-  final FlutterErrorDetails errorDetails;
 
   const ErrorReportDialog({
-    super.key,
-    required this.errorDetails,
+    required this.errorDetails, super.key,
   });
+  final FlutterErrorDetails errorDetails;
 
   @override
   Widget build(BuildContext context) {

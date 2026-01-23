@@ -2,6 +2,7 @@
 /// 
 /// Abstract base class for all view models in the application.
 /// Provides common functionality for state management and lifecycle.
+library;
 
 import 'package:flutter/foundation.dart';
 

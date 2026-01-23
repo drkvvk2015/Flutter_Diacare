@@ -1,15 +1,16 @@
 /// Debouncer
 /// 
 /// Utility class for debouncing function calls.
+library;
 
 import 'dart:async';
 
 /// Debouncer for delaying function execution
 class Debouncer {
-  final Duration delay;
-  Timer? _timer;
 
   Debouncer({this.delay = const Duration(milliseconds: 500)});
+  final Duration delay;
+  Timer? _timer;
 
   /// Run the action after delay
   void run(void Function() action) {
@@ -30,11 +31,11 @@ class Debouncer {
 
 /// Throttler for limiting function execution rate
 class Throttler {
+
+  Throttler({this.duration = const Duration(milliseconds: 500)});
   final Duration duration;
   Timer? _timer;
   bool _isThrottled = false;
-
-  Throttler({this.duration = const Duration(milliseconds: 500)});
 
   /// Run the action if not throttled
   void run(void Function() action) {

@@ -8,12 +8,22 @@
 /// - Anthropometry: Body measurements (height, weight, BMI, etc.)
 /// - BPReading: Blood pressure measurements
 /// - SMBGReading: Self-Monitoring Blood Glucose readings
+library;
 
 /// Anthropometry measurement model
 /// 
 /// Stores body measurements taken at a specific date.
 /// Used for tracking patient's physical health over time.
 class Anthropometry {
+
+  const Anthropometry({
+    required this.height,
+    required this.weight,
+    required this.bmi,
+    required this.waist,
+    required this.hip,
+    required this.date,
+  });
   /// Height in centimeters
   final double height;
   
@@ -31,15 +41,6 @@ class Anthropometry {
   
   /// Date of measurement
   final DateTime date;
-
-  const Anthropometry({
-    required this.height,
-    required this.weight,
-    required this.bmi,
-    required this.waist,
-    required this.hip,
-    required this.date,
-  });
 }
 
 /// Blood Pressure Reading model
@@ -47,6 +48,13 @@ class Anthropometry {
 /// Stores blood pressure measurements with pulse rate.
 /// Tracks cardiovascular health over time.
 class BPReading {
+
+  const BPReading({
+    required this.systolic,
+    required this.diastolic,
+    required this.pulse,
+    required this.date,
+  });
   /// Systolic blood pressure (mmHg)
   final int systolic;
   
@@ -58,13 +66,6 @@ class BPReading {
   
   /// Date and time of measurement
   final DateTime date;
-
-  const BPReading({
-    required this.systolic,
-    required this.diastolic,
-    required this.pulse,
-    required this.date,
-  });
 }
 
 /// Self-Monitoring Blood Glucose Reading model
@@ -72,6 +73,14 @@ class BPReading {
 /// Stores multiple blood glucose measurements throughout the day.
 /// Essential for diabetes management and insulin dosing decisions.
 class SMBGReading {
+
+  const SMBGReading({
+    required this.fasting,
+    required this.preLunch,
+    required this.preDinner,
+    required this.postMeal,
+    required this.date,
+  });
   /// Fasting blood glucose (mg/dL)
   final double fasting;
   
@@ -86,14 +95,6 @@ class SMBGReading {
   
   /// Date of readings
   final DateTime date;
-
-  const SMBGReading({
-    required this.fasting,
-    required this.preLunch,
-    required this.preDinner,
-    required this.postMeal,
-    required this.date,
-  });
 }
 
 /// Patient model
@@ -101,6 +102,15 @@ class SMBGReading {
 /// Core patient information with complete health history.
 /// Aggregates all health measurements and identifiers.
 class Patient {
+
+  const Patient({
+    required this.id,
+    required this.uhid,
+    required this.name,
+    this.anthropometryHistory = const [],
+    this.bpHistory = const [],
+    this.smbgHistory = const [],
+  });
   /// Unique patient identifier
   final String id;
   
@@ -118,13 +128,4 @@ class Patient {
   
   /// Historical blood glucose readings
   final List<SMBGReading> smbgHistory;
-
-  const Patient({
-    required this.id,
-    required this.uhid,
-    required this.name,
-    this.anthropometryHistory = const [],
-    this.bpHistory = const [],
-    this.smbgHistory = const [],
-  });
 }

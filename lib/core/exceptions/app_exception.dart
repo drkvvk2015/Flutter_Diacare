@@ -1,14 +1,15 @@
 /// Application Exceptions
 /// 
 /// Custom exception classes for the application.
+library;
 
 /// Base application exception
 abstract class AppException implements Exception {
+
+  AppException(this.message, {this.code, this.details});
   final String message;
   final String? code;
   final dynamic details;
-
-  AppException(this.message, {this.code, this.details});
 
   @override
   String toString() => message;
@@ -26,7 +27,6 @@ class AuthException extends AppException {
 
 /// Validation exceptions
 class ValidationException extends AppException {
-  final Map<String, String>? fieldErrors;
 
   ValidationException(
     super.message, {
@@ -34,11 +34,11 @@ class ValidationException extends AppException {
     super.details,
     this.fieldErrors,
   });
+  final Map<String, String>? fieldErrors;
 }
 
 /// Server exceptions
 class ServerException extends AppException {
-  final int? statusCode;
 
   ServerException(
     super.message, {
@@ -46,6 +46,7 @@ class ServerException extends AppException {
     super.details,
     this.statusCode,
   });
+  final int? statusCode;
 }
 
 /// Cache exceptions

@@ -1,9 +1,10 @@
 /// Debouncer Tests
 /// 
 /// Tests for the Debouncer and Throttler classes.
+library;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_diacare/core/utils/debouncer.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Debouncer', () {
@@ -16,7 +17,7 @@ void main() {
       });
 
       expect(called, false);
-      await Future.delayed(const Duration(milliseconds: 150));
+      await Future<void>.delayed(const Duration(milliseconds: 150));
       expect(called, true);
     });
 
@@ -28,7 +29,7 @@ void main() {
       debouncer.run(() => callCount++);
       debouncer.run(() => callCount++);
 
-      await Future.delayed(const Duration(milliseconds: 150));
+      await Future<void>.delayed(const Duration(milliseconds: 150));
       expect(callCount, 1);
     });
 
@@ -41,7 +42,7 @@ void main() {
       });
       debouncer.cancel();
 
-      await Future.delayed(const Duration(milliseconds: 150));
+      await Future<void>.delayed(const Duration(milliseconds: 150));
       expect(called, false);
     });
   });
@@ -68,9 +69,10 @@ void main() {
 
       expect(callCount, 1);
 
-      await Future.delayed(const Duration(milliseconds: 150));
+      await Future<void>.delayed(const Duration(milliseconds: 150));
       throttler.run(() => callCount++);
       expect(callCount, 2);
     });
   });
 }
+

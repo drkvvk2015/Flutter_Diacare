@@ -2,14 +2,13 @@
 /// 
 /// Handles all appointment-related data operations.
 /// Manages appointment scheduling, updates, and queries.
+library;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../api/api_client.dart';
 import '../utils/logger.dart';
 
 /// Repository for appointment data management
 class AppointmentRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final ApiClient _apiClient = ApiClient();
 
   /// Get appointments for a user (doctor or patient)
   Future<List<Map<String, dynamic>>> getAppointmentsByUser(
@@ -28,7 +27,7 @@ class AppointmentRepository {
       return snapshot.docs.map((doc) => {
         'id': doc.id,
         ...doc.data(),
-      }).toList();
+      },).toList();
     } catch (e) {
       logError('Error fetching appointments', e);
       rethrow;
@@ -44,7 +43,7 @@ class AppointmentRepository {
           .get();
 
       if (!doc.exists) {
-        logWarning('Appointment not found: $appointmentId');
+        logInfo('Appointment not found: $appointmentId');
         return null;
       }
 
@@ -144,7 +143,7 @@ class AppointmentRepository {
       return snapshot.docs.map((doc) => {
         'id': doc.id,
         ...doc.data(),
-      }).toList();
+      },).toList();
     } catch (e) {
       logError('Error fetching upcoming appointments', e);
       rethrow;
@@ -172,7 +171,7 @@ class AppointmentRepository {
       return snapshot.docs.map((doc) => {
         'id': doc.id,
         ...doc.data(),
-      }).toList();
+      },).toList();
     } catch (e) {
       logError('Error fetching past appointments', e);
       rethrow;
@@ -202,7 +201,7 @@ class AppointmentRepository {
       return snapshot.docs.map((doc) => {
         'id': doc.id,
         ...doc.data(),
-      }).toList();
+      },).toList();
     } catch (e) {
       logError('Error fetching appointments by date', e);
       rethrow;

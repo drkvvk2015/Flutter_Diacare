@@ -2,10 +2,12 @@
 /// 
 /// Abstract base class for all repositories in the application.
 /// Provides common error handling and data transformation logic.
+library;
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import '../../services/logger_service.dart';
+
 import '../../constants/error_messages.dart';
+import '../../services/logger_service.dart';
 
 /// Base Repository class
 abstract class BaseRepository {
@@ -71,16 +73,11 @@ abstract class BaseRepository {
 
 /// Result wrapper for repository operations
 class Result<T> {
-  final T? data;
-  final String? error;
-  final Object? exception;
-  final bool isSuccess;
 
   Result._({
-    this.data,
+    required this.isSuccess, this.data,
     this.error,
     this.exception,
-    required this.isSuccess,
   });
 
   factory Result.success(T data) {
@@ -97,6 +94,10 @@ class Result<T> {
       isSuccess: false,
     );
   }
+  final T? data;
+  final String? error;
+  final Object? exception;
+  final bool isSuccess;
 
   /// Check if result is failure
   bool get isFailure => !isSuccess;

@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+
 import 'firebase_options.dart';
 import 'utils/logger.dart';
 
@@ -12,10 +13,10 @@ class FirebaseConnectionTest extends StatefulWidget {
 }
 
 class _FirebaseConnectionTestState extends State<FirebaseConnectionTest> {
-  String _status = "Testing Firebase connection...";
+  String _status = 'Testing Firebase connection...';
   bool _isLoading = true;
   bool _isConnected = false;
-  String _errorMessage = "";
+  String _errorMessage = '';
 
   @override
   void initState() {
@@ -52,16 +53,16 @@ class _FirebaseConnectionTestState extends State<FirebaseConnectionTest> {
 
       if (verifyDoc.exists && verifyDoc.data()?['test'] == true) {
         setState(() {
-          _status = "Firebase connection successful!";
+          _status = 'Firebase connection successful!';
           _isLoading = false;
           _isConnected = true;
         });
       } else {
         setState(() {
-          _status = "Firebase connection issue: Could not verify data";
+          _status = 'Firebase connection issue: Could not verify data';
           _isLoading = false;
           _errorMessage =
-              "Document exists: ${verifyDoc.exists}, Data: ${verifyDoc.data()}";
+              'Document exists: ${verifyDoc.exists}, Data: ${verifyDoc.data()}';
         });
       }
 
@@ -72,11 +73,11 @@ class _FirebaseConnectionTestState extends State<FirebaseConnectionTest> {
           .delete();
     } catch (e) {
       setState(() {
-        _status = "Firebase connection failed";
+        _status = 'Firebase connection failed';
         _isLoading = false;
         _errorMessage = e.toString();
       });
-      logError("Firebase connection error: $e");
+      logError('Firebase connection error: $e');
     }
   }
 
@@ -84,12 +85,12 @@ class _FirebaseConnectionTestState extends State<FirebaseConnectionTest> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Firebase Connection Test"),
+        title: const Text('Firebase Connection Test'),
         backgroundColor: Colors.teal,
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -130,13 +131,13 @@ class _FirebaseConnectionTestState extends State<FirebaseConnectionTest> {
                 ),
                 onPressed: () {
                   setState(() {
-                    _status = "Testing Firebase connection...";
+                    _status = 'Testing Firebase connection...';
                     _isLoading = true;
-                    _errorMessage = "";
+                    _errorMessage = '';
                   });
                   _testFirebaseConnection();
                 },
-                child: const Text("Test Again"),
+                child: const Text('Test Again'),
               ),
             ],
           ),

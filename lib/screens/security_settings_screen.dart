@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
-import '../services/security_service.dart';
-import '../services/secure_data_manager.dart';
+
 import '../services/analytics_service.dart';
+import '../services/secure_data_manager.dart';
+import '../services/security_service.dart';
 
 /// Security settings screen for managing biometric authentication,
 /// encryption settings, and security audit features
@@ -144,32 +145,32 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
             const SizedBox(height: 16),
             _buildStatusRow(
               'Device Support',
-              _biometricSupport?.isDeviceSupported == true
+              _biometricSupport?.isDeviceSupported ?? false
                   ? 'Supported'
                   : 'Not Supported',
-              _biometricSupport?.isDeviceSupported == true
+              _biometricSupport?.isDeviceSupported ?? false
                   ? Colors.green
                   : Colors.red,
             ),
             _buildStatusRow(
               'Biometric Available',
-              _biometricSupport?.isAvailable == true
+              _biometricSupport?.isAvailable ?? false
                   ? 'Available'
                   : 'Not Available',
-              _biometricSupport?.isAvailable == true
+              _biometricSupport?.isAvailable ?? false
                   ? Colors.green
                   : Colors.red,
             ),
             _buildStatusRow(
               'Current Status',
-              _securityStatus?.biometricEnabled == true
+              _securityStatus?.biometricEnabled ?? false
                   ? 'Enabled'
                   : 'Disabled',
-              _securityStatus?.biometricEnabled == true
+              _securityStatus?.biometricEnabled ?? false
                   ? Colors.green
                   : Colors.orange,
             ),
-            if (_biometricSupport?.availableBiometrics.isNotEmpty == true) ...[
+            if (_biometricSupport?.availableBiometrics.isNotEmpty ?? false) ...[
               const SizedBox(height: 8),
               Text(
                 'Available Biometrics:',
@@ -210,18 +211,18 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
               subtitle: const Text(
                 'Use biometrics to unlock sensitive features',
               ),
-              value: _biometricSettings?.enabled == true,
-              onChanged: _biometricSupport?.isAvailable == true
-                  ? (value) => _toggleBiometric(value)
+              value: _biometricSettings?.enabled ?? false,
+              onChanged: _biometricSupport?.isAvailable ?? false
+                  ? _toggleBiometric
                   : null,
             ),
-            if (_biometricSettings?.enabled == true) ...[
+            if (_biometricSettings?.enabled ?? false) ...[
               SwitchListTile(
                 title: const Text('Require for Login'),
                 subtitle: const Text(
                   'Require biometric authentication for app login',
                 ),
-                value: _biometricSettings?.requireForLogin == true,
+                value: _biometricSettings?.requireForLogin ?? false,
                 onChanged: (value) =>
                     _updateBiometricSetting('requireForLogin', value),
               ),
@@ -230,7 +231,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
                 subtitle: const Text(
                   'Require biometric for accessing patient data',
                 ),
-                value: _biometricSettings?.requireForSensitiveData == true,
+                value: _biometricSettings?.requireForSensitiveData ?? false,
                 onChanged: (value) =>
                     _updateBiometricSetting('requireForSensitiveData', value),
               ),
@@ -258,7 +259,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _biometricSupport?.isAvailable == true
+                onPressed: _biometricSupport?.isAvailable ?? false
                     ? _testBiometric
                     : null,
                 child: const Text('Test Biometric Authentication'),
@@ -316,26 +317,26 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
             const SizedBox(height: 16),
             _buildStatusRow(
               'Security Service',
-              _securityStatus?.isInitialized == true
+              _securityStatus?.isInitialized ?? false
                   ? 'Initialized'
                   : 'Not Initialized',
-              _securityStatus?.isInitialized == true
+              _securityStatus?.isInitialized ?? false
                   ? Colors.green
                   : Colors.red,
             ),
             _buildStatusRow(
               'Encryption',
-              _securityStatus?.encryptionEnabled == true
+              _securityStatus?.encryptionEnabled ?? false
                   ? 'Enabled'
                   : 'Disabled',
-              _securityStatus?.encryptionEnabled == true
+              _securityStatus?.encryptionEnabled ?? false
                   ? Colors.green
                   : Colors.orange,
             ),
             _buildStatusRow(
               'Account Status',
-              _securityStatus?.isLockedOut == true ? 'Locked Out' : 'Active',
-              _securityStatus?.isLockedOut == true ? Colors.red : Colors.green,
+              _securityStatus?.isLockedOut ?? false ? 'Locked Out' : 'Active',
+              _securityStatus?.isLockedOut ?? false ? Colors.red : Colors.green,
             ),
             if (_securityStatus?.failedAttempts != null) ...[
               _buildStatusRow(
@@ -376,11 +377,11 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
             SwitchListTile(
               title: const Text('Auto-Lock'),
               subtitle: const Text('Automatically lock app after inactivity'),
-              value: _securitySettings?.autoLockEnabled == true,
+              value: _securitySettings?.autoLockEnabled ?? false,
               onChanged: (value) =>
                   _updateSecuritySetting('autoLockEnabled', value),
             ),
-            if (_securitySettings?.autoLockEnabled == true) ...[
+            if (_securitySettings?.autoLockEnabled ?? false) ...[
               ListTile(
                 title: const Text('Auto-Lock Timeout'),
                 subtitle: Text(
@@ -395,14 +396,14 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
             SwitchListTile(
               title: const Text('Data Encryption'),
               subtitle: const Text('Encrypt all stored data'),
-              value: _securitySettings?.dataEncryptionEnabled == true,
+              value: _securitySettings?.dataEncryptionEnabled ?? false,
               onChanged: (value) =>
                   _updateSecuritySetting('dataEncryptionEnabled', value),
             ),
             SwitchListTile(
               title: const Text('Audit Logging'),
               subtitle: const Text('Log security events for audit trail'),
-              value: _securitySettings?.auditLoggingEnabled == true,
+              value: _securitySettings?.auditLoggingEnabled ?? false,
               onChanged: (value) =>
                   _updateSecuritySetting('auditLoggingEnabled', value),
             ),
@@ -429,16 +430,16 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
             Row(
               children: [
                 Icon(
-                  _securityStatus?.encryptionEnabled == true
+                  _securityStatus?.encryptionEnabled ?? false
                       ? Icons.lock
                       : Icons.lock_open,
-                  color: _securityStatus?.encryptionEnabled == true
+                  color: _securityStatus?.encryptionEnabled ?? false
                       ? Colors.green
                       : Colors.red,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _securityStatus?.encryptionEnabled == true
+                  _securityStatus?.encryptionEnabled ?? false
                       ? 'All data is encrypted'
                       : 'Data encryption disabled',
                 ),
@@ -972,7 +973,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
 
   Future<void> _showAutoLockTimeoutDialog() async {
     final currentContext = context;
-    int currentTimeout = _securitySettings?.autoLockTimeout ?? 300;
+    final int currentTimeout = _securitySettings?.autoLockTimeout ?? 300;
     int newTimeout = currentTimeout;
 
     final result = await showDialog<int>(
@@ -1043,7 +1044,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
   Future<void> _showDataSummary() async {
     final summary = await _dataManager.getDataSummary();
     if (!mounted) return;
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Data Summary'),
@@ -1094,7 +1095,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed ?? false) {
       try {
         await _dataManager.clearUserData();
         _analyticsService.logUserAction('user_data_cleared');
@@ -1132,7 +1133,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed ?? false) {
       try {
         await _dataManager.clearAllData();
         _analyticsService.logUserAction('all_data_cleared');
@@ -1238,7 +1239,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
   }
 
   void _showEventDetails(SecurityEvent event) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(_formatEventType(event.eventType)),
@@ -1288,3 +1289,4 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen>
     );
   }
 }
+

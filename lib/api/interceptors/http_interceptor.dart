@@ -1,7 +1,9 @@
 /// HTTP Interceptor
 /// 
 /// Interceptor pattern for HTTP requests and responses.
+library;
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 /// Base interceptor interface
@@ -20,32 +22,32 @@ abstract class HttpInterceptor {
 class LoggingInterceptor implements HttpInterceptor {
   @override
   Future<http.Request> onRequest(http.Request request) async {
-    print('→ ${request.method} ${request.url}');
-    print('Headers: ${request.headers}');
+    debugPrint('→ ${request.method} ${request.url}');
+    debugPrint('Headers: ${request.headers}');
     if (request.body.isNotEmpty) {
-      print('Body: ${request.body}');
+      debugPrint('Body: ${request.body}');
     }
     return request;
   }
 
   @override
   Future<http.Response> onResponse(http.Response response) async {
-    print('← ${response.statusCode} ${response.request?.url}');
-    print('Body: ${response.body}');
+    debugPrint('← ${response.statusCode} ${response.request?.url}');
+    debugPrint('Body: ${response.body}');
     return response;
   }
 
   @override
   Future<void> onError(Exception error) async {
-    print('✗ Error: $error');
+    debugPrint('✗ Error: $error');
   }
 }
 
 /// Authentication interceptor
 class AuthInterceptor implements HttpInterceptor {
-  final String Function() getToken;
 
   AuthInterceptor(this.getToken);
+  final String Function() getToken;
 
   @override
   Future<http.Request> onRequest(http.Request request) async {
@@ -69,14 +71,14 @@ class AuthInterceptor implements HttpInterceptor {
 
 /// Retry interceptor
 class RetryInterceptor implements HttpInterceptor {
-  final int maxRetries;
-  final Duration retryDelay;
-  int _retryCount = 0;
 
   RetryInterceptor({
     this.maxRetries = 3,
     this.retryDelay = const Duration(seconds: 1),
   });
+  final int maxRetries;
+  final Duration retryDelay;
+  int _retryCount = 0;
 
   @override
   Future<http.Request> onRequest(http.Request request) async {
@@ -87,7 +89,7 @@ class RetryInterceptor implements HttpInterceptor {
   Future<http.Response> onResponse(http.Response response) async {
     if (response.statusCode >= 500 && _retryCount < maxRetries) {
       _retryCount++;
-      await Future.delayed(retryDelay);
+      await Future<void>.delayed(retryDelay);
       throw Exception('Retry needed');
     }
     _retryCount = 0;
@@ -102,10 +104,10 @@ class RetryInterceptor implements HttpInterceptor {
 
 /// Cache interceptor
 class CacheInterceptor implements HttpInterceptor {
-  final Map<String, http.Response> _cache = {};
-  final Duration cacheDuration;
 
   CacheInterceptor({this.cacheDuration = const Duration(minutes: 5)});
+  final Map<String, http.Response> _cache = {};
+  final Duration cacheDuration;
 
   @override
   Future<http.Request> onRequest(http.Request request) async {
@@ -141,3 +143,4 @@ class CacheInterceptor implements HttpInterceptor {
     _cache.remove(url);
   }
 }
+

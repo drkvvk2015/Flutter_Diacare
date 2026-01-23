@@ -2,6 +2,7 @@
 /// 
 /// Centralized constants used throughout the application.
 /// Includes app configuration, limits, and default values.
+library;
 
 /// Application-wide constants
 class AppConstants {
@@ -38,24 +39,24 @@ class AppConstants {
   static const Duration imageCacheExpiration = Duration(days: 7);
 
   // Health Data Limits
-  static const double minHeartRate = 40.0;
-  static const double maxHeartRate = 220.0;
-  static const double minBPSystolic = 70.0;
-  static const double maxBPSystolic = 250.0;
-  static const double minBPDiastolic = 40.0;
-  static const double maxBPDiastolic = 150.0;
-  static const double minBloodGlucose = 20.0;
-  static const double maxBloodGlucose = 600.0;
-  static const double minWeight = 10.0;
-  static const double maxWeight = 300.0;
-  static const double minHeight = 50.0;
-  static const double maxHeight = 250.0;
+  static const double minHeartRate = 40;
+  static const double maxHeartRate = 220;
+  static const double minBPSystolic = 70;
+  static const double maxBPSystolic = 250;
+  static const double minBPDiastolic = 40;
+  static const double maxBPDiastolic = 150;
+  static const double minBloodGlucose = 20;
+  static const double maxBloodGlucose = 600;
+  static const double minWeight = 10;
+  static const double maxWeight = 300;
+  static const double minHeight = 50;
+  static const double maxHeight = 250;
 
   // Blood Glucose Ranges (mg/dL)
-  static const double normalFastingGlucoseMin = 70.0;
-  static const double normalFastingGlucoseMax = 100.0;
-  static const double preDiabeticFastingGlucoseMax = 125.0;
-  static const double normalPostMealGlucoseMax = 140.0;
+  static const double normalFastingGlucoseMin = 70;
+  static const double normalFastingGlucoseMax = 100;
+  static const double preDiabeticFastingGlucoseMax = 125;
+  static const double normalPostMealGlucoseMax = 140;
 
   // Blood Pressure Categories
   static const int normalBPSystolicMax = 120;

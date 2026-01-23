@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'dart:async';
+
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 /// Global error handler for catching and reporting all Flutter errors
 class GlobalErrorHandler {
@@ -41,7 +42,6 @@ class GlobalErrorHandler {
         error,
         stackTrace,
         reason: reason,
-        fatal: false,
       );
     } catch (e) {
       debugPrint('Failed to log error to Crashlytics: $e');
@@ -51,16 +51,15 @@ class GlobalErrorHandler {
 
 /// Error boundary widget that catches errors in the widget tree
 class ErrorBoundary extends StatefulWidget {
-  final Widget child;
-  final Widget Function(FlutterErrorDetails)? errorBuilder;
-  final void Function(FlutterErrorDetails)? onError;
 
   const ErrorBoundary({
-    super.key,
-    required this.child,
+    required this.child, super.key,
     this.errorBuilder,
     this.onError,
   });
+  final Widget child;
+  final Widget Function(FlutterErrorDetails)? errorBuilder;
+  final void Function(FlutterErrorDetails)? onError;
 
   @override
   State<ErrorBoundary> createState() => _ErrorBoundaryState();
@@ -87,7 +86,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
         backgroundColor: Colors.red,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

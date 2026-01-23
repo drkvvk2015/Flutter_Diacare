@@ -7,6 +7,7 @@
 /// - Direct login for patients
 /// - Patient-specific UI theme (Teal color scheme)
 /// - Simplified navigation for non-medical users
+library;
 import 'package:flutter/material.dart';
 import 'package:flutter_diacare/features/auth/login_screen.dart';
 

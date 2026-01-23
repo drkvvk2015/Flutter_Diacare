@@ -3,6 +3,19 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 /// A reusable TextFormField with a microphone suffixIcon for voice-to-text input.
 class VoiceTextFormField extends StatefulWidget {
+
+  const VoiceTextFormField({
+    required this.controller, required this.labelText, super.key,
+    this.helperText,
+    this.prefixIcon,
+    this.obscureText = false,
+    this.validator,
+    this.keyboardType,
+    this.maxLines = 1,
+    this.enabled = true,
+    this.onChanged,
+    this.initialValue,
+  });
   final TextEditingController controller;
   final String labelText;
   final String? helperText;
@@ -14,21 +27,6 @@ class VoiceTextFormField extends StatefulWidget {
   final bool enabled;
   final void Function(String)? onChanged;
   final String? initialValue;
-
-  const VoiceTextFormField({
-    super.key,
-    required this.controller,
-    required this.labelText,
-    this.helperText,
-    this.prefixIcon,
-    this.obscureText = false,
-    this.validator,
-    this.keyboardType,
-    this.maxLines = 1,
-    this.enabled = true,
-    this.onChanged,
-    this.initialValue,
-  });
 
   @override
   State<VoiceTextFormField> createState() => _VoiceTextFormFieldState();
@@ -47,8 +45,8 @@ class _VoiceTextFormFieldState extends State<VoiceTextFormField> {
     }
   }
 
-  void _startListening() async {
-    bool available = await _speech.initialize();
+  Future<void> _startListening() async {
+    final bool available = await _speech.initialize();
     if (available) {
       setState(() => _isListening = true);
       _speech.listen(

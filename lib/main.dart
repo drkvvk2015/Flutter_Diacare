@@ -10,26 +10,24 @@
 /// - Admin dashboard for system oversight
 /// - Multi-theme support (light/dark modes)
 /// - Firebase integration for backend services
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'themes/app_theme.dart';
-import 'firebase_options.dart';
+library;
+// import 'package:firebase_app_check/firebase_app_check.dart'; // Disabled for development
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 
-// State management providers
-import 'providers/user_provider.dart';
-import 'providers/theme_provider.dart';
+import 'firebase_options.dart';
 import 'providers/appointment_provider.dart';
 import 'providers/notification_provider.dart';
-
-// Application screens
-import 'screens/role_selection_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/patient_dashboard_screen.dart';
-import 'screens/admin_dashboard_screen.dart';
-import 'screens/health_analytics_screen.dart';
+import 'providers/theme_provider.dart';
+// State management providers
+import 'providers/user_provider.dart';
+import 'router.dart';
+import 'services/admob_service.dart';
+import 'services/hive_service.dart';
+import 'themes/app_theme.dart';
 
 /// Main application entry point
 /// 
@@ -46,6 +44,21 @@ void main() async {
   
   // Initialize Firebase with platform-specific configuration
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Initialize Hive for local caching
+  await initHive();
+
+  // NOTE: App Check disabled for development. Enable for production.
+  // await FirebaseAppCheck.instance.activate(
+  //   webProvider: ReCaptchaV3Provider('YOUR_RECAPTCHA_SITE_KEY'),
+  //   androidProvider: AndroidProvider.playIntegrity,
+  //   appleProvider: AppleProvider.appAttest,
+  // );
+
+  // Initialize AdMob (only on mobile platforms)
+  if (!kIsWeb) {
+    await AdMobService().initialize();
+  }
 
   // Launch the application
   runApp(const DiaCareApp());
@@ -89,15 +102,8 @@ class DiaCareApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             // Start at role selection screen
             initialRoute: '/',
-            // Application routing configuration
-            routes: {
-              '/': (context) => const RoleSelectionScreen(),
-              '/login': (context) => const LoginScreen(),
-              '/dashboard': (context) => const DashboardScreen(),
-              '/patientDashboard': (context) => const PatientDashboardScreen(),
-              '/adminDashboard': (context) => const AdminDashboardScreen(),
-              '/healthAnalytics': (context) => const HealthAnalyticsScreen(),
-            },
+            // Use AppRouter for all route generation
+            onGenerateRoute: AppRouter.generateRoute,
           );
         },
       ),

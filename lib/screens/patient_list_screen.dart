@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+
 import '../models/patient.dart';
 import '../models/patient_hive.dart';
 import 'patient_detail_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:hive/hive.dart';
 
 class PatientListScreen extends StatefulWidget {
   const PatientListScreen({super.key});
@@ -45,8 +46,8 @@ class _PatientListScreenState extends State<PatientListScreen> {
           final data = doc.data();
           return Patient(
             id: doc.id,
-            uhid: data['uhid'] ?? '',
-            name: data['name'] ?? '',
+            uhid: data['uhid'] as String? ?? '',
+            name: data['name'] as String? ?? '',
           );
         }).toList();
         setState(() {
@@ -172,7 +173,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
+                        MaterialPageRoute<void>(
                           builder: (_) => PatientDetailScreen(patient: patient),
                         ),
                       );
@@ -184,3 +185,4 @@ class _PatientListScreenState extends State<PatientListScreen> {
     );
   }
 }
+

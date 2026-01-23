@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class PaymentService {
   final Razorpay _razorpay = Razorpay();
 
   void initListeners({
-    required Function(PaymentSuccessResponse) onSuccess,
-    required Function(PaymentFailureResponse) onError,
-    required Function(ExternalWalletResponse) onExternalWallet,
+    required void Function(PaymentSuccessResponse) onSuccess,
+    required void Function(PaymentFailureResponse) onError,
+    required void Function(ExternalWalletResponse) onExternalWallet,
   }) {
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, onSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, onError);
@@ -27,7 +27,7 @@ class PaymentService {
     required String contact,
     required BuildContext context,
   }) {
-    var options = {
+    final options = {
       'key': 'YOUR_RAZORPAY_KEY',
       'amount': (amount * 100).toInt(),
       'name': name,
@@ -66,7 +66,7 @@ class PaymentService {
           'method': method,
           'receiptUrl': receiptUrl,
           'timestamp': DateTime.now().toIso8601String(),
-        }, SetOptions(merge: true));
+        }, SetOptions(merge: true),);
   }
 
   static Stream<QuerySnapshot> getPaymentsForDoctor(String doctorId) {

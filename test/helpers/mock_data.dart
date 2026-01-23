@@ -1,58 +1,32 @@
 /// Mock Data
 /// 
 /// Mock data for testing purposes.
+library;
 
-import '../../lib/models/patient.dart';
+import 'package:flutter_diacare/models/patient.dart';
 
 /// Mock patient data
 class MockData {
   MockData._();
 
   // Mock Patient
-  static Patient get mockPatient => Patient(
+  static Patient get mockPatient => const Patient(
         id: 'patient_1',
+        uhid: 'UHID001',
         name: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '1234567890',
-        dateOfBirth: DateTime(1990, 1, 1),
-        gender: 'M',
-        bloodGroup: 'O+',
-        address: '123 Main St',
-        emergencyContact: '0987654321',
-        medicalHistory: ['Diabetes Type 2'],
-        allergies: ['Penicillin'],
-        currentMedications: ['Metformin'],
       );
 
   static List<Patient> get mockPatientList => [
         mockPatient,
-        Patient(
+        const Patient(
           id: 'patient_2',
+          uhid: 'UHID002',
           name: 'Jane Smith',
-          email: 'jane.smith@example.com',
-          phone: '2345678901',
-          dateOfBirth: DateTime(1985, 5, 15),
-          gender: 'F',
-          bloodGroup: 'A+',
-          address: '456 Oak Ave',
-          emergencyContact: '1234567890',
-          medicalHistory: ['Hypertension'],
-          allergies: [],
-          currentMedications: ['Lisinopril'],
         ),
-        Patient(
+        const Patient(
           id: 'patient_3',
+          uhid: 'UHID003',
           name: 'Bob Johnson',
-          email: 'bob.johnson@example.com',
-          phone: '3456789012',
-          dateOfBirth: DateTime(1995, 12, 25),
-          gender: 'M',
-          bloodGroup: 'B+',
-          address: '789 Pine Rd',
-          emergencyContact: '2345678901',
-          medicalHistory: [],
-          allergies: ['Aspirin'],
-          currentMedications: [],
         ),
       ];
 
@@ -118,10 +92,10 @@ class MockData {
       };
 
   // Mock API responses
-  static Map<String, dynamic> get mockSuccessResponse => {
+  static Map<String, dynamic> get mockSuccessResponse => <String, dynamic>{
         'success': true,
         'message': 'Operation successful',
-        'data': {},
+        'data': <String, dynamic>{},
       };
 
   static Map<String, dynamic> get mockErrorResponse => {

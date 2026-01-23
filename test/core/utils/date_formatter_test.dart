@@ -1,9 +1,10 @@
 /// Date Formatter Tests
 /// 
 /// Tests for the DateFormatter utility class.
+library;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_diacare/core/utils/date_formatter.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DateFormatter', () {

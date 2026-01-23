@@ -1,18 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
 import 'payment_service.dart';
 
 class PaymentScreen extends StatefulWidget {
+  const PaymentScreen({
+    required this.appointmentId, required this.amount, required this.doctorId, super.key,
+  });
   final String appointmentId;
   final double amount;
   final String doctorId;
-  const PaymentScreen({
-    super.key,
-    required this.appointmentId,
-    required this.amount,
-    required this.doctorId,
-  });
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -42,7 +40,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
-  void _startPayment() async {
+  Future<void> _startPayment() async {
     setState(() => _isPaying = true);
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -58,7 +56,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
     // Listen for payment result (should be improved for real app)
     // For demo, mark as paid after a delay
-    await Future.delayed(const Duration(seconds: 5));
+    await Future<void>.delayed(const Duration(seconds: 5));
     await PaymentService.savePaymentStatus(
       userId: user.uid,
       appointmentId: widget.appointmentId,
@@ -107,9 +105,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     style: const TextStyle(fontSize: 20),
                   ),
                   const SizedBox(height: 24),
-                  _isPaying
-                      ? const CircularProgressIndicator()
-                      : ElevatedButton.icon(
+                  if (_isPaying) const CircularProgressIndicator() else ElevatedButton.icon(
                           icon: const Icon(Icons.payment),
                           label: const Text('Pay Now'),
                           onPressed: _startPayment,
@@ -128,3 +124,4 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 }
+

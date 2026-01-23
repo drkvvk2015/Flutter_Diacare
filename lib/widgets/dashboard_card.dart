@@ -3,6 +3,14 @@ import 'glassmorphic_card.dart';
 
 /// A reusable dashboard card for admin, pharmacy, and patient dashboards.
 class DashboardCard extends StatelessWidget {
+
+  const DashboardCard({
+    required this.icon, required this.iconColor, required this.title, required this.subtitle, super.key,
+    this.onTap,
+    this.cardColor,
+    this.borderRadius = 18,
+    this.useGlassmorphic = true,
+  });
   final IconData icon;
   final Color iconColor;
   final String title;
@@ -11,18 +19,6 @@ class DashboardCard extends StatelessWidget {
   final Color? cardColor;
   final double borderRadius;
   final bool useGlassmorphic;
-
-  const DashboardCard({
-    super.key,
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    required this.subtitle,
-    this.onTap,
-    this.cardColor,
-    this.borderRadius = 18,
-    this.useGlassmorphic = true,
-  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
+
 import '../providers/appointment_provider.dart';
-import '../providers/theme_provider.dart';
 import '../providers/notification_provider.dart';
+import '../providers/theme_provider.dart';
+import '../providers/user_provider.dart';
 import '../widgets/glassmorphic_card.dart';
 
 /// Comprehensive state management demo screen
@@ -63,7 +64,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
         ],
       ),
       extendBodyBehindAppBar: true,
-      body: Container(
+      body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFF667eea), Color(0xFFf093fb)],
@@ -73,7 +74,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 _buildUserProviderDemo(),
@@ -98,7 +99,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
       builder: (context, userProvider, child) {
         return GlassmorphicCard(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -193,7 +194,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
       builder: (context, themeProvider, child) {
         return GlassmorphicCard(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -302,7 +303,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
       builder: (context, notificationProvider, child) {
         return GlassmorphicCard(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -423,7 +424,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
       builder: (context, appointmentProvider, child) {
         return GlassmorphicCard(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -515,7 +516,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
   Widget _buildProviderStatistics() {
     return GlassmorphicCard(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -644,7 +645,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
     );
   }
 
-  void _simulateUserLogin(UserProvider userProvider) async {
+  Future<void> _simulateUserLogin(UserProvider userProvider) async {
     // Simulate creating a sample user for demo purposes
     await userProvider.updateProfile(
       displayName: 'Demo User',
@@ -664,15 +665,13 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
       patientName: 'John Doe',
       doctorName: 'Dr. Smith',
       dateTime: DateTime.now().add(const Duration(hours: 2)),
-      type: AppointmentType.consultation,
-      status: AppointmentStatus.scheduled,
     );
 
     appointmentProvider.createAppointment(appointment);
   }
 
   void _showNotificationsDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => Consumer<NotificationProvider>(
         builder: (context, notificationProvider, _) {
@@ -703,9 +702,7 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
                               : notification.color.withAlpha(26),
                           onTap: () {
                             notificationProvider.markAsRead(notification.id);
-                            if (notification.onTap != null) {
-                              notification.onTap!();
-                            }
+                            notification.onTap?.call();
                           },
                         );
                       },
@@ -728,3 +725,4 @@ class _StateManagementDemoScreenState extends State<StateManagementDemoScreen> {
     );
   }
 }
+

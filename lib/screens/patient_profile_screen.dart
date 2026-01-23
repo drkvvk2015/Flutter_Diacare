@@ -1,16 +1,17 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
 // Only import dart:html on web
 // ignore: uri_does_not_exist
 import 'patient_profile_web_stub.dart'
     if (dart.library.html) 'patient_profile_web_html.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 class PatientProfileScreen extends StatefulWidget {
+  const PatientProfileScreen({required this.userId, super.key});
   final String userId;
-  const PatientProfileScreen({super.key, required this.userId});
 
   @override
   State<PatientProfileScreen> createState() => _PatientProfileScreenState();
@@ -51,12 +52,12 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
           .doc(widget.userId);
       final doc = await docRef.get();
       if (!mounted) return;
-      Map<String, dynamic> data = doc.data() ?? {};
+      final Map<String, dynamic> data = doc.data() ?? {};
       // Patient required fields
-      final requiredFields = {
+      final Map<String, Object> requiredFields = {
         'name': '',
         'uhid': '',
-        'comorbidities': [],
+        'comorbidities': <dynamic>[],
         'allergies': '',
         'surgeries': '',
         'contact': '',
@@ -77,23 +78,23 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
       if (!mounted) return;
       profile = data;
       setState(() {
-        nameController.text = profile?['name'] ?? '';
-        contactController.text = profile?['contact'] ?? '';
-        aboutController.text = profile?['about'] ?? '';
-        photoUrl = profile?['photoUrl'];
-        uhid = profile?['uhid'];
+        nameController.text = profile?['name'] as String? ?? '';
+        contactController.text = profile?['contact'] as String? ?? '';
+        aboutController.text = profile?['about'] as String? ?? '';
+        photoUrl = profile?['photoUrl'] as String?;
+        uhid = profile?['uhid'] as String?;
         final List<dynamic> comorbiditiesRaw =
-            (profile?['comorbidities'] ?? []) as List<dynamic>;
+            (profile?['comorbidities'] ?? <dynamic>[]) as List<dynamic>;
         _comorbiditiesList = comorbiditiesRaw
             .map<Map<String, String>>(
               (item) => {
-                'name': item['name'] ?? '',
-                'duration': item['duration'] ?? '',
+                'name': (item as Map)['name'] as String? ?? '',
+                'duration': item['duration'] as String? ?? '',
               },
             )
             .toList();
-        allergiesController.text = profile?['allergies'] ?? '';
-        surgeriesController.text = profile?['surgeries'] ?? '';
+        allergiesController.text = profile?['allergies'] as String? ?? '';
+        surgeriesController.text = profile?['surgeries'] as String? ?? '';
         loading = false;
       });
     } catch (e) {
@@ -564,3 +565,4 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
     );
   }
 }
+

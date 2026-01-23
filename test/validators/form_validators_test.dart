@@ -1,9 +1,10 @@
 /// Form Validators Tests
 /// 
 /// Unit tests for form validators
+library;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_diacare/validators/form_validators.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Form Validators Tests', () {

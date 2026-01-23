@@ -23,7 +23,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
       duration: const Duration(milliseconds: 1200),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
@@ -103,7 +103,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: FadeTransition(
                   opacity: _fadeAnimation,
                   child: SlideTransition(
@@ -149,7 +149,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontFamily: 'Roboto', // Or system default
-                            letterSpacing: 2.0,
+                            letterSpacing: 2,
                             shadows: [
                               Shadow(
                                 color: Colors.black45,
@@ -247,11 +247,11 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
     // Staggered animation delay handled by Interval in curve
 
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
+      tween: Tween(begin: 0, end: 1),
       duration: const Duration(milliseconds: 800),
       curve: Interval(
         (index * 0.1).clamp(0.0, 1.0),
-        1.0,
+        1,
         curve: Curves.easeOutBack,
       ),
       builder: (context, value, child) {
@@ -269,7 +269,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<void>(
               builder: (_) => LoginScreen(role: role),
               settings: RouteSettings(arguments: {'role': role}),
             ),
@@ -352,3 +352,4 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
     );
   }
 }
+

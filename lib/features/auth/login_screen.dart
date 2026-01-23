@@ -1,27 +1,24 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'dart:ui';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
+import '../../screens/admin_dashboard_screen.dart';
+import '../../screens/dashboard_screen.dart';
+import '../../screens/patient_dashboard_screen.dart';
+import '../../screens/pharmacy_dashboard_screen.dart';
+import '../../screens/registration_screen.dart';
 // import 'package:flutter_facebook_auth/flutter_facebook_auth.dart'; // Removed Facebook login
 // import 'package:speech_to_text/speech_to_text.dart' as stt; // No longer needed, handled by VoiceTextFormField
 import '../../widgets/voice_text_field.dart';
-import '../../screens/dashboard_screen.dart';
-
-      // Get authentication details
-import '../../screens/patient_dashboard_screen.dart';
-
-      // Create credential with idToken and accessToken
-import '../../screens/admin_dashboard_screen.dart';
-import '../../screens/pharmacy_dashboard_screen.dart';
-import '../../screens/registration_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  final String? role;
 
   const LoginScreen({super.key, this.role});
+  final String? role;
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 
@@ -48,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
         if (args != null && args['role'] != null) {
           setState(() {
-            selectedRole = args['role'];
+            selectedRole = args['role'] as String;
           });
         }
       });
@@ -59,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
   static const String _adminEmail = 'admin@admin.com';
   static const String _adminPassword = 'Admin@123';
 
-  void _login() async {
+  Future<void> _login() async {
     setState(() {
       loading = true;
       error = null;
@@ -99,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
             'role': selectedRole,
             'email': cred.user!.email,
             'lastLogin': DateTime.now().toIso8601String(),
-          }, SetOptions(merge: true));
+          }, SetOptions(merge: true),);
 
       if (!mounted) return;
       _navigateToRoleDashboard(selectedRole);
@@ -129,25 +126,25 @@ class _LoginScreenState extends State<LoginScreen> {
       case 'patient':
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const PatientDashboardScreen()),
+          MaterialPageRoute<void>(builder: (_) => const PatientDashboardScreen()),
         );
         break;
       case 'admin':
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+          MaterialPageRoute<void>(builder: (_) => const AdminDashboardScreen()),
         );
         break;
       case 'pharmacy':
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const PharmacyDashboardScreen()),
+          MaterialPageRoute<void>(builder: (_) => const PharmacyDashboardScreen()),
         );
         break;
       default: // doctor
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+          MaterialPageRoute<void>(builder: (_) => const DashboardScreen()),
         );
     }
   }
@@ -158,27 +155,31 @@ class _LoginScreenState extends State<LoginScreen> {
       error = null;
     });
     try {
-      // Use GoogleSignIn singleton instance
-      // Initialize with clientId for Web support
-      final GoogleSignIn googleSignIn = kIsWeb
-          ? GoogleSignIn(
-              clientId:
-                  '603628370602-j5ejajnde0nd5d99hfq8g3tpd6obfr39.apps.googleusercontent.com',
-            )
-          : GoogleSignIn();
+      // Use GoogleSignIn singleton instance (google_sign_in 7.x API)
+      final googleSignIn = GoogleSignIn.instance;
       
-      final GoogleSignInAccount? account = await googleSignIn.signIn();
-      if (account == null) {
-        setState(() {
-          loading = false;
-          error = 'Google sign-in aborted';
-        });
-        return;
+      // Initialize with clientId for Web support
+      if (kIsWeb) {
+        await googleSignIn.initialize(
+          clientId: '603628370602-j5ejajnde0nd5d99hfq8g3tpd6obfr39.apps.googleusercontent.com',
+        );
+      } else {
+        await googleSignIn.initialize();
       }
-      final GoogleSignInAuthentication auth = await account.authentication;
+      
+      // Authenticate user - throws GoogleSignInException on failure
+      final account = await googleSignIn.authenticate();
+      
+      // Get idToken from authentication
+      final idToken = account.authentication.idToken;
+      
+      // Get accessToken from authorization (if needed)
+      final authorization = await account.authorizationClient.authorizationForScopes([]);
+      final accessToken = authorization?.accessToken;
+      
       final credential = GoogleAuthProvider.credential(
-        idToken: auth.idToken,
-        accessToken: auth.accessToken,
+        idToken: idToken,
+        accessToken: accessToken,
       );
       final userCredential = await FirebaseAuth.instance.signInWithCredential(
         credential,
@@ -187,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
           .collection('users')
           .doc(userCredential.user!.uid)
           .get();
-      String userRole = doc.data()?['role'] ?? selectedRole;
+      String userRole = doc.data()?['role'] as String? ?? selectedRole;
 
       if (!doc.exists) {
         await FirebaseFirestore.instance
@@ -251,10 +252,10 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.tealAccent.withValues(alpha:0.1),
+                color: Colors.tealAccent.withValues(alpha: 0.1),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.tealAccent.withValues(alpha:0.2),
+                    color: Colors.tealAccent.withValues(alpha: 0.2),
                     blurRadius: 80,
                     spreadRadius: 10,
                   ),
@@ -270,17 +271,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                   child: Container(
-                    padding: const EdgeInsets.all(36.0),
+                    padding: const EdgeInsets.all(36),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha:0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha:0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         width: 1.5,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha:0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -291,24 +292,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         // Animated logo
                         TweenAnimationBuilder<double>(
-                          tween: Tween(begin: 0.8, end: 1.0),
+                          tween: Tween(begin: 0.8, end: 1),
                           duration: const Duration(milliseconds: 800),
                           curve: Curves.elasticOut,
                           builder: (context, scale, child) =>
                               Transform.scale(scale: scale, child: child),
-                          child: Container(
+                          child: DecoratedBox(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.tealAccent.withValues(alpha:0.3),
+                                  color: Colors.tealAccent.withValues(alpha: 0.3),
                                   blurRadius: 20,
                                   spreadRadius: 2,
                                 ),
                               ],
                             ),
                             child: CircleAvatar(
-                              backgroundColor: Colors.tealAccent.withValues(alpha:0.2),
+                              backgroundColor: Colors.tealAccent.withValues(alpha: 0.2),
                               radius: 48,
                               child: const Icon(
                                 Icons.medical_services_rounded,
@@ -340,7 +341,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           'Sign in to your account',
                           style: TextStyle(
                             fontSize: 18,
-                            color: Colors.white.withValues(alpha:0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
                         const SizedBox(height: 32),
@@ -349,13 +350,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           data: Theme.of(context).copyWith(
                             inputDecorationTheme: InputDecorationTheme(
                               filled: true,
-                              fillColor: Colors.black.withValues(alpha:0.2),
+                              fillColor: Colors.black.withValues(alpha: 0.2),
                               labelStyle: const TextStyle(color: Colors.white70),
                               prefixIconColor: Colors.tealAccent,
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
-                                  color: Colors.white.withValues(alpha:0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
@@ -403,11 +404,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 8),
                         ],
                         const SizedBox(height: 12),
-                        loading
-                            ? const CircularProgressIndicator(
+                        if (loading) const CircularProgressIndicator(
                                 color: Colors.tealAccent,
-                              )
-                            : SizedBox(
+                              ) else SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
@@ -420,7 +419,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                     elevation: 8,
                                     shadowColor:
-                                        Colors.tealAccent.withValues(alpha:0.4),
+                                        Colors.tealAccent.withValues(alpha: 0.4),
                                   ),
                                   onPressed: _login,
                                   child: const Text(
@@ -439,8 +438,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                                color: Colors.white.withValues(alpha:0.1)),
-                            color: Colors.white.withValues(alpha:0.05),
+                                color: Colors.white.withValues(alpha: 0.1),),
+                            color: Colors.white.withValues(alpha: 0.05),
                           ),
                           child: TextButton.icon(
                             icon: const Icon(
@@ -461,15 +460,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 builder: (dialogCtx) {
                                   return Dialog(
                                     backgroundColor:
-                                        const Color(0xFF203A43).withValues(alpha:0.9),
+                                        const Color(0xFF203A43).withValues(alpha: 0.9),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20),
                                       side: BorderSide(
-                                        color: Colors.tealAccent.withValues(alpha:0.5),
+                                        color: Colors.tealAccent.withValues(alpha: 0.5),
                                       ),
                                     ),
                                     child: Padding(
-                                      padding: const EdgeInsets.all(24.0),
+                                      padding: const EdgeInsets.all(24),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
@@ -518,7 +517,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (role != null && context.mounted) {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  MaterialPageRoute<void>(
                                     builder: (_) =>
                                         RegistrationScreen(userType: role),
                                   ),
@@ -541,12 +540,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text('Feature coming soon')),
+                                  content: Text('Feature coming soon'),),
                             );
                           },
                           child: Text(
                             'Forgot Password?',
-                            style: TextStyle(color: Colors.white.withValues(alpha:0.6)),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -554,14 +553,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         Row(
                           children: [
                             Expanded(
-                              child: Divider(color: Colors.white.withValues(alpha:0.2)),
+                              child: Divider(color: Colors.white.withValues(alpha: 0.2)),
                             ),
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               child: Text(
                                 'Or continue with',
                                 style: TextStyle(
-                                  color: Colors.white.withValues(alpha:0.6),
+                                  color: Colors.white.withValues(alpha: 0.6),
                                   fontSize: 14,
                                 ),
                               ),
@@ -600,7 +599,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: Colors.tealAccent.withValues(alpha:0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                                color: Colors.tealAccent.withValues(alpha:0.3)),
+                                color: Colors.tealAccent.withValues(alpha: 0.3),),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -641,7 +640,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildDialogOption(BuildContext context, String title, IconData icon,
-      Color color, String role) {
+      Color color, String role,) {
     return ListTile(
       leading: Icon(icon, color: color),
       title: Text(
@@ -649,11 +648,14 @@ class _LoginScreenState extends State<LoginScreen> {
         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
       ),
       onTap: () => Navigator.pop(context, role),
-      hoverColor: Colors.white.withValues(alpha:0.1),
+      hoverColor: Colors.white.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     );
   }
 }
+
+
+
 
 
 

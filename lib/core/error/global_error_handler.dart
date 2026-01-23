@@ -1,28 +1,30 @@
 /// Global Error Handler
 /// 
 /// Centralized error handling for the entire application.
+library;
 
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'dart:ui';
+
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import '../services/logger_service.dart';
-import '../constants/error_messages.dart';
-import '../core/exceptions/app_exception.dart';
+import 'package:flutter/material.dart';
+
+import '../../constants/error_messages.dart';
+import '../../services/logger_service.dart';
+import '../exceptions/app_exception.dart';
 
 /// Global error handler
 class GlobalErrorHandler {
-  static final GlobalErrorHandler _instance = GlobalErrorHandler._internal();
   factory GlobalErrorHandler() => _instance;
   GlobalErrorHandler._internal();
+  static final GlobalErrorHandler _instance = GlobalErrorHandler._internal();
 
   final LoggerService _logger = LoggerService();
 
   /// Initialize error handling
   void initialize() {
     // Catch Flutter framework errors
-    FlutterError.onError = (FlutterErrorDetails details) {
-      _handleFlutterError(details);
-    };
+    FlutterError.onError = _handleFlutterError;
 
     // Catch errors outside Flutter framework (async errors)
     PlatformDispatcher.instance.onError = (error, stack) {
@@ -132,7 +134,7 @@ class GlobalErrorHandler {
     BuildContext context,
     String message,
   ) async {
-    return showDialog(
+    return showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Error'),
@@ -195,6 +197,7 @@ class GlobalErrorHandler {
         retries++;
 
         if (retries >= maxRetries) {
+          // ignore: use_build_context_synchronously
           await handleError(context, error, stackTrace: stackTrace);
           return null;
         }
@@ -204,7 +207,7 @@ class GlobalErrorHandler {
           error: error,
         );
 
-        await Future.delayed(retryDelay);
+        await Future<void>.delayed(retryDelay);
       }
     }
 
@@ -247,8 +250,8 @@ mixin ErrorHandlerMixin<T extends StatefulWidget> on State<T> {
   }
 
   /// Execute operation with error handling
-  Future<T?> executeWithErrorHandling<T>(
-    Future<T> Function() operation, {
+  Future<R?> executeWithErrorHandling<R>(
+    Future<R> Function() operation, {
     String? errorMessage,
   }) async {
     try {
@@ -262,3 +265,5 @@ mixin ErrorHandlerMixin<T extends StatefulWidget> on State<T> {
 
 /// Global error handler instance
 final globalErrorHandler = GlobalErrorHandler();
+
+

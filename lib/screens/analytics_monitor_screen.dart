@@ -167,7 +167,7 @@ class _AnalyticsMonitorScreenState extends State<AnalyticsMonitorScreen>
             _buildSummaryRow('Active Traces', '${summary['active_traces']}'),
             _buildSummaryRow(
               'Current Screen',
-              summary['current_screen'] ?? 'None',
+              summary['current_screen'] as String? ?? 'None',
             ),
           ],
         ),
@@ -288,13 +288,13 @@ class _AnalyticsMonitorScreenState extends State<AnalyticsMonitorScreen>
                       (event) => Card(
                         margin: const EdgeInsets.symmetric(vertical: 4),
                         child: ListTile(
-                          title: Text(event['name']),
-                          subtitle: Text(event['timestamp']),
+                          title: Text(event['name'] as String),
+                          subtitle: Text(event['timestamp'] as String),
                           trailing: event['parameters'] != null
                               ? const Icon(Icons.info_outline)
                               : null,
                           onTap: event['parameters'] != null
-                              ? () => _showEventDetails(event)
+                              ? () => _showEventDetails(event as Map<String, dynamic>)
                               : null,
                         ),
                       ),
@@ -418,7 +418,7 @@ class _AnalyticsMonitorScreenState extends State<AnalyticsMonitorScreen>
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () => _setTestUserProperties(),
+                      onPressed: _setTestUserProperties,
                       child: const Text('Set Test User Properties'),
                     ),
                   ),
@@ -463,7 +463,7 @@ class _AnalyticsMonitorScreenState extends State<AnalyticsMonitorScreen>
       _analyticsService.startTrace('test_performance_trace');
 
       // Simulate some work
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
 
       await _analyticsService.stopTrace(
         'test_performance_trace',
@@ -484,7 +484,7 @@ class _AnalyticsMonitorScreenState extends State<AnalyticsMonitorScreen>
       _analyticsService.startHttpMetric(url, method);
 
       // Simulate HTTP request
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
 
       await _analyticsService.stopHttpMetric(
         url,
@@ -550,7 +550,6 @@ class _AnalyticsMonitorScreenState extends State<AnalyticsMonitorScreen>
       await _analyticsService.recordError(
         'Test error from Analytics Monitor',
         StackTrace.current,
-        fatal: false,
       );
 
       _showSnackBar('Test error reported successfully');
@@ -575,10 +574,10 @@ class _AnalyticsMonitorScreenState extends State<AnalyticsMonitorScreen>
   }
 
   void _showEventDetails(Map<String, dynamic> event) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(event['name']),
+        title: Text(event['name'] as String),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -612,9 +611,11 @@ class _AnalyticsMonitorScreenState extends State<AnalyticsMonitorScreen>
   }
 
   String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, "0");
-    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    final String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return '${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds';
   }
 }
+
+
