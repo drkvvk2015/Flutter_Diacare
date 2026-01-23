@@ -34,6 +34,10 @@ class UserProvider extends ChangeNotifier {
   bool get isAuthenticated => _currentUser != null;
   bool get isDoctor => _userRole == UserRole.doctor;
   bool get isPatient => _userRole == UserRole.patient;
+  bool get isPharmacist => _userRole == UserRole.pharmacist;
+  bool get isAdmin => _userRole == UserRole.admin;
+  /// Check if user is a healthcare professional (doctor or pharmacist)
+  bool get isHealthcareProfessional => isDoctor || isPharmacist;
 
   String get displayName =>
       (_userData?['displayName'] as String?) ??
@@ -348,6 +352,7 @@ enum UserRole {
   unknown,
   patient,
   doctor,
+  pharmacist,
   admin;
 
   String get displayName {
@@ -358,6 +363,8 @@ enum UserRole {
         return 'Patient';
       case UserRole.doctor:
         return 'Doctor';
+      case UserRole.pharmacist:
+        return 'Pharmacist';
       case UserRole.admin:
         return 'Administrator';
     }

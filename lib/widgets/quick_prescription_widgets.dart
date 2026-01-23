@@ -232,7 +232,7 @@ class QuickPrescriptionData {
   ];
 }
 
-/// Widget for quick selection chips
+/// Widget for quick selection chips with high contrast colors
 class QuickSelectChips extends StatelessWidget {
   const QuickSelectChips({
     required this.options,
@@ -249,6 +249,9 @@ class QuickSelectChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -273,12 +276,28 @@ class QuickSelectChips extends StatelessWidget {
                 option,
                 style: TextStyle(
                   fontSize: 12,
-                  color: isSelected ? Colors.white : null,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected
+                      ? Colors.white
+                      : isDarkMode
+                          ? Colors.white
+                          : Colors.grey.shade800,
                 ),
               ),
               backgroundColor: isSelected
-                  ? Theme.of(context).primaryColor
-                  : Colors.grey[200],
+                  ? theme.primaryColor
+                  : isDarkMode
+                      ? Colors.grey.shade700
+                      : Colors.grey.shade300,
+              side: BorderSide(
+                color: isSelected
+                    ? theme.primaryColor
+                    : isDarkMode
+                        ? Colors.grey.shade500
+                        : Colors.grey.shade400,
+              ),
+              elevation: isSelected ? 2 : 0,
+              shadowColor: theme.primaryColor.withValues(alpha: 0.3),
               onPressed: () => onSelected(option),
             );
           }).toList(),

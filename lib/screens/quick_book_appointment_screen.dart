@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../features/payments/payment_screen.dart';
 import '../features/telemedicine/appointment_model.dart';
 import '../features/telemedicine/appointment_service.dart';
-// Removed unused direct cloud_firestore import (service handles it)
 import '../utils/logger.dart';
 import 'appointment_screen.dart';
 import 'patient_dashboard_screen.dart';
@@ -124,9 +124,14 @@ class _QuickBookAppointmentScreenState
 
     _formKey.currentState!.save();
 
+    // Store values in local non-nullable variables after validation
+    final doctorId = _selectedDoctorId!;
+    final doctorName = _selectedDoctorName ?? 'Doctor';
+    final fee = _fee ?? 500;
+
     setState(() {
       _isLoading = true;
-      _status = 'Booking appointment...';
+      _status = 'Creating appointment...';
     });
 
     try {
@@ -139,64 +144,150 @@ class _QuickBookAppointmentScreenState
       );
 
       logInfo(
-        'Creating appointment: patient=${user.uid} doctor=$_selectedDoctorId time=$appointmentTime fee=$_fee',
+        'Creating appointment: patient=${user.uid} doctor=$doctorId time=$appointmentTime fee=$fee',
       );
 
       final appointment = Appointment(
         id: '', // Will be assigned by Firestore
         patientId: user.uid,
-        doctorId: _selectedDoctorId!,
+        doctorId: doctorId,
         time: appointmentTime,
-        status: 'scheduled',
+        status: 'pending_payment', // Changed: Set initial status to pending_payment
         notes: _notes,
-        fee: _fee,
+        fee: fee,
+        paymentStatus: 'pending', // Added: Track payment status
       );
 
-      final appointmentId = await _service.bookAppointment(appointment);
+      final appointmentIdResult = await _service.bookAppointment(appointment);
+      
+      if (appointmentIdResult == null) {
+        _showError('Failed to create appointment');
+        setState(() {
+          _isLoading = false;
+          _status = '❌ Failed to create appointment';
+        });
+        return;
+      }
+      
+      final appointmentId = appointmentIdResult;
 
       setState(() {
         _isLoading = false;
-        _status =
-            '✅ Success! Appointment booked successfully. ID: $appointmentId';
+        _status = 'Appointment created. Proceeding to payment...';
       });
 
-      // Show success dialog
+      // Navigate to payment screen
       if (mounted) {
-        showDialog<void>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Appointment Booked'),
-            content: Text(
-              'Your appointment with $_selectedDoctorName has been successfully booked for ${appointmentTime.toString().substring(0, 16)}.\n\nAppointment ID: $appointmentId',
+        final paymentResult = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute<bool>(
+            builder: (_) => PaymentScreen(
+              appointmentId: appointmentId,
+              amount: fee,
+              doctorId: doctorId,
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                },
-                child: const Text('OK'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (_) => AppointmentScreen(
-                        userRole: 'patient',
-                        userId: user.uid,
-                      ),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                ),
-                child: const Text('View All Appointments'),
-              ),
-            ],
           ),
         );
+
+        // Check if payment was successful
+        if (paymentResult ?? false) {
+          // Update appointment status to scheduled after payment
+          await _service.updateStatus(appointmentId, 'scheduled');
+          
+          setState(() {
+            _status = '✅ Success! Appointment booked and payment completed.';
+          });
+
+          // Show success dialog
+          if (mounted) {
+            showDialog<void>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Appointment Confirmed'),
+                content: Text(
+                  'Your appointment with $doctorName has been confirmed for ${appointmentTime.toString().substring(0, 16)}.\n\nPayment received successfully!\n\nAppointment ID: $appointmentId',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                    },
+                    child: const Text('OK'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (_) => AppointmentScreen(
+                            userRole: 'patient',
+                            userId: user.uid,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                    ),
+                    child: const Text('View All Appointments'),
+                  ),
+                ],
+              ),
+            );
+          }
+        } else {
+          // Payment was cancelled or failed
+          setState(() {
+            _status = '⚠️ Payment not completed. Appointment is pending.';
+          });
+          
+          if (mounted) {
+            showDialog<void>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Payment Pending'),
+                content: Text(
+                  'Your appointment has been created but payment is pending.\n\nPlease complete the payment to confirm your appointment with $doctorName.\n\nAppointment ID: $appointmentId',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                    },
+                    child: const Text('Later'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pop(ctx);
+                      // Retry payment
+                      final retryResult = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute<bool>(
+                          builder: (_) => PaymentScreen(
+                            appointmentId: appointmentId,
+                            amount: fee,
+                            doctorId: doctorId,
+                          ),
+                        ),
+                      );
+                      if (retryResult ?? false) {
+                        await _service.updateStatus(appointmentId, 'scheduled');
+                        setState(() {
+                          _status = '✅ Payment completed! Appointment confirmed.';
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    child: const Text('Pay Now'),
+                  ),
+                ],
+              ),
+            );
+          }
+        }
       }
     } catch (e) {
       logError('Error booking appointment', e);
@@ -211,6 +302,137 @@ class _QuickBookAppointmentScreenState
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  /// Generates available time slots from 9 AM to 10 PM
+  List<TimeOfDay> _generateTimeSlots() {
+    final slots = <TimeOfDay>[];
+    // Generate slots from 9 AM to 9:30 PM (last slot at 9:30 PM for 30-min appointment)
+    for (var hour = 9; hour < 22; hour++) {
+      slots.add(TimeOfDay(hour: hour, minute: 0));
+      slots.add(TimeOfDay(hour: hour, minute: 30));
+    }
+    return slots;
+  }
+
+  /// Builds quick time slot selection grid
+  Widget _buildQuickTimeSlots() {
+    final timeSlots = _generateTimeSlots();
+    final theme = Theme.of(context);
+    
+    // Group slots by time period
+    final morningSlots = timeSlots.where((t) => t.hour >= 9 && t.hour < 12).toList();
+    final afternoonSlots = timeSlots.where((t) => t.hour >= 12 && t.hour < 17).toList();
+    final eveningSlots = timeSlots.where((t) => t.hour >= 17 && t.hour < 22).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Morning slots
+        _buildTimeSlotSection(
+          'Morning (9 AM - 12 PM)',
+          morningSlots,
+          Colors.orange,
+          theme,
+        ),
+        const SizedBox(height: 12),
+        
+        // Afternoon slots
+        _buildTimeSlotSection(
+          'Afternoon (12 PM - 5 PM)',
+          afternoonSlots,
+          Colors.blue,
+          theme,
+        ),
+        const SizedBox(height: 12),
+        
+        // Evening slots
+        _buildTimeSlotSection(
+          'Evening (5 PM - 10 PM)',
+          eveningSlots,
+          Colors.purple,
+          theme,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimeSlotSection(
+    String title,
+    List<TimeOfDay> slots,
+    Color accentColor,
+    ThemeData theme,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 4,
+              height: 16,
+              decoration: BoxDecoration(
+                color: accentColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: slots.map((time) {
+            final isSelected = _selectedTime != null &&
+                _selectedTime!.hour == time.hour &&
+                _selectedTime!.minute == time.minute;
+            
+            return InkWell(
+              onTap: () {
+                setState(() {
+                  _selectedTime = time;
+                });
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? accentColor
+                      : accentColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isSelected
+                        ? accentColor
+                        : accentColor.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  time.format(context),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected ? Colors.white : accentColor.withValues(alpha: 0.8),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -324,28 +546,92 @@ class _QuickBookAppointmentScreenState
                               ),
                             ),
                             const SizedBox(height: 16),
+                            
+                            // Quick Time Slot Selection
+                            const Text(
+                              'Preferred Time Slots',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            _buildQuickTimeSlots(),
+                            
+                            const SizedBox(height: 12),
+                            const Center(
+                              child: Text(
+                                '— OR select custom time —',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            
                             InkWell(
                               onTap: () async {
+                                // Determine initial time - default to 9 AM if current time is outside range
+                                final now = TimeOfDay.now();
+                                TimeOfDay initialTime;
+                                if (now.hour < 9) {
+                                  initialTime = const TimeOfDay(hour: 9, minute: 0);
+                                } else if (now.hour >= 22) {
+                                  initialTime = const TimeOfDay(hour: 21, minute: 0);
+                                } else {
+                                  initialTime = now;
+                                }
+
                                 final time = await showTimePicker(
                                   context: context,
-                                  initialTime: TimeOfDay.now(),
+                                  initialTime: initialTime,
+                                  helpText: 'Select time (9 AM - 10 PM)',
                                 );
                                 if (time != null) {
+                                  // Validate time is within 9 AM - 10 PM
+                                  if (time.hour < 9 || time.hour >= 22) {
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Please select a time between 9 AM and 10 PM',
+                                        ),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   setState(() {
                                     _selectedTime = time;
                                   });
                                 }
                               },
                               child: InputDecorator(
-                                decoration: const InputDecoration(
-                                  labelText: 'Appointment Time',
-                                  border: OutlineInputBorder(),
-                                  prefixIcon: Icon(Icons.access_time),
+                                decoration: InputDecoration(
+                                  labelText: 'Custom Time (9 AM - 10 PM)',
+                                  border: const OutlineInputBorder(),
+                                  prefixIcon: const Icon(Icons.access_time),
+                                  suffixIcon: _selectedTime != null
+                                      ? IconButton(
+                                          icon: const Icon(Icons.clear),
+                                          onPressed: () {
+                                            setState(() {
+                                              _selectedTime = null;
+                                            });
+                                          },
+                                        )
+                                      : null,
                                 ),
                                 child: Text(
                                   _selectedTime == null
-                                      ? 'Select Time'
+                                      ? 'Tap to select custom time'
                                       : _selectedTime!.format(context),
+                                  style: TextStyle(
+                                    color: _selectedTime == null
+                                        ? Colors.grey
+                                        : null,
+                                  ),
                                 ),
                               ),
                             ),

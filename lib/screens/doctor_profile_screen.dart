@@ -387,7 +387,9 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
 
 class AvailabilityPicker extends StatefulWidget {
   const AvailabilityPicker({
-    required this.initial, required this.onChanged, super.key,
+    required this.initial,
+    required this.onChanged,
+    super.key,
   });
   final Map<String, List<Map<String, String>>> initial;
   final void Function(Map<String, List<Map<String, String>>> avail) onChanged;
@@ -429,13 +431,55 @@ class _AvailabilityPickerState extends State<AvailabilityPicker> {
     final from = await showTimePicker(
       context: ctx,
       initialTime: const TimeOfDay(hour: 9, minute: 0),
+      helpText: 'Select start time (9 AM - 10 PM)',
     );
     if (from == null || !mounted) return;
+
+    // Validate start time is within 9 AM - 10 PM
+    if (from.hour < 9 || from.hour >= 22) {
+      if (!ctx.mounted) return;
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(
+          content: Text('Start time must be between 9 AM and 10 PM'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Calculate end time - default to 1 hour later, max 10 PM
+    final endHour = (from.hour + 1).clamp(9, 22);
     final to = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay(hour: (from.hour + 1) % 24, minute: from.minute),
+      initialTime: TimeOfDay(hour: endHour, minute: from.minute),
+      helpText: 'Select end time (9 AM - 10 PM)',
     );
     if (to == null) return;
+
+    // Validate end time is within 9 AM - 10 PM
+    if (to.hour < 9 || to.hour > 22 || (to.hour == 22 && to.minute > 0)) {
+      if (!ctx.mounted) return;
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(
+          content: Text('End time must be between 9 AM and 10 PM'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Validate end time is after start time
+    if (to.hour < from.hour || (to.hour == from.hour && to.minute <= from.minute)) {
+      if (!ctx.mounted) return;
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(
+          content: Text('End time must be after start time'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     if (!mounted) return;
     setState(() {
       avail[day]!.add({'from': from.format(ctx), 'to': to.format(ctx)});
@@ -450,60 +494,437 @@ class _AvailabilityPickerState extends State<AvailabilityPicker> {
     });
   }
 
+  /// Adds a quick preset time slot
+  void addQuickSlot(String day, String from, String to) {
+    // Check if slot already exists
+    final exists = avail[day]!.any(
+      (slot) => slot['from'] == from && slot['to'] == to,
+    );
+    if (exists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('This time slot is already added'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+    setState(() {
+      avail[day]!.add({'from': from, 'to': to});
+      widget.onChanged(avail);
+    });
+  }
+
+  /// Shows quick slot selection dialog
+  void showQuickSlotDialog(String day) {
+    final quickSlots = <Map<String, String>>[
+      // Morning slots
+      {'from': '9:00 AM', 'to': '10:00 AM', 'label': 'Morning Early'},
+      {'from': '10:00 AM', 'to': '11:00 AM', 'label': 'Morning Mid'},
+      {'from': '11:00 AM', 'to': '12:00 PM', 'label': 'Morning Late'},
+      // Afternoon slots
+      {'from': '12:00 PM', 'to': '1:00 PM', 'label': 'Noon'},
+      {'from': '1:00 PM', 'to': '2:00 PM', 'label': 'Early Afternoon'},
+      {'from': '2:00 PM', 'to': '3:00 PM', 'label': 'Mid Afternoon'},
+      {'from': '3:00 PM', 'to': '4:00 PM', 'label': 'Late Afternoon'},
+      {'from': '4:00 PM', 'to': '5:00 PM', 'label': 'Evening Start'},
+      // Evening slots
+      {'from': '5:00 PM', 'to': '6:00 PM', 'label': 'Early Evening'},
+      {'from': '6:00 PM', 'to': '7:00 PM', 'label': 'Evening'},
+      {'from': '7:00 PM', 'to': '8:00 PM', 'label': 'Late Evening'},
+      {'from': '8:00 PM', 'to': '9:00 PM', 'label': 'Night Early'},
+      {'from': '9:00 PM', 'to': '10:00 PM', 'label': 'Night'},
+    ];
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Quick Add Slots for $day'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Select preferred time slots:',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 16),
+                // Morning section
+                _buildSlotSection(
+                  'Morning (9 AM - 12 PM)',
+                  Colors.orange,
+                  quickSlots.where((s) => 
+                    s['from']!.contains('9:00 AM') || 
+                    s['from']!.contains('10:00 AM') || 
+                    s['from']!.contains('11:00 AM'),
+                  ).toList(),
+                  day,
+                  ctx,
+                ),
+                const SizedBox(height: 12),
+                // Afternoon section
+                _buildSlotSection(
+                  'Afternoon (12 PM - 5 PM)',
+                  Colors.blue,
+                  quickSlots.where((s) => 
+                    s['from']!.contains('12:00 PM') || 
+                    s['from']!.contains('1:00 PM') || 
+                    s['from']!.contains('2:00 PM') ||
+                    s['from']!.contains('3:00 PM') ||
+                    s['from']!.contains('4:00 PM'),
+                  ).toList(),
+                  day,
+                  ctx,
+                ),
+                const SizedBox(height: 12),
+                // Evening section
+                _buildSlotSection(
+                  'Evening (5 PM - 10 PM)',
+                  Colors.purple,
+                  quickSlots.where((s) => 
+                    s['from']!.contains('5:00 PM') || 
+                    s['from']!.contains('6:00 PM') || 
+                    s['from']!.contains('7:00 PM') ||
+                    s['from']!.contains('8:00 PM') ||
+                    s['from']!.contains('9:00 PM'),
+                  ).toList(),
+                  day,
+                  ctx,
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Done'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSlotSection(
+    String title,
+    Color color,
+    List<Map<String, String>> slots,
+    String day,
+    BuildContext dialogContext,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 4,
+              height: 16,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: color,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: slots.map((slot) {
+            final isAdded = avail[day]!.any(
+              (s) => s['from'] == slot['from'] && s['to'] == slot['to'],
+            );
+            return InkWell(
+              onTap: isAdded
+                  ? null
+                  : () {
+                      addQuickSlot(day, slot['from']!, slot['to']!);
+                      Navigator.pop(dialogContext);
+                      showQuickSlotDialog(day); // Reopen to show updated state
+                    },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: isAdded
+                      ? Colors.green.withValues(alpha: 0.2)
+                      : color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isAdded ? Colors.green : color.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isAdded)
+                      const Icon(Icons.check, size: 16, color: Colors.green)
+                    else
+                      Icon(Icons.add, size: 16, color: color),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${slot['from']} - ${slot['to']}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isAdded ? Colors.green : color,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final day in days)
-          Row(
+        // Quick preset buttons
+        Container(
+          padding: const EdgeInsets.all(12),
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: Colors.teal.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
+          ),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Checkbox(
-                value: avail[day]!.isNotEmpty,
-                onChanged: (val) {
-                  setState(() {
-                    if ((val ?? false) && avail[day]!.isEmpty) {
-                      avail[day]!.add({'from': '09:00', 'to': '10:00'});
-                    } else if (val == false) {
-                      avail[day] = [];
-                    }
-                    widget.onChanged(avail);
-                  });
-                },
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      day,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
+              const Row(
+                children: [
+                  Icon(Icons.flash_on, color: Colors.teal, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    'Quick Presets',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal,
                     ),
-                    if (avail[day]!.isNotEmpty)
-                      Wrap(
-                        spacing: 8,
-                        children: [
-                          for (int i = 0; i < avail[day]!.length; i++)
-                            Chip(
-                              label: Text(
-                                '${avail[day]![i]['from']} - ${avail[day]![i]['to']}',
-                              ),
-                              onDeleted: () => removeSlot(day, i),
-                            ),
-                          ActionChip(
-                            label: const Text('Add Time Slot'),
-                            avatar: const Icon(Icons.add, size: 18),
-                            onPressed: () => addSlot(day),
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  ActionChip(
+                    avatar: const Icon(Icons.wb_sunny, size: 16),
+                    label: const Text('Morning Only'),
+                    backgroundColor: Colors.orange.withValues(alpha: 0.2),
+                    onPressed: () => _applyPreset('morning'),
+                  ),
+                  ActionChip(
+                    avatar: const Icon(Icons.wb_cloudy, size: 16),
+                    label: const Text('Afternoon Only'),
+                    backgroundColor: Colors.blue.withValues(alpha: 0.2),
+                    onPressed: () => _applyPreset('afternoon'),
+                  ),
+                  ActionChip(
+                    avatar: const Icon(Icons.nights_stay, size: 16),
+                    label: const Text('Evening Only'),
+                    backgroundColor: Colors.purple.withValues(alpha: 0.2),
+                    onPressed: () => _applyPreset('evening'),
+                  ),
+                  ActionChip(
+                    avatar: const Icon(Icons.all_inclusive, size: 16),
+                    label: const Text('Full Day'),
+                    backgroundColor: Colors.green.withValues(alpha: 0.2),
+                    onPressed: () => _applyPreset('fullday'),
+                  ),
+                  ActionChip(
+                    avatar: const Icon(Icons.work, size: 16),
+                    label: const Text('Weekdays Only'),
+                    backgroundColor: Colors.indigo.withValues(alpha: 0.2),
+                    onPressed: () => _applyPreset('weekdays'),
+                  ),
+                ],
               ),
             ],
           ),
+        ),
+        
+        // Day-wise availability
+        for (final day in days)
+          Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Checkbox(
+                    value: avail[day]!.isNotEmpty,
+                    onChanged: (val) {
+                      setState(() {
+                        if ((val ?? false) && avail[day]!.isEmpty) {
+                          avail[day]!.add({'from': '9:00 AM', 'to': '10:00 AM'});
+                        } else if (val == false) {
+                          avail[day] = [];
+                        }
+                        widget.onChanged(avail);
+                      });
+                    },
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              day,
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            const Spacer(),
+                            if (avail[day]!.isNotEmpty)
+                              Text(
+                                '${avail[day]!.length} slot(s)',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (avail[day]!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (int i = 0; i < avail[day]!.length; i++)
+                                Chip(
+                                  label: Text(
+                                    '${avail[day]![i]['from']} - ${avail[day]![i]['to']}',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  deleteIcon: const Icon(Icons.close, size: 16),
+                                  onDeleted: () => removeSlot(day, i),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              ActionChip(
+                                label: const Text('Quick Add'),
+                                avatar: const Icon(Icons.flash_on, size: 16),
+                                backgroundColor: Colors.teal.withValues(alpha: 0.1),
+                                onPressed: () => showQuickSlotDialog(day),
+                              ),
+                              const SizedBox(width: 8),
+                              ActionChip(
+                                label: const Text('Custom'),
+                                avatar: const Icon(Icons.access_time, size: 16),
+                                onPressed: () => addSlot(day),
+                              ),
+                            ],
+                          ),
+                        ] else
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              'Not available',
+                              style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
       ],
+    );
+  }
+
+  void _applyPreset(String preset) {
+    setState(() {
+      switch (preset) {
+        case 'morning':
+          for (final day in days) {
+            avail[day] = [
+              {'from': '9:00 AM', 'to': '10:00 AM'},
+              {'from': '10:00 AM', 'to': '11:00 AM'},
+              {'from': '11:00 AM', 'to': '12:00 PM'},
+            ];
+          }
+        case 'afternoon':
+          for (final day in days) {
+            avail[day] = [
+              {'from': '12:00 PM', 'to': '1:00 PM'},
+              {'from': '2:00 PM', 'to': '3:00 PM'},
+              {'from': '3:00 PM', 'to': '4:00 PM'},
+              {'from': '4:00 PM', 'to': '5:00 PM'},
+            ];
+          }
+        case 'evening':
+          for (final day in days) {
+            avail[day] = [
+              {'from': '5:00 PM', 'to': '6:00 PM'},
+              {'from': '6:00 PM', 'to': '7:00 PM'},
+              {'from': '7:00 PM', 'to': '8:00 PM'},
+              {'from': '8:00 PM', 'to': '9:00 PM'},
+              {'from': '9:00 PM', 'to': '10:00 PM'},
+            ];
+          }
+        case 'fullday':
+          for (final day in days) {
+            avail[day] = [
+              {'from': '9:00 AM', 'to': '12:00 PM'},
+              {'from': '2:00 PM', 'to': '5:00 PM'},
+              {'from': '6:00 PM', 'to': '9:00 PM'},
+            ];
+          }
+        case 'weekdays':
+          for (final day in days) {
+            if (day != 'Saturday' && day != 'Sunday') {
+              avail[day] = [
+                {'from': '9:00 AM', 'to': '12:00 PM'},
+                {'from': '2:00 PM', 'to': '5:00 PM'},
+              ];
+            } else {
+              avail[day] = [];
+            }
+          }
+      }
+      widget.onChanged(avail);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Applied ${preset.replaceAll('_', ' ')} preset'),
+        backgroundColor: Colors.teal,
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 }

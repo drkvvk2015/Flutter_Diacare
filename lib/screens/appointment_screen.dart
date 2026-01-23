@@ -239,16 +239,43 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                   ListTile(
                     title: Text(
                       selectedTime == null
-                          ? 'Select Time'
+                          ? 'Select Time (9 AM - 10 PM)'
                           : 'Time: ${selectedTime?.format(context)}',
                     ),
                     trailing: const Icon(Icons.access_time),
                     onTap: () async {
+                      // Determine initial time - default to 9 AM if current time is outside range
+                      final now = TimeOfDay.now();
+                      TimeOfDay initialTime;
+                      if (now.hour < 9) {
+                        initialTime = const TimeOfDay(hour: 9, minute: 0);
+                      } else if (now.hour >= 22) {
+                        initialTime = const TimeOfDay(hour: 21, minute: 0);
+                      } else {
+                        initialTime = now;
+                      }
+
                       final t = await showTimePicker(
                         context: context,
-                        initialTime: TimeOfDay.now(),
+                        initialTime: initialTime,
+                        helpText: 'Select time (9 AM - 10 PM)',
                       );
-                      if (t != null) setState(() => selectedTime = t);
+                      if (t != null) {
+                        // Validate time is within 9 AM - 10 PM
+                        if (t.hour < 9 || t.hour >= 22) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Please select a time between 9 AM and 10 PM',
+                              ),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
+                          return;
+                        }
+                        setState(() => selectedTime = t);
+                      }
                     },
                   ),
                   const SizedBox(height: 16),

@@ -8,8 +8,107 @@ import 'patient_list_screen.dart';
 import 'pharmacy_dashboard_screen.dart';
 import 'records_screen.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
+
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  // Statistics data
+  int _totalDoctors = 0;
+  int _totalPatients = 0;
+  int _appointmentsToday = 0;
+  double _revenueToday = 0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStatistics();
+  }
+
+  Future<void> _fetchStatistics() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final firestore = FirebaseFirestore.instance;
+
+      // Fetch total doctors
+      final doctorsQuery = await firestore
+          .collection('users')
+          .where('role', isEqualTo: 'doctor')
+          .count()
+          .get();
+      final totalDoctors = doctorsQuery.count ?? 0;
+
+      // Fetch total patients
+      final patientsQuery = await firestore
+          .collection('users')
+          .where('role', isEqualTo: 'patient')
+          .count()
+          .get();
+      final totalPatients = patientsQuery.count ?? 0;
+
+      // Fetch today's appointments
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+      final appointmentsQuery = await firestore
+          .collection('appointments')
+          .where('time', isGreaterThanOrEqualTo: startOfDay.toIso8601String())
+          .where('time', isLessThanOrEqualTo: endOfDay.toIso8601String())
+          .get();
+      final appointmentsToday = appointmentsQuery.docs.length;
+
+      // Fetch today's revenue from payments
+      final paymentsQuery = await firestore
+          .collection('payments')
+          .where('status', isEqualTo: 'success')
+          .get();
+
+      double revenueToday = 0;
+      for (final doc in paymentsQuery.docs) {
+        final data = doc.data();
+        final timestamp = data['timestamp'] as String?;
+        if (timestamp != null) {
+          try {
+            final paymentDate = DateTime.parse(timestamp);
+            if (paymentDate.year == now.year &&
+                paymentDate.month == now.month &&
+                paymentDate.day == now.day) {
+              final amount = (data['amount'] as num?)?.toDouble() ?? 0;
+              revenueToday += amount;
+            }
+          } catch (_) {
+            // Skip invalid timestamps
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _totalDoctors = totalDoctors;
+          _totalPatients = totalPatients;
+          _appointmentsToday = appointmentsToday;
+          _revenueToday = revenueToday;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading statistics: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +119,11 @@ class AdminDashboardScreen extends StatelessWidget {
         backgroundColor: Colors.purple[700],
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh Statistics',
+            onPressed: _fetchStatistics,
+          ),
           Semantics(
             label: 'Logout',
             button: true,
@@ -43,50 +147,22 @@ class AdminDashboardScreen extends StatelessWidget {
           final isWide = constraints.maxWidth > 700;
           final cardSpacing = isWide ? 24.0 : 12.0;
           final padding = isWide ? 48.0 : 16.0;
-          return Padding(
-            padding: EdgeInsets.all(padding),
-            child: ListView(
-              children: [
-                // Stat cards
-                if (isWide) Row(
-                        children: [
-                          Expanded(
-                            child: Semantics(
-                              label: 'Total Doctors: 24',
-                              child: _buildStatCard(
-                                'Total Doctors',
-                                '24',
-                                Icons.medical_services,
-                                Colors.blue,
-                                key: const Key(
-                                  'admin_dashboard_stat_total_doctors',
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: cardSpacing),
-                          Expanded(
-                            child: Semantics(
-                              label: 'Total Patients: 156',
-                              child: _buildStatCard(
-                                'Total Patients',
-                                '156',
-                                Icons.people,
-                                Colors.green,
-                                key: const Key(
-                                  'admin_dashboard_stat_total_patients',
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ) else Column(
-                        children: [
-                          Semantics(
-                            label: 'Total Doctors: 24',
+          return RefreshIndicator(
+            onRefresh: _fetchStatistics,
+            child: Padding(
+              padding: EdgeInsets.all(padding),
+              child: ListView(
+                children: [
+                  // Stat cards
+                  if (isWide)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Semantics(
+                            label: 'Total Doctors: $_totalDoctors',
                             child: _buildStatCard(
                               'Total Doctors',
-                              '24',
+                              _isLoading ? '...' : '$_totalDoctors',
                               Icons.medical_services,
                               Colors.blue,
                               key: const Key(
@@ -94,12 +170,14 @@ class AdminDashboardScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          SizedBox(height: cardSpacing),
-                          Semantics(
-                            label: 'Total Patients: 156',
+                        ),
+                        SizedBox(width: cardSpacing),
+                        Expanded(
+                          child: Semantics(
+                            label: 'Total Patients: $_totalPatients',
                             child: _buildStatCard(
                               'Total Patients',
-                              '156',
+                              _isLoading ? '...' : '$_totalPatients',
                               Icons.people,
                               Colors.green,
                               key: const Key(
@@ -107,48 +185,49 @@ class AdminDashboardScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                SizedBox(height: cardSpacing),
-                if (isWide) Row(
-                        children: [
-                          Expanded(
-                            child: Semantics(
-                              label: 'Appointments Today: 12',
-                              child: _buildStatCard(
-                                'Appointments Today',
-                                '12',
-                                Icons.calendar_today,
-                                Colors.orange,
-                                key: const Key(
-                                  'admin_dashboard_stat_appointments_today',
-                                ),
-                              ),
+                        ),
+                      ],
+                    )
+                  else
+                    Column(
+                      children: [
+                        Semantics(
+                          label: 'Total Doctors: $_totalDoctors',
+                          child: _buildStatCard(
+                            'Total Doctors',
+                            _isLoading ? '...' : '$_totalDoctors',
+                            Icons.medical_services,
+                            Colors.blue,
+                            key: const Key(
+                              'admin_dashboard_stat_total_doctors',
                             ),
                           ),
-                          SizedBox(width: cardSpacing),
-                          Expanded(
-                            child: Semantics(
-                              label: r'Revenue Today: $1,240',
-                              child: _buildStatCard(
-                                'Revenue Today',
-                                r'$1,240',
-                                Icons.attach_money,
-                                Colors.purple,
-                                key: const Key(
-                                  'admin_dashboard_stat_revenue_today',
-                                ),
-                              ),
+                        ),
+                        SizedBox(height: cardSpacing),
+                        Semantics(
+                          label: 'Total Patients: $_totalPatients',
+                          child: _buildStatCard(
+                            'Total Patients',
+                            _isLoading ? '...' : '$_totalPatients',
+                            Icons.people,
+                            Colors.green,
+                            key: const Key(
+                              'admin_dashboard_stat_total_patients',
                             ),
                           ),
-                        ],
-                      ) else Column(
-                        children: [
-                          Semantics(
-                            label: 'Appointments Today: 12',
+                        ),
+                      ],
+                    ),
+                  SizedBox(height: cardSpacing),
+                  if (isWide)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Semantics(
+                            label: 'Appointments Today: $_appointmentsToday',
                             child: _buildStatCard(
                               'Appointments Today',
-                              '12',
+                              _isLoading ? '...' : '$_appointmentsToday',
                               Icons.calendar_today,
                               Colors.orange,
                               key: const Key(
@@ -156,12 +235,14 @@ class AdminDashboardScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          SizedBox(height: cardSpacing),
-                          Semantics(
-                            label: r'Revenue Today: $1,240',
+                        ),
+                        SizedBox(width: cardSpacing),
+                        Expanded(
+                          child: Semantics(
+                            label: 'Revenue Today: ₹${_revenueToday.toStringAsFixed(0)}',
                             child: _buildStatCard(
                               'Revenue Today',
-                              r'$1,240',
+                              _isLoading ? '...' : '₹${_revenueToday.toStringAsFixed(0)}',
                               Icons.attach_money,
                               Colors.purple,
                               key: const Key(
@@ -169,85 +250,116 @@ class AdminDashboardScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                SizedBox(height: cardSpacing * 2),
-                // Management and navigation cards
-                Wrap(
-                  spacing: cardSpacing,
-                  runSpacing: cardSpacing,
-                  children: [
-                    SizedBox(
-                      width: isWide ? 340 : double.infinity,
-                      child: DashboardCard(
-                        key: const Key(
-                          'admin_dashboard_card_doctor_management',
                         ),
-                        icon: Icons.medical_services,
-                        iconColor: Colors.blue,
-                        title: 'Doctor Management',
-                        subtitle: 'Add, edit, and manage doctors.',
-                        onTap: () => _showDoctorManagement(context),
-                      ),
+                      ],
+                    )
+                  else
+                    Column(
+                      children: [
+                        Semantics(
+                          label: 'Appointments Today: $_appointmentsToday',
+                          child: _buildStatCard(
+                            'Appointments Today',
+                            _isLoading ? '...' : '$_appointmentsToday',
+                            Icons.calendar_today,
+                            Colors.orange,
+                            key: const Key(
+                              'admin_dashboard_stat_appointments_today',
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: cardSpacing),
+                        Semantics(
+                          label: 'Revenue Today: ₹${_revenueToday.toStringAsFixed(0)}',
+                          child: _buildStatCard(
+                            'Revenue Today',
+                            _isLoading ? '...' : '₹${_revenueToday.toStringAsFixed(0)}',
+                            Icons.attach_money,
+                            Colors.purple,
+                            key: const Key(
+                              'admin_dashboard_stat_revenue_today',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(
-                      width: isWide ? 340 : double.infinity,
-                      child: DashboardCard(
-                        key: const Key(
-                          'admin_dashboard_card_patient_management',
+                  SizedBox(height: cardSpacing * 2),
+                  // Management and navigation cards
+                  Wrap(
+                    spacing: cardSpacing,
+                    runSpacing: cardSpacing,
+                    children: [
+                      SizedBox(
+                        width: isWide ? 340 : double.infinity,
+                        child: DashboardCard(
+                          key: const Key(
+                            'admin_dashboard_card_doctor_management',
+                          ),
+                          icon: Icons.medical_services,
+                          iconColor: Colors.blue,
+                          title: 'Doctor Management',
+                          subtitle: 'Add, edit, and manage doctors.',
+                          onTap: () => _showDoctorManagement(context),
                         ),
-                        icon: Icons.people,
-                        iconColor: Colors.green,
-                        title: 'Patient Management',
-                        subtitle: 'View and manage all patients.',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (_) => const PatientListScreen(),
+                      ),
+                      SizedBox(
+                        width: isWide ? 340 : double.infinity,
+                        child: DashboardCard(
+                          key: const Key(
+                            'admin_dashboard_card_patient_management',
+                          ),
+                          icon: Icons.people,
+                          iconColor: Colors.green,
+                          title: 'Patient Management',
+                          subtitle: 'View and manage all patients.',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (_) => const PatientListScreen(),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      width: isWide ? 340 : double.infinity,
-                      child: DashboardCard(
-                        key: const Key(
-                          'admin_dashboard_card_appointment_management',
-                        ),
-                        icon: Icons.calendar_month,
-                        iconColor: Colors.orange,
-                        title: 'Appointment Management',
-                        subtitle: 'View and manage all appointments.',
-                        onTap: () async {
-                          final user = FirebaseAuth.instance.currentUser;
-                          final String userId = user?.uid ?? '';
-                          if (context.mounted) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute<void>(
-                                builder: (_) => AppointmentScreen(
-                                  userRole: 'admin',
-                                  userId: userId,
+                      SizedBox(
+                        width: isWide ? 340 : double.infinity,
+                        child: DashboardCard(
+                          key: const Key(
+                            'admin_dashboard_card_appointment_management',
+                          ),
+                          icon: Icons.calendar_month,
+                          iconColor: Colors.orange,
+                          title: 'Appointment Management',
+                          subtitle: 'View and manage all appointments.',
+                          onTap: () async {
+                            final user = FirebaseAuth.instance.currentUser;
+                            final String userId = user?.uid ?? '';
+                            if (context.mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute<void>(
+                                  builder: (_) => AppointmentScreen(
+                                    userRole: 'admin',
+                                    userId: userId,
+                                  ),
                                 ),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    SizedBox(
-                      width: isWide ? 340 : double.infinity,
-                      child: DashboardCard(
-                        key: const Key(
-                          'admin_dashboard_card_analytics_reports',
+                              );
+                            }
+                          },
                         ),
-                        icon: Icons.analytics,
-                        iconColor: Colors.purple,
-                        title: 'Analytics & Reports',
-                        subtitle: 'View system analytics and reports.',
-                        onTap: () => _showAnalytics(context),
                       ),
-                    ),
+                      SizedBox(
+                        width: isWide ? 340 : double.infinity,
+                        child: DashboardCard(
+                          key: const Key(
+                            'admin_dashboard_card_analytics_reports',
+                          ),
+                          icon: Icons.analytics,
+                          iconColor: Colors.purple,
+                          title: 'Analytics & Reports',
+                          subtitle: 'View system analytics and reports.',
+                          onTap: () => _showAnalytics(context),
+                        ),
+                      ),
                     SizedBox(
                       width: isWide ? 340 : double.infinity,
                       child: DashboardCard(
@@ -319,7 +431,8 @@ class AdminDashboardScreen extends StatelessWidget {
                 ),
               ],
             ),
-          );
+          ),
+        );
         },
       ),
     );

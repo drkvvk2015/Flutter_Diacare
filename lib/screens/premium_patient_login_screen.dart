@@ -1,10 +1,15 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../services/auth_bridge_service.dart';
 import '../widgets/voice_text_field.dart';
+import 'patient_dashboard_screen.dart';
 import 'registration_screen.dart';
 
 class PatientLoginScreen extends StatefulWidget {
@@ -137,15 +142,65 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
     _pulseController.repeat();
 
     try {
-      // Simulate Google sign-in with AuthBridge
-      await Future<void>.delayed(const Duration(seconds: 2));
+      // Use GoogleSignIn singleton instance (google_sign_in 7.x API)
+      final googleSignIn = GoogleSignIn.instance;
+      
+      // Initialize with clientId for Web support
+      if (kIsWeb) {
+        await googleSignIn.initialize(
+          clientId: '603628370602-j5ejajnde0nd5d99hfq8g3tpd6obfr39.apps.googleusercontent.com',
+        );
+      } else {
+        await googleSignIn.initialize();
+      }
+      
+      // Authenticate user - throws GoogleSignInException on failure
+      final account = await googleSignIn.authenticate();
+      
+      // Get idToken from authentication
+      final idToken = account.authentication.idToken;
+      
+      // Get accessToken from authorization (if needed)
+      final authorization = await account.authorizationClient.authorizationForScopes([]);
+      final accessToken = authorization?.accessToken;
+      
+      final credential = GoogleAuthProvider.credential(
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
+      
+      // Get or create user document in Firestore
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .get();
+
+      if (!doc.exists) {
+        // Create new user document as patient
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .set({
+              'name': userCredential.user!.displayName ?? '',
+              'email': userCredential.user!.email ?? '',
+              'role': 'patient',
+              'createdAt': FieldValue.serverTimestamp(),
+              'loginMethod': 'google',
+            });
+      }
 
       if (mounted) {
         HapticFeedback.mediumImpact();
-        Navigator.pushReplacementNamed(context, '/patient_dashboard');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute<void>(builder: (_) => const PatientDashboardScreen()),
+        );
       }
     } catch (e) {
-      _showErrorMessage('Google sign-in failed. Please try again.');
+      _showErrorMessage('Google sign-in failed: ${e.toString()}');
     } finally {
       if (mounted) {
         setState(() {

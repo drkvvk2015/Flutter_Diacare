@@ -432,7 +432,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                         const SizedBox(height: 18),
-                        // Registration Logic
+                        // Registration Logic - Hidden for admin
+                        if (selectedRole != 'admin')
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
@@ -549,7 +550,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        // Social login
+                        // Social login - Hidden for admin
+                        if (selectedRole != 'admin') ...[
                         Row(
                           children: [
                             Expanded(
@@ -589,6 +591,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
+                        ],
                         // Role Badge
                         Container(
                           padding: const EdgeInsets.symmetric(

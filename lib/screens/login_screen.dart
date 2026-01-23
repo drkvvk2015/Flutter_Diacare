@@ -1,8 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-// Removed unused dart:ui import
-// import 'dashboard_screen.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 import '../widgets/voice_text_field.dart';
-// import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'dashboard_screen.dart';
+import 'patient_dashboard_screen.dart';
 
 /// LoginScreen handles authentication for both doctor and patient roles.
 /// The role is passed via navigation arguments and is used for login context.
@@ -79,23 +83,85 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
     try {
-      // Simulate Google authentication for testing purposes
-      await Future<void>.delayed(const Duration(seconds: 3));
-
-      if (!mounted) return; // context safety
-      Navigator.pushReplacementNamed(
-        context,
-        '/dashboard',
-        arguments: {'role': _role},
+      // Use GoogleSignIn singleton instance (google_sign_in 7.x API)
+      final googleSignIn = GoogleSignIn.instance;
+      
+      // Initialize with clientId for Web support
+      if (kIsWeb) {
+        await googleSignIn.initialize(
+          clientId: '603628370602-j5ejajnde0nd5d99hfq8g3tpd6obfr39.apps.googleusercontent.com',
+        );
+      } else {
+        await googleSignIn.initialize();
+      }
+      
+      // Authenticate user - throws GoogleSignInException on failure
+      final account = await googleSignIn.authenticate();
+      
+      // Get idToken from authentication
+      final idToken = account.authentication.idToken;
+      
+      // Get accessToken from authorization (if needed)
+      final authorization = await account.authorizationClient.authorizationForScopes([]);
+      final accessToken = authorization?.accessToken;
+      
+      final credential = GoogleAuthProvider.credential(
+        idToken: idToken,
+        accessToken: accessToken,
       );
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
+      
+      // Get or create user document in Firestore
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .get();
+      
+      String userRole = doc.data()?['role'] as String? ?? _role ?? 'doctor';
+
+      if (!doc.exists) {
+        // Create new user document
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .set({
+              'name': userCredential.user!.displayName ?? '',
+              'email': userCredential.user!.email ?? '',
+              'role': _role ?? 'doctor',
+              'createdAt': FieldValue.serverTimestamp(),
+              'loginMethod': 'google',
+            });
+        userRole = _role ?? 'doctor';
+      }
+
+      if (!mounted) return;
+      
+      // Navigate to appropriate dashboard based on role
+      if (userRole == 'patient') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute<void>(builder: (_) => const PatientDashboardScreen()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute<void>(builder: (_) => const DashboardScreen()),
+        );
+      }
     } catch (e) {
-      setState(() {
-        _error = 'Google sign-in is currently unavailable for testing.';
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Google sign-in failed: ${e.toString()}';
+        });
+      }
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 

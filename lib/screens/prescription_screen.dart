@@ -5,8 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../providers/user_provider.dart';
+import '../services/drug_interaction_service.dart';
+import '../widgets/drug_adr_card.dart';
+import '../widgets/drug_interaction_dialog.dart';
 import '../widgets/quick_prescription_widgets.dart';
 
 class PrescriptionScreen extends StatefulWidget {
@@ -281,6 +286,404 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
   Map<String, dynamic>? _selectedDrug;
   bool _showQuickTemplates = true;
 
+  // Comprehensive drug interaction service
+  final DrugInteractionService _interactionService = DrugInteractionService();
+  DrugInteractionReport? _interactionReport;
+  bool _isCheckingInteractions = false;
+
+  /// Check interactions using comprehensive API service
+  Future<void> _checkComprehensiveInteractions() async {
+    if (prescriptions.isEmpty) {
+      setState(() {
+        _interactionReport = null;
+      });
+      return;
+    }
+
+    final drugNames = prescriptions
+        .map((p) => p['generic'] ?? '')
+        .where((name) => name.isNotEmpty)
+        .toList();
+
+    if (drugNames.length < 2) {
+      setState(() {
+        _interactionReport = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _isCheckingInteractions = true;
+    });
+
+    try {
+      final report = await _interactionService.checkInteractionsForPrescription(drugNames);
+      if (mounted) {
+        setState(() {
+          _interactionReport = report;
+          _isCheckingInteractions = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Interaction check error: $e');
+      if (mounted) {
+        setState(() {
+          _isCheckingInteractions = false;
+        });
+      }
+    }
+  }
+
+  /// Show detailed interaction report dialog
+  Future<bool> _showInteractionReportDialog() async {
+    if (_interactionReport == null || !_interactionReport!.hasInteractions) {
+      return true;
+    }
+    return showDrugInteractionDialog(context, _interactionReport!);
+  }
+
+  /// Build the comprehensive drug interaction display widget
+  Widget _buildInteractionWidget() {
+    // Show local (fast) interactions first
+    final localWarnings = checkInteractions();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Quick local check results
+        if (localWarnings.isNotEmpty) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              border: Border.all(color: Colors.orange),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.warning_amber, color: Colors.orange.shade700),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Quick Check (Local)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ...localWarnings.map(
+                  (w) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.arrow_right, size: 16, color: Colors.red),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            w,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        
+        // Comprehensive API check results
+        if (_isCheckingInteractions)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              border: Border.all(color: Colors.blue.shade300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.blue.shade600,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Checking RxNav + OpenFDA + DrugBank for interactions...',
+                    style: TextStyle(color: Colors.blue.shade700),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else if (_interactionReport != null && _interactionReport!.hasInteractions)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _interactionReport!.hasSevereInteractions
+                  ? Colors.red.shade50
+                  : _interactionReport!.hasHighInteractions
+                      ? Colors.orange.shade50
+                      : Colors.amber.shade50,
+              border: Border.all(
+                color: _interactionReport!.hasSevereInteractions
+                    ? Colors.red
+                    : _interactionReport!.hasHighInteractions
+                        ? Colors.deepOrange
+                        : Colors.amber,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      _interactionReport!.hasSevereInteractions
+                          ? Icons.dangerous
+                          : Icons.warning_amber,
+                      color: _interactionReport!.hasSevereInteractions
+                          ? Colors.red
+                          : Colors.deepOrange,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Comprehensive Interaction Report',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: _interactionReport!.hasSevereInteractions
+                              ? Colors.red.shade700
+                              : Colors.orange.shade800,
+                        ),
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: _showInteractionReportDialog,
+                      icon: const Icon(Icons.open_in_new, size: 16),
+                      label: const Text('View Details'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // Summary chips
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    if (_interactionReport!.severeCount > 0)
+                      _buildSeverityChip(
+                        'Severe: ${_interactionReport!.severeCount}',
+                        Colors.red,
+                      ),
+                    if (_interactionReport!.highCount > 0)
+                      _buildSeverityChip(
+                        'High: ${_interactionReport!.highCount}',
+                        Colors.deepOrange,
+                      ),
+                    if (_interactionReport!.moderateCount > 0)
+                      _buildSeverityChip(
+                        'Moderate: ${_interactionReport!.moderateCount}',
+                        Colors.amber.shade700,
+                      ),
+                    if (_interactionReport!.lowCount > 0)
+                      _buildSeverityChip(
+                        'Low: ${_interactionReport!.lowCount}',
+                        Colors.green,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Sources: ${_interactionReport!.sources.join(', ')}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else if (prescriptions.length >= 2)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              border: Border.all(color: Colors.green),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green.shade600),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'No significant drug interactions detected',
+                    style: TextStyle(color: Colors.green),
+                  ),
+                ),
+                TextButton(
+                  onPressed: _checkComprehensiveInteractions,
+                  child: const Text('Re-check'),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSeverityChip(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        border: Border.all(color: color),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
+  /// Build ADR summary section for all prescribed drugs
+  /// [showContraindications] - Only true for healthcare professionals
+  Widget _buildADRSummarySection({bool showContraindications = true}) {
+    final drugNames = prescriptions
+        .map((p) => p['generic'] ?? '')
+        .where((name) => name.isNotEmpty)
+        .toSet()
+        .toList();
+
+    if (drugNames.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.health_and_safety, color: Colors.purple),
+            const SizedBox(width: 8),
+            Text(
+              showContraindications
+                  ? 'Adverse Drug Reactions & Contraindications'
+                  : 'Drug Side Effects & Allergy Alerts',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const Spacer(),
+            TextButton.icon(
+              onPressed: () {
+                // Show all ADRs in a modal
+                showModalBottomSheet<void>(
+                  context: context,
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                  ),
+                  builder: (ctx) => DraggableScrollableSheet(
+                    initialChildSize: 0.7,
+                    minChildSize: 0.5,
+                    maxChildSize: 0.95,
+                    expand: false,
+                    builder: (ctx, scrollController) => Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.purple.shade50,
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(16),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.health_and_safety, color: Colors.purple),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  showContraindications
+                                      ? 'Complete ADR Profile'
+                                      : 'Drug Safety Information',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () => Navigator.pop(ctx),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: ListView.builder(
+                            controller: scrollController,
+                            padding: const EdgeInsets.all(16),
+                            itemCount: drugNames.length,
+                            itemBuilder: (ctx, index) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: DrugADRCard(
+                                drugName: drugNames[index],
+                                showFullDetails: true,
+                                showContraindications: showContraindications,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.open_in_new, size: 16),
+              label: const Text('View All'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Show compact ADR cards for each drug
+        ...drugNames.map(
+          (drug) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: DrugADRCard(
+              drugName: drug,
+              showContraindications: showContraindications,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   final List<String> drugTypes = [
     'Tablet',
     'Capsule',
@@ -468,6 +871,8 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
         selectedFoodRelation = 'After Food';
         _selectedDrug = null;
       });
+      // Trigger comprehensive interaction check
+      _checkComprehensiveInteractions();
     }
   }
 
@@ -486,6 +891,8 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
         'duration': template['duration'] ?? '',
       });
     });
+    // Trigger comprehensive interaction check
+    _checkComprehensiveInteractions();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Added: ${template['name']}'),
@@ -527,6 +934,10 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
     final patientId = patient?.id;
     final user = FirebaseAuth.instance.currentUser;
     final doctorId = user?.uid;
+
+    // Get user role for conditional display
+    final userProvider = context.watch<UserProvider>();
+    final isHealthcareProfessional = userProvider.isHealthcareProfessional;
 
     // Toggle for general prescription
     final bool isGeneral = args?['general'] == true;
@@ -952,28 +1363,9 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  Builder(
-                    builder: (context) {
-                      final warnings = checkInteractions();
-                      if (warnings.isNotEmpty) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: warnings
-                              .map(
-                                (w) => Text(
-                                  w,
-                                  style: const TextStyle(
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
+                  // Comprehensive Drug Interaction Widget
+                  // Only visible to healthcare professionals (doctors & pharmacists)
+                  if (isHealthcareProfessional) _buildInteractionWidget(),
                   const SizedBox(height: 16),
                 ],
                 const Text(
@@ -1024,6 +1416,15 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
+                                    // ADR Info Button
+                                    IconButton(
+                                      icon: const Icon(Icons.health_and_safety, color: Colors.purple),
+                                      tooltip: 'View Adverse Reactions',
+                                      onPressed: () => showDrugADRDialog(
+                                        context,
+                                        item['generic'] ?? '',
+                                      ),
+                                    ),
                                     if (viewOnly)
                                       ElevatedButton.icon(
                                         icon: const Icon(Icons.shopping_cart, size: 16),
@@ -1042,6 +1443,8 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                                           setState(() {
                                             prescriptions.removeAt(index);
                                           });
+                                          // Re-check interactions after removal
+                                          _checkComprehensiveInteractions();
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             const SnackBar(
                                               content: Text('Drug removed from prescription'),
@@ -1060,6 +1463,15 @@ class _PrescriptionScreenState extends State<PrescriptionScreen> {
                         .toList(),
                   ),
                 ),
+
+                // ADR Summary Section - Visible to ALL users (doctors, pharmacists, patients)
+                // Shows Adverse Drug Reactions and Allergy alerts for every drug
+                if (prescriptions.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  _buildADRSummarySection(
+                    showContraindications: isHealthcareProfessional,
+                  ),
+                ],
 
                 const SizedBox(height: 24),
                 const Divider(),
