@@ -10,12 +10,13 @@ class AppointmentNotifications {
 
   static Future<void> init() async {
     tz.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation(DateTime.now().timeZoneName));
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const InitializationSettings settings = InitializationSettings(
       android: androidSettings,
     );
-    await _plugin.initialize(settings);
+    await _plugin.initialize(settings: settings);
   }
 
   static Future<void> scheduleReminder(Appointment appt) async {
@@ -24,11 +25,11 @@ class AppointmentNotifications {
       tz.local,
     );
     await _plugin.zonedSchedule(
-      appt.hashCode,
-      'Appointment Reminder',
-      'You have an appointment at ${appt.time.toString().substring(0, 16)}',
-      scheduledTime,
-      const NotificationDetails(
+      id: appt.hashCode,
+      title: 'Appointment Reminder',
+      body: 'You have an appointment at ${appt.time.toString().substring(0, 16)}',
+      scheduledDate: scheduledTime,
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'appt_channel',
           'Appointments',

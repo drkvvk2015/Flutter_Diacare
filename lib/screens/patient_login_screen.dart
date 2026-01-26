@@ -153,21 +153,36 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
       } else {
         await googleSignIn.initialize();
       }
-      
+
       // Authenticate user - throws GoogleSignInException on failure
-      final account = await googleSignIn.authenticate();
-      
+      final GoogleSignInAccount account;
+      try {
+        account = await googleSignIn.authenticate();
+      } on GoogleSignInException catch (e) {
+        if (mounted) {
+          setState(() {
+            _error = e.code == GoogleSignInExceptionCode.canceled 
+                ? 'Google sign-in cancelled.'
+                : 'Google sign-in failed: ${e.description}';
+            _loading = false;
+          });
+        }
+        return;
+      }
+
       // Get idToken from authentication
       final idToken = account.authentication.idToken;
       
       // Get accessToken from authorization (if needed)
       final authorization = await account.authorizationClient.authorizationForScopes([]);
       final accessToken = authorization?.accessToken;
-      
+
+      // Create a new credential
       final credential = GoogleAuthProvider.credential(
-        idToken: idToken,
         accessToken: accessToken,
+        idToken: idToken,
       );
+
       final userCredential = await FirebaseAuth.instance.signInWithCredential(
         credential,
       );
@@ -200,7 +215,7 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
         );
       }
     } catch (e) {
-      _showErrorMessage('Google sign-in failed: ${e.toString()}');
+      _showErrorMessage('Google sign-in failed: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -594,5 +609,3 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
     );
   }
 }
-
-

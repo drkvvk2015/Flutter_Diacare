@@ -200,7 +200,7 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
         );
       }
     } catch (e) {
-      _showErrorMessage('Google sign-in failed: ${e.toString()}');
+      _showErrorMessage('Google sign-in failed: $e');
     } finally {
       if (mounted) {
         setState(() {

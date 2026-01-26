@@ -379,26 +379,25 @@ class _ExerciseAdviceTabState extends State<ExerciseAdviceTab> {
 
   Future<void> _initNotifications() async {
     tz.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation(DateTime.now().timeZoneName));
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const InitializationSettings settings = InitializationSettings(
       android: androidSettings,
     );
-    await _localNotifications.initialize(settings);
+    await _localNotifications.initialize(settings: settings);
   }
 
   Future<void> _scheduleExerciseReminder(String planTitle) async {
-    final now = DateTime.now();
-    final scheduledTime = tz.TZDateTime.from(
-      now.add(const Duration(hours: 1)),
-      tz.local,
-    );
+    final now = tz.TZDateTime.now(tz.local);
+    final scheduledTime = now.add(const Duration(hours: 1));
+
     await _localNotifications.zonedSchedule(
-      planTitle.hashCode,
-      'Exercise Reminder',
-      'Time for your exercise: $planTitle',
-      scheduledTime,
-      const NotificationDetails(
+      id: planTitle.hashCode,
+      title: 'Exercise Reminder',
+      body: 'Time for your exercise: $planTitle',
+      scheduledDate: scheduledTime,
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'exercise_channel',
           'Exercise Reminders',
