@@ -33,12 +33,30 @@ class _PaymentScreenState extends State<PaymentScreen> {
   String? _paymentStatus;
   PaymentMethod? _selectedMethod;
   final PaymentService _paymentService = PaymentService();
+  String? _doctorName;
 
   @override
   void initState() {
     super.initState();
     _checkPaymentStatus();
     _initPaymentListeners();
+    _fetchDoctorDetails();
+  }
+
+  Future<void> _fetchDoctorDetails() async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.doctorId)
+          .get();
+      if (doc.exists && mounted) {
+        setState(() {
+          _doctorName = doc.data()?['name'] as String? ?? 'Doctor';
+        });
+      }
+    } catch (e) {
+      // Continue with default name
+    }
   }
 
   void _initPaymentListeners() {
@@ -62,6 +80,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     await PaymentService.savePaymentStatus(
       userId: user.uid,
       appointmentId: widget.appointmentId,
+      doctorId: widget.doctorId,
       status: 'success',
       amount: widget.amount,
       paymentId: response.paymentId?.toString() ?? widget.appointmentId,
@@ -155,6 +174,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       contact: user.phoneNumber ?? '',
       context: context,
       preferredMethod: _selectedMethod,
+      doctorName: _doctorName,
     );
   }
 

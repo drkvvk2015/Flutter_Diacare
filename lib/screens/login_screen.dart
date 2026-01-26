@@ -86,13 +86,19 @@ class _LoginScreenState extends State<LoginScreen> {
       // Use GoogleSignIn singleton instance (google_sign_in 7.x API)
       final googleSignIn = GoogleSignIn.instance;
       
-      // Initialize with clientId for Web support
+      // Web Client ID from Google Cloud Console
+      const webClientId = '603628370602-j5ejajnde0nd5d99hfq8g3tpd6obfr39.apps.googleusercontent.com';
+      
+      // Initialize with clientId for Web, serverClientId for Android/iOS
       if (kIsWeb) {
         await googleSignIn.initialize(
-          clientId: '603628370602-j5ejajnde0nd5d99hfq8g3tpd6obfr39.apps.googleusercontent.com',
+          clientId: webClientId,
         );
       } else {
-        await googleSignIn.initialize();
+        // serverClientId is required on Android to get idToken for Firebase Auth
+        await googleSignIn.initialize(
+          serverClientId: webClientId,
+        );
       }
 
       // Authenticate user - throws GoogleSignInException on failure

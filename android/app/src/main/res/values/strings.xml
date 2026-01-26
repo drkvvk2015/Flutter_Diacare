@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DiaCare</string>
+    <!-- Web Client ID from Google Cloud Console - used for Android OAuth to get idToken -->
+    <!-- This must match the Web Client ID in Firebase Console → Authentication → Sign-in method → Google -->
+    <string name="default_web_client_id">603628370602-j5ejajnde0nd5d99hfq8g3tpd6obfr39.apps.googleusercontent.com</string>
+</resources>

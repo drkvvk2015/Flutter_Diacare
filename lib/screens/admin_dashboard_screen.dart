@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/dashboard_card.dart';
+import 'admin_accounts_screen.dart';
 import 'appointment_screen.dart';
 import 'patient_list_screen.dart';
 import 'pharmacy_dashboard_screen.dart';
@@ -425,6 +426,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         title: 'User Management',
                         subtitle: 'View, edit, and manage all users.',
                         onTap: () => _showUserManagement(context),
+                      ),
+                    ),
+                    SizedBox(
+                      width: isWide ? 340 : double.infinity,
+                      child: DashboardCard(
+                        key: const Key('admin_dashboard_card_accounts'),
+                        icon: Icons.account_balance_wallet,
+                        iconColor: Colors.green,
+                        title: 'Accounts & Settlements',
+                        subtitle: 'Manage payments and doctor settlements.',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (_) => const AdminAccountsScreen(),
+                          ),
+                        ),
                       ),
                     ),
                   ],

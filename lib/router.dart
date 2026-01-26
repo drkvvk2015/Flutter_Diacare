@@ -12,6 +12,8 @@ library;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'features/payments/payment_screen.dart';
+import 'screens/admin_accounts_screen.dart';
 import 'screens/admin_dashboard_screen.dart';
 import 'screens/appointment_screen.dart';
 import 'screens/chat_screen.dart';
@@ -87,6 +89,10 @@ class AppRouter {
       case '/adminDashboard':
         return MaterialPageRoute<void>(builder: (_) => const AdminDashboardScreen());
       
+      // Admin accounts management route
+      case '/adminAccounts':
+        return MaterialPageRoute<void>(builder: (_) => const AdminAccountsScreen());
+      
       // Health analytics and reporting route
       case '/healthAnalytics':
         return MaterialPageRoute<void>(builder: (_) => const HealthAnalyticsScreen());
@@ -136,6 +142,23 @@ class AppRouter {
       case '/pharmacy':
         return MaterialPageRoute<void>(
             builder: (_) => const PharmacyDashboardScreen(),);
+      
+      // Payment screen route - requires appointmentId, amount, doctorId from arguments
+      case '/payment':
+        {
+          final args = settings.arguments as Map<String, dynamic>?;
+          if (args != null) {
+            return MaterialPageRoute<bool>(
+              builder: (_) => PaymentScreen(
+                appointmentId: args['appointmentId'] as String? ?? '',
+                amount: (args['amount'] as num?)?.toDouble() ?? 0.0,
+                doctorId: args['doctorId'] as String? ?? '',
+              ),
+            );
+          }
+          // Fallback if no arguments provided
+          return MaterialPageRoute<void>(builder: (_) => const RoleSelectionScreen());
+        }
       
       // Default fallback for unknown routes
       default:
