@@ -46,6 +46,22 @@ android {
         versionName = flutter.versionName
     }
 
+    // Product flavors for separate Patient and Doctor apps
+    flavorDimensions += "app"
+    
+    productFlavors {
+        create("patient") {
+            dimension = "app"
+            applicationId = "com.diacare.patient"
+            resValue("string", "app_name", "DiaCare Patient")
+        }
+        create("doctor") {
+            dimension = "app"
+            applicationId = "com.diacare.doctor"
+            resValue("string", "app_name", "DiaCare Doctor")
+        }
+    }
+
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")

@@ -8,13 +8,41 @@
 /// - Patient-specific UI theme (Teal color scheme)
 /// - Simplified navigation for non-medical users
 library;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_diacare/features/auth/login_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+
+import 'firebase_options.dart';
+import 'providers/appointment_provider.dart';
+import 'providers/notification_provider.dart';
+import 'providers/theme_provider.dart';
+import 'providers/user_provider.dart';
+import 'router.dart';
+import 'screens/patient_login_screen.dart';
+import 'services/admob_service.dart';
+import 'services/hive_service.dart';
+import 'themes/app_theme.dart';
 
 /// Main entry point for the patient application
-void main() {
+void main() async {
   // Initialize Flutter framework bindings
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load environment variables (API keys, secrets, etc.)
+  await dotenv.load();
+  
+  // Initialize Firebase with platform-specific configuration
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Initialize Hive for local caching
+  await initHive();
+
+  // Initialize AdMob (only on mobile platforms)
+  if (!kIsWeb) {
+    await AdMobService().initialize();
+  }
   
   // Launch the patient-specific application
   runApp(const DiaCarePatientApp());
@@ -31,19 +59,38 @@ class DiaCarePatientApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'DiaCare Patient',
-      theme: ThemeData(
-        // Calming teal color scheme for patients
-        primarySwatch: Colors.teal,
-        // Adaptive density for different screen sizes
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        // Use Material Design 3 components
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AppointmentProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'DiaCare Patient',
+            theme: AppTheme.lightTheme().copyWith(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.teal,
+                brightness: Brightness.light,
+              ),
+            ),
+            darkTheme: AppTheme.darkTheme().copyWith(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.teal,
+                brightness: Brightness.dark,
+              ),
+            ),
+            themeMode: themeProvider.themeMode,
+            debugShowCheckedModeBanner: false,
+            // Start directly at patient login
+            home: const PatientLoginScreen(),
+            // Use AppRouter for navigation after login
+            onGenerateRoute: AppRouter.generateRoute,
+          );
+        },
       ),
-      debugShowCheckedModeBanner: false,
-      // Start directly at login with patient role
-      home: const LoginScreen(role: 'patient'),
     );
   }
 }

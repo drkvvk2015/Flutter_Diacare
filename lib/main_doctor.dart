@@ -8,13 +8,41 @@
 /// - Doctor-specific UI theme (Indigo color scheme)
 /// - Optimized workflow for medical professionals
 library;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_diacare/features/auth/login_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+
+import 'firebase_options.dart';
+import 'providers/appointment_provider.dart';
+import 'providers/notification_provider.dart';
+import 'providers/theme_provider.dart';
+import 'providers/user_provider.dart';
+import 'router.dart';
+import 'screens/login_screen.dart';
+import 'services/admob_service.dart';
+import 'services/hive_service.dart';
+import 'themes/app_theme.dart';
 
 /// Main entry point for the doctor application
-void main() {
+void main() async {
   // Initialize Flutter framework bindings
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load environment variables (API keys, secrets, etc.)
+  await dotenv.load();
+  
+  // Initialize Firebase with platform-specific configuration
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Initialize Hive for local caching
+  await initHive();
+
+  // Initialize AdMob (only on mobile platforms)
+  if (!kIsWeb) {
+    await AdMobService().initialize();
+  }
   
   // Launch the doctor-specific application
   runApp(const DiaCareDoctorApp());
@@ -31,19 +59,48 @@ class DiaCareDoctorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'DiaCare Doctor',
-      theme: ThemeData(
-        // Professional indigo color scheme for doctors
-        primarySwatch: Colors.indigo,
-        // Adaptive density for different screen sizes
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        // Use Material Design 3 components
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AppointmentProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'DiaCare Doctor',
+            theme: AppTheme.lightTheme().copyWith(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.indigo,
+                brightness: Brightness.light,
+              ),
+            ),
+            darkTheme: AppTheme.darkTheme().copyWith(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.indigo,
+                brightness: Brightness.dark,
+              ),
+            ),
+            themeMode: themeProvider.themeMode,
+            debugShowCheckedModeBanner: false,
+            // Use custom route generator that injects doctor role
+            onGenerateRoute: (settings) {
+              // Redirect root to login with doctor role
+              if (settings.name == '/' || settings.name == '/login') {
+                return MaterialPageRoute<void>(
+                  settings: const RouteSettings(
+                    name: '/login',
+                    arguments: {'role': 'doctor'},
+                  ),
+                  builder: (_) => const LoginScreen(),
+                );
+              }
+              return AppRouter.generateRoute(settings);
+            },
+          );
+        },
       ),
-      debugShowCheckedModeBanner: false,
-      // Start directly at login with doctor role
-      home: const LoginScreen(role: 'doctor'),
     );
   }
 }
