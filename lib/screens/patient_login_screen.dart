@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../services/auth_bridge_service.dart';
+import '../utils/logger.dart';
 import '../widgets/voice_text_field.dart';
 import 'patient_dashboard_screen.dart';
 import 'registration_screen.dart';
@@ -142,56 +143,26 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
     _pulseController.repeat();
 
     try {
-      // Use GoogleSignIn singleton instance (google_sign_in 7.x API)
-      final googleSignIn = GoogleSignIn.instance;
+      UserCredential? userCredential;
       
-      // Web Client ID from Google Cloud Console
-      const webClientId = '603628370602-j5ejajnde0nd5d99hfq8g3tpd6obfr39.apps.googleusercontent.com';
-      
-      // Initialize with clientId for Web, serverClientId for Android/iOS
       if (kIsWeb) {
-        await googleSignIn.initialize(
-          clientId: webClientId,
-        );
+        // On web, use Firebase Auth popup directly (more reliable)
+        userCredential = await _signInWithGoogleWeb();
       } else {
-        // serverClientId is required on Android to get idToken for Firebase Auth
-        await googleSignIn.initialize(
-          serverClientId: webClientId,
-        );
+        // On mobile, use google_sign_in package
+        userCredential = await _signInWithGoogleMobile();
       }
-
-      // Authenticate user - throws GoogleSignInException on failure
-      final GoogleSignInAccount account;
-      try {
-        account = await googleSignIn.authenticate();
-      } on GoogleSignInException catch (e) {
+      
+      if (userCredential == null) {
+        // User cancelled
         if (mounted) {
           setState(() {
-            _error = e.code == GoogleSignInExceptionCode.canceled 
-                ? 'Google sign-in cancelled.'
-                : 'Google sign-in failed: ${e.description}';
+            _error = 'Google sign-in cancelled.';
             _loading = false;
           });
         }
         return;
       }
-
-      // Get idToken from authentication
-      final idToken = account.authentication.idToken;
-      
-      // Get accessToken from authorization (if needed)
-      final authorization = await account.authorizationClient.authorizationForScopes([]);
-      final accessToken = authorization?.accessToken;
-
-      // Create a new credential
-      final credential = GoogleAuthProvider.credential(
-        accessToken: accessToken,
-        idToken: idToken,
-      );
-
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(
-        credential,
-      );
       
       // Get or create user document in Firestore
       final doc = await FirebaseFirestore.instance
@@ -221,7 +192,8 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
         );
       }
     } catch (e) {
-      _showErrorMessage('Google sign-in failed: $e');
+      logError('Google sign-in error', e);
+      _showErrorMessage('Google sign-in failed: ${e.toString().replaceAll('Exception: ', '')}');
     } finally {
       if (mounted) {
         setState(() {
@@ -230,6 +202,71 @@ class _PatientLoginScreenState extends State<PatientLoginScreen>
         _pulseController.stop();
       }
     }
+  }
+  
+  /// Web implementation using Firebase Auth popup
+  Future<UserCredential?> _signInWithGoogleWeb() async {
+    try {
+      final googleProvider = GoogleAuthProvider();
+      
+      // Add scopes
+      googleProvider.addScope('email');
+      googleProvider.addScope('profile');
+      
+      // Set custom parameters for account selection
+      googleProvider.setCustomParameters({
+        'prompt': 'select_account',
+      });
+      
+      // Use popup for web
+      return FirebaseAuth.instance.signInWithPopup(googleProvider);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'popup-closed-by-user' || 
+          e.code == 'cancelled-popup-request' ||
+          e.code == 'popup-blocked') {
+        return null; // User cancelled
+      }
+      rethrow;
+    }
+  }
+  
+  /// Mobile implementation using google_sign_in package
+  Future<UserCredential?> _signInWithGoogleMobile() async {
+    final googleSignIn = GoogleSignIn.instance;
+
+    // Optional override. If not provided, plugin uses platform config.
+    const serverClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
+    if (serverClientId.isEmpty) {
+      await googleSignIn.initialize();
+    } else {
+      await googleSignIn.initialize(serverClientId: serverClientId);
+    }
+
+    // Authenticate user - throws GoogleSignInException on failure
+    final GoogleSignInAccount account;
+    try {
+      account = await googleSignIn.authenticate();
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        return null; // User cancelled
+      }
+      throw Exception(e.description ?? 'Google sign-in failed');
+    }
+
+    // Get idToken from authentication
+    final idToken = account.authentication.idToken;
+    
+    // Get accessToken from authorization (if needed)
+    final authorization = await account.authorizationClient.authorizationForScopes([]);
+    final accessToken = authorization?.accessToken;
+
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: accessToken,
+      idToken: idToken,
+    );
+
+    return FirebaseAuth.instance.signInWithCredential(credential);
   }
 
   void _showErrorMessage(String message) {

@@ -20,7 +20,7 @@ import 'providers/notification_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
 import 'router.dart';
-import 'screens/login_screen.dart';
+import 'screens/role_selection_screen.dart';
 import 'services/admob_service.dart';
 import 'services/hive_service.dart';
 import 'themes/app_theme.dart';
@@ -73,7 +73,6 @@ class DiaCareDoctorApp extends StatelessWidget {
             theme: AppTheme.lightTheme().copyWith(
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Colors.indigo,
-                brightness: Brightness.light,
               ),
             ),
             darkTheme: AppTheme.darkTheme().copyWith(
@@ -84,20 +83,10 @@ class DiaCareDoctorApp extends StatelessWidget {
             ),
             themeMode: themeProvider.themeMode,
             debugShowCheckedModeBanner: false,
-            // Use custom route generator that injects doctor role
-            onGenerateRoute: (settings) {
-              // Redirect root to login with doctor role
-              if (settings.name == '/' || settings.name == '/login') {
-                return MaterialPageRoute<void>(
-                  settings: const RouteSettings(
-                    name: '/login',
-                    arguments: {'role': 'doctor'},
-                  ),
-                  builder: (_) => const LoginScreen(),
-                );
-              }
-              return AppRouter.generateRoute(settings);
-            },
+            // Start at role selection screen
+            home: const RoleSelectionScreen(),
+            // Use AppRouter for navigation with role selection
+            onGenerateRoute: AppRouter.generateRoute,
           );
         },
       ),

@@ -4,11 +4,13 @@ import 'package:health/health.dart';
 import '../utils/logger.dart';
 
 /// Modern enhanced HealthService with analytics and robust error handling
+/// Note: Health data is only available on mobile platforms (Android/iOS)
 class HealthService with ChangeNotifier {
   final Health _health = Health();
   bool _isInitialized = false;
   bool _isFetching = false;
   String? _lastError;
+  final bool _isWebPlatform = kIsWeb;
 
   // Health data with null safety and proper typing
   int _steps = 0;
@@ -69,6 +71,9 @@ class HealthService with ChangeNotifier {
 
   /// Last error message, if any
   String? get lastError => _lastError;
+  
+  /// Whether health features are supported on this platform
+  bool get isSupported => !_isWebPlatform;
 
   /// Historical health data for analytics
   List<HealthDataPoint> get historicalData =>
@@ -93,7 +98,17 @@ class HealthService with ChangeNotifier {
 
   /// Request authorization for health data access
   /// Returns true if authorization was granted
+  /// Returns false immediately on web platform (not supported)
   Future<bool> requestAuthorization() async {
+    // Health plugin is not supported on web
+    if (kIsWeb) {
+      logInfo('Health data not available on web platform');
+      _lastError = 'Health features are only available on mobile devices';
+      _isInitialized = false;
+      notifyListeners();
+      return false;
+    }
+    
     try {
       logInfo('Requesting health data authorization');
       final authorized = await _health.requestAuthorization(supportedTypes);

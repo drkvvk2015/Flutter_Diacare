@@ -19,7 +19,7 @@ import 'providers/appointment_provider.dart';
 import 'providers/notification_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
-import 'router.dart';
+import 'router_patient.dart';
 import 'screens/patient_login_screen.dart';
 import 'services/admob_service.dart';
 import 'services/hive_service.dart';
@@ -73,7 +73,6 @@ class DiaCarePatientApp extends StatelessWidget {
             theme: AppTheme.lightTheme().copyWith(
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Colors.teal,
-                brightness: Brightness.light,
               ),
             ),
             darkTheme: AppTheme.darkTheme().copyWith(
@@ -86,8 +85,8 @@ class DiaCarePatientApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             // Start directly at patient login
             home: const PatientLoginScreen(),
-            // Use AppRouter for navigation after login
-            onGenerateRoute: AppRouter.generateRoute,
+            // Use PatientAppRouter for navigation (no role selection)
+            onGenerateRoute: PatientAppRouter.generateRoute,
           );
         },
       ),
